@@ -35,16 +35,12 @@ def backup_host(cfg, full):
 	base_dir = home_dir + '/' + base_dir
 
     for dir in cfg['dirs']:
-	remote_dir = dir['path']
+        remote_dir = dir['path']
         if remote_dir[0] != '/':
             error ('Directory must be absolute: ' + remote_dir)
         local_dir = base_dir + remote_dir
-	if not os.path.isdir(local_dir):
+        if not os.path.isdir(local_dir):
             os.makedirs(local_dir)
-        if full:
-            opts = '-b'
-        else:
-            opts = ''
         args = [rdiff_path]
         if full:
             args.append('-b')
@@ -53,7 +49,6 @@ def backup_host(cfg, full):
         e = os.spawnv(os.P_WAIT, rdiff_path, args)
         if e != 0:
             print >> sys.stderr, 'Failed to execute the rdiff-backup'
-	print args
 
 def handle_dir(dir_el):
     assert dir_el.tagName == 'dir'
@@ -77,7 +72,6 @@ def process_hosts(dir, full):
     ls = os.listdir(dir)
     for ent in ls:
         fn = dir + '/' + ent
-	print fn
         if not os.path.isfile(fn):
             continue
         if not ent.endswith('.cfg'):
