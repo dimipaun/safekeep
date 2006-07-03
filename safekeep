@@ -15,7 +15,7 @@ def usage():
     print "-f, --full            force full backup (default is incremental)"
 
 def error (msg):
-    print msg
+    print >> sys.stderr, msg
     sys.exit(1)
 
 def backup_host(cfg, full):
@@ -52,7 +52,7 @@ def backup_host(cfg, full):
         args.append(local_dir)
         e = os.spawnv(os.P_WAIT, rdiff_path, args)
         if e != 0:
-            print 'Failed to execute the rdiff-backup'
+            print >> sys.stderr, 'Failed to execute the rdiff-backup'
 	print args
 
 def handle_dir(dir_el):
