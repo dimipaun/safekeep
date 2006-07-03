@@ -1,0 +1,89 @@
+#!/usr/bin/python
+
+import getopt, os, sys, yaml
+
+config_dir = '/etc/labackup.d'
+home_dir = '/home/rdiff-achilles'
+
+def usage():
+    print "usage: %s [options]" % (sys.argv[0])
+    print
+    print "options:"
+    print "-h, --help            show this help message and exit"
+    print "-f, --full            force full backup (default is incremental)"
+
+def error (msg):
+    print msg
+    sys.exit(1)
+
+def backup_host(cfg, full):
+    if not cfg.has_key('host'):
+        error ('You need to specify the host')
+
+    if not cfg.has_key('dirs'):
+        error ('You need to specify the directories to be backup')
+
+    if cfg.has_key('base_dir'):
+        base_dir = cfg['base_dir']
+    else:
+        base_dir = cfg['host']
+
+    # if the base dir is relative, it's relative to the home dir
+    if base_dir[0] != '/':
+	base_dir = home_dir + '/' + base_dir
+
+    for dir in cfg['dirs']:
+	remote_dir = dir['name']
+        if remote_dir[0] != '/':
+            error ('Directory must be absolute: ' + remote_dir)
+        local_dir = base_dir + remote_dir
+	if not os.path.isdir(local_dir):
+            os.makedirs(local_dir)
+        if full:
+            opts = '-b'
+        else:
+            opts = ''
+        args = ['rdiff-backup']
+        if full:
+            args.append('-b')
+        args.append(cfg['host'] + '::' + remote_dir)
+        args.append(local_dir)
+        e = os.spawnvp(os.P_WAIT, 'rdiff-backup', args)
+        if e != 0:
+            print 'Failed to execute the rdiff-backup'
+	print args
+
+
+def process_hosts(dir, full):
+    ls = os.listdir(dir)
+    for ent in ls:
+        fn = dir + '/' + ent
+	print fn
+        if not os.path.isfile(fn):
+            continue
+        if not ent.endswith('.cfg'):
+            continue
+        f = file(fn, 'rb')
+        cfg = yaml.load(f)
+        f.close()
+        backup_host(cfg, full)
+
+
+def main():
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "hf", ["help", "full"])
+    except getopt.GetoptError:
+        usage()
+        sys.exit(2)
+    full = False
+    for o, a in opts:
+        if o in ("-f", "--full"):
+            full = True
+        if o in ("-h", "--help"):
+            usage()
+            sys.exit()
+    process_hosts(config_dir, full)
+
+if __name__ == "__main__":
+    main()
+
