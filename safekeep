@@ -1,9 +1,11 @@
 #!/usr/bin/python
 
-import getopt, os, sys, yaml
+import getopt, os, sys
+import xml.dom.minidom
 
 config_dir = '/etc/labackup.d'
 home_dir = '/home/rdiff-achilles'
+rdiff_path = '/usr/bin/rdiff-backup'
 
 def usage():
     print "usage: %s [options]" % (sys.argv[0])
@@ -33,7 +35,7 @@ def backup_host(cfg, full):
 	base_dir = home_dir + '/' + base_dir
 
     for dir in cfg['dirs']:
-	remote_dir = dir['name']
+	remote_dir = dir['path']
         if remote_dir[0] != '/':
             error ('Directory must be absolute: ' + remote_dir)
         local_dir = base_dir + remote_dir
@@ -43,16 +45,33 @@ def backup_host(cfg, full):
             opts = '-b'
         else:
             opts = ''
-        args = ['rdiff-backup']
+        args = [rdiff_path]
         if full:
             args.append('-b')
         args.append(cfg['host'] + '::' + remote_dir)
         args.append(local_dir)
-        e = os.spawnvp(os.P_WAIT, 'rdiff-backup', args)
+        e = os.spawnv(os.P_WAIT, rdiff_path, args)
         if e != 0:
             print 'Failed to execute the rdiff-backup'
 	print args
 
+def handle_dir(dir_el):
+    assert dir_el.tagName == 'dir'
+    path = dir_el.getAttribute('path')
+    assert path != None
+    return { 'path' : path }
+
+def handle_host(host_el):
+    assert host_el.tagName == 'host'
+    host = host_el.getAttribute('address')
+    assert host != None
+    
+    dir_els = host_el.getElementsByTagName('dir')
+    dirs = []
+    for dir_el in dir_els:
+        dirs.append(handle_dir(dir_el))
+        
+    return { 'host' : host, 'dirs' : dirs }
 
 def process_hosts(dir, full):
     ls = os.listdir(dir)
@@ -63,9 +82,9 @@ def process_hosts(dir, full):
             continue
         if not ent.endswith('.cfg'):
             continue
-        f = file(fn, 'rb')
-        cfg = yaml.load(f)
-        f.close()
+        dom = xml.dom.minidom.parse(fn)
+        cfg = handle_host(dom.documentElement)
+        dom.unlink()
         backup_host(cfg, full)
 
 
