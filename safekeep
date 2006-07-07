@@ -3,7 +3,7 @@
 import getopt, os, sys
 import xml.dom.minidom
 
-config_dir = '/etc/labackup.d'
+config_dir = './etc/labackup'
 home_dir = '/home/rdiff-achilles'
 rdiff_path = '/usr/bin/rdiff-backup'
 
@@ -12,13 +12,14 @@ def usage():
     print
     print "options:"
     print "-h, --help            show this help message and exit"
-    print "-f, --full            force full backup (default is incremental)"
+    print "-s, --server          launch in server mode (default)"
+    print "-c, --client          launch in client mode"
 
 def error (msg):
     print >> sys.stderr, msg
     sys.exit(1)
 
-def backup_host(cfg, full):
+def backup_item(cfg, full):
     if not cfg.has_key('host'):
         error ('You need to specify the host')
 
@@ -50,52 +51,131 @@ def backup_host(cfg, full):
         if e != 0:
             print >> sys.stderr, 'Failed to execute the rdiff-backup'
 
-def handle_dir(dir_el):
+def parse_dir(dir_el):
     assert dir_el.tagName == 'dir'
     path = dir_el.getAttribute('path')
     assert path != None
     return { 'path' : path }
 
-def handle_host(host_el):
+def parse_config(host_el):
     assert host_el.tagName == 'host'
     host = host_el.getAttribute('address')
     assert host != None
-    
+
     dir_els = host_el.getElementsByTagName('dir')
     dirs = []
     for dir_el in dir_els:
-        dirs.append(handle_dir(dir_el))
-        
-    return { 'host' : host, 'dirs' : dirs }
+        dirs.append(parse_dir(dir_el))
 
-def process_hosts(dir, full):
-    ls = os.listdir(dir)
+    user_el = host_el.getElementsByTagName('user')
+    assert user_el[0].tagName == 'user'
+    user = user_el[0].getAttribute('name')
+    assert user != None
+
+    return { 'host' : host, 'user' : user, 'dirs' : dirs }
+
+def do_client_dbdump(cfg):
+    print "lbc: Doing DB dumps"
+
+def do_client_snap(cfg):
+    print "lbc: Doing FS snapshots"
+
+def do_client_rdiff():
+    print "lbc: Doing RDIFF backup"
+    #os.system("rdiff-backup --server")
+    print "lbc: DONE"
+
+def do_server_rdiff(cfg):
+    print "lbs: Doing RDIFF backup"
+    print "rdiff-backup " + cfg['user'] + "@" + cfg['host'] + "::/tmp tmp"
+
+def do_client():
+    cfgStr = ""
+    line = sys.stdin.readline()
+    if not line:
+        print "lbc: Unexpected end of file"
+	sys.exit(1)
+    if line.find("LABACKUP") == -1:
+        do_client_rdiff()
+	return
+    while True:
+    	line = sys.stdin.readline()
+	if not line:
+	    print "lbc: Unexpected end of file"
+	    sys.exit(1)
+    	cfgStr += line
+	if line.find("</host>") != -1:
+	    break
+    dom = xml.dom.minidom.parseString(cfgStr)
+    cfg = parse_config(dom.documentElement)
+    dom.unlink()
+    print "lbc: Do backup of " + cfg['host']
+    do_client_dbdump(cfg)
+    do_client_snap(cfg)
+    print "lbc: READY"
+    # wait for rdiff-backup to end
+    while True:
+    	line = sys.stdin.readline()
+	if not line:
+	    print "lbc: Unexpected end of file"
+	    sys.exit(1)
+	if line.find("CLEANUP") != -1:
+	    break
+    print "lbc: Doing cleanup"
+    print "lbc: DONE"
+
+def do_server():
+    ls = os.listdir(config_dir)
     for ent in ls:
-        fn = dir + '/' + ent
+        fn = config_dir + '/' + ent
         if not os.path.isfile(fn):
             continue
         if not ent.endswith('.cfg'):
             continue
         dom = xml.dom.minidom.parse(fn)
-        cfg = handle_host(dom.documentElement)
+        cfg = parse_config(dom.documentElement)
         dom.unlink()
-        backup_host(cfg, full)
-
+    	print "lbs: Do server backup as " + cfg['user'] + " on " + cfg['host']
+	(ci, co) = os.popen2("ssh " + cfg['user'] + '@' + cfg['host'])
+	ci.write("LABACKUP\n")
+	ci.write(open(fn).read())
+	ci.flush()
+	while True:
+	    reply = co.readline()
+	    if not reply:
+	        print "lbs: Client died before start, problem"
+		break
+	    elif reply.find("READY") != -1:
+	    	print "lbs: Launch rdiff-backup"
+		do_server_rdiff(cfg)
+		ci.write("CLEANUP\n")
+	        ci.flush()
+	    elif reply.find("DONE") != -1:
+	    	print "lbs: Client successfully ended"
+		break
+	    else:
+	        print reply
+	print "lbs: Server backup done"
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hf", ["help", "full"])
+        opts, args = getopt.getopt(sys.argv[1:], "hsc", ["help", "server", "client"])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
-    full = False
+    mode = "server"
     for o, a in opts:
-        if o in ("-f", "--full"):
-            full = True
         if o in ("-h", "--help"):
             usage()
             sys.exit()
-    process_hosts(config_dir, full)
+        elif o in ("-s", "--server"):
+	    mode = "server"
+	elif o in ("-c", "--client"):
+	    mode = "client"
+    if mode == "server":
+        do_server()
+    else:
+        do_client()
 
 if __name__ == "__main__":
     main()
