@@ -24,8 +24,9 @@ def parse_dump(dump_el):
 	type = dump_el.getAttribute('type')
 	db = dump_el.getAttribute('db')
 	file = dump_el.getAttribute('file')
+	cleanup = dump_el.getAttribute('cleanup')
 	assert type != None and db != None and file != None
-	return { 'type' : type, 'db' : db, 'file' : file }
+	return { 'type' : type, 'db' : db, 'file' : file, 'cleanup' : cleanup }
 
 def parse_snap(snap_el):
 	volume = snap_el.getAttribute('volume')
@@ -90,6 +91,10 @@ def do_client_dbdump(cfg):
 
 def do_client_dbdump_teardown(cfg):
 	log('lbc: Tear down DB dumps')
+    for dump in dumps:
+		if dump['cleanup'] != 'true':
+			continue
+		os.remove(dump['file'])
 
 def do_client_snap(cfg):
 	log('lbc: Doing FS snapshots')
