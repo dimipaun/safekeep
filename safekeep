@@ -1,182 +1,289 @@
 #!/usr/bin/python
 
-import getopt, os, sys
+import getopt, os, sys, re
 import xml.dom.minidom
+import pexpect
 
 config_dir = './etc/labackup'
-home_dir = '/home/rdiff-achilles'
-rdiff_path = '/usr/bin/rdiff-backup'
+rdiff_sem = '/tmp/rdiff_sem'
+lbc_sem = '/tmp/lbc_sem'
 
-def usage():
-    print "usage: %s [options]" % (sys.argv[0])
-    print
-    print "options:"
-    print "-h, --help            show this help message and exit"
-    print "-s, --server          launch in server mode (default)"
-    print "-c, --client          launch in client mode"
+######################################################################
+# Miscellaneous
+######################################################################
 
-def error (msg):
-    print >> sys.stderr, msg
-    sys.exit(1)
+def log(msg):
+	print >> sys.stderr, msg
+	pass
 
-def backup_item(cfg, full):
-    if not cfg.has_key('host'):
-        error ('You need to specify the host')
+######################################################################
+# Configuration file parser
+######################################################################
 
-    if not cfg.has_key('dirs'):
-        error ('You need to specify the directories to be backup')
+def parse_dump(dump_el):
+	type = dump_el.getAttribute('type')
+	db = dump_el.getAttribute('db')
+	file = dump_el.getAttribute('file')
+	assert type != None and db != None and file != None
+	return { 'type' : type, 'db' : db, 'file' : file }
 
-    if cfg.has_key('base_dir'):
-        base_dir = cfg['base_dir']
-    else:
-        base_dir = cfg['host']
+def parse_snap(snap_el):
+	volume = snap_el.getAttribute('volume')
+	assert volume != None
+	return { 'volume' : volume }
 
-    # if the base dir is relative, it's relative to the home dir
-    if base_dir[0] != '/':
-	base_dir = home_dir + '/' + base_dir
+def parse_include(include_el):
+	path = include_el.getAttribute('path')
+	glob = include_el.getAttribute('glob')
+	regexp = include_el.getAttribute('regexp')
+	assert path != None or glob != None or regexp != None
+	return { 'path' : path, 'glob' : glob, 'regexp' : regexp }
 
-    for dir in cfg['dirs']:
-        remote_dir = dir['path']
-        if remote_dir[0] != '/':
-            error ('Directory must be absolute: ' + remote_dir)
-        local_dir = base_dir + remote_dir
-        if not os.path.isdir(local_dir):
-            os.makedirs(local_dir)
-        args = [rdiff_path]
-        if full:
-            args.append('-b')
-        args.append(cfg['host'] + '::' + remote_dir)
-        args.append(local_dir)
-        e = os.spawnv(os.P_WAIT, rdiff_path, args)
-        if e != 0:
-            print >> sys.stderr, 'Failed to execute the rdiff-backup'
+def parse_config(backup_el):
+	assert backup_el.tagName == 'backup'
+	id = backup_el.getAttribute('id')
+	assert id != None
 
-def parse_dir(dir_el):
-    assert dir_el.tagName == 'dir'
-    path = dir_el.getAttribute('path')
-    assert path != None
-    return { 'path' : path }
+	host_el = backup_el.getElementsByTagName('host')
+	host = host_el[0].getAttribute('name')
+	user = host_el[0].getAttribute('user')
+	assert host != None and user != None
 
-def parse_config(host_el):
-    assert host_el.tagName == 'host'
-    host = host_el.getAttribute('address')
-    assert host != None
+	dir_el = backup_el.getElementsByTagName('dir')
+	dir = dir_el[0].getAttribute('path')
+	assert dir != None
 
-    dir_els = host_el.getElementsByTagName('dir')
-    dirs = []
-    for dir_el in dir_els:
-        dirs.append(parse_dir(dir_el))
+	setup_el = backup_el.getElementsByTagName('setup')
+	dump_els = setup_el[0].getElementsByTagName('dump')
+	dumps = []
+	for dump_el in dump_els:
+		dumps.append(parse_dump(dump_el))
+	snap_els = setup_el[0].getElementsByTagName('snapshot')
+	snaps = []
+	for snap_el in snap_els:
+		snaps.append(parse_snap(snap_el))
 
-    user_el = host_el.getElementsByTagName('user')
-    assert user_el[0].tagName == 'user'
-    user = user_el[0].getAttribute('name')
-    assert user != None
+	data_el = backup_el.getElementsByTagName('data')
+	root_el = data_el[0].getElementsByTagName('root')
+	rootpath = root_el[0].getAttribute('path')
+	include_els = data_el[0].getElementsByTagName('include')
+	includes = []
+	for include_el in include_els:
+		includes.append(parse_include(include_el))
+	assert len(includes) > 0
+	exclude_els = data_el[0].getElementsByTagName('exclude')
+	excludes = []
+	for exclude_el in exclude_els:
+		excludes.append(parse_include(exclude_el))
 
-    return { 'host' : host, 'user' : user, 'dirs' : dirs }
+	return { 'host' : host, 'user' : user, 'dir' : dir,
+			 'dumps' : dumps, 'snaps' : snaps,
+			 'rootpath' : rootpath,
+			 'includes' : includes, 'excludes' : excludes}
+
+######################################################################
+# DB and SNAPSHOT support
+######################################################################
 
 def do_client_dbdump(cfg):
-    print "lbc: Doing DB dumps"
+	log('lbc: Doing DB dumps')
+
+def do_client_dbdump_teardown(cfg):
+	log('lbc: Tear down DB dumps')
 
 def do_client_snap(cfg):
-    print "lbc: Doing FS snapshots"
+	log('lbc: Doing FS snapshots')
+	#raise Exception('fuck off')
+
+def do_client_snap_teardown(cfg):
+	log('lbc: Tear down FS snapshots dumps')
+	#raise Exception('fuck off')
+
+######################################################################
+# Client / server implementation
+######################################################################
 
 def do_client_rdiff():
-    print "lbc: Doing RDIFF backup"
-    #os.system("rdiff-backup --server")
-    print "lbc: DONE"
+	log('lbc: Doing rdiff-backup --server')
+	os.execlp('rdiff-backup', 'rdiff-backup', '--server')
+	print 'lbc: ERROR'
+	sys.exit(1)
 
 def do_server_rdiff(cfg):
-    print "lbs: Doing RDIFF backup"
-    print "rdiff-backup " + cfg['user'] + "@" + cfg['host'] + "::/tmp tmp"
+	log('lbs: Doing rdiff-backup')
+	ret = os.spawnlp(os.P_WAIT, 'rdiff-backup', 'rdiff-backup',
+		cfg['user'] + '@' + cfg['host'] + '::' +
+		cfg['rootpath'], cfg['dir'])
+	if ret != 0:
+		raise Exception('rdiff-backup returned %d' % ret)
 
 def do_client():
-    cfgStr = ""
-    line = sys.stdin.readline()
-    if not line:
-        print "lbc: Unexpected end of file"
-	sys.exit(1)
-    if line.find("LABACKUP") == -1:
-        do_client_rdiff()
-	return
-    while True:
-    	line = sys.stdin.readline()
-	if not line:
-	    print "lbc: Unexpected end of file"
-	    sys.exit(1)
-    	cfgStr += line
-	if line.find("</host>") != -1:
-	    break
-    dom = xml.dom.minidom.parseString(cfgStr)
-    cfg = parse_config(dom.documentElement)
-    dom.unlink()
-    print "lbc: Do backup of " + cfg['host']
-    do_client_dbdump(cfg)
-    do_client_snap(cfg)
-    print "lbc: READY"
-    # wait for rdiff-backup to end
-    while True:
-    	line = sys.stdin.readline()
-	if not line:
-	    print "lbc: Unexpected end of file"
-	    sys.exit(1)
-	if line.find("CLEANUP") != -1:
-	    break
-    print "lbc: Doing cleanup"
-    print "lbc: DONE"
+	if os.path.exists(rdiff_sem):
+		try:
+			os.remove(rdiff_sem)
+		except Exception, e:
+			print 'ERROR: ', e
+			sys.exit(1)
+		do_client_rdiff()
+		# no return
+
+	# read config file from server
+	line = ''
+	cfgStr = ''
+	while line.find('</backup>') == -1:
+		line = sys.stdin.readline()
+		if not line:
+			log('lbc: Unexpected end of file')
+			sys.exit(1)
+		cfgStr += line
+
+	# parse it
+	try:
+		dom = xml.dom.minidom.parseString(cfgStr)
+		cfg = parse_config(dom.documentElement)
+		dom.unlink()
+	except Exception, e:
+		print 'ERROR: ', e
+		sys.exit(1)
+
+	log('lbc: Do backup of ' + cfg['host'])
+
+	# prepare for backup
+	try:
+		do_client_dbdump(cfg)
+	except Exception, e:
+		print 'ERROR:', e
+		sys.exit(1)
+
+	try:
+		do_client_snap(cfg)
+	except Exception, e:
+		print 'ERROR:', e
+		try:
+			do_client_dbdump_teardown(cfg)
+		except:
+			pass
+		sys.exit(1)
+
+	# go !
+	lock = open(rdiff_sem, 'w')
+	lock.close()
+	print 'READY'
+
+	# wait for rdiff-backup to end
+	while line.find('CLEANUP') == -1:
+		line = sys.stdin.readline()
+		if not line:
+			print 'ERROR: Unexpected end of file'
+			break
+
+	# tear down...
+	if os.path.exists(rdiff_sem):
+		os.remove(rdiff_sem)
+
+	try:
+		do_client_snap_teardown(cfg)
+	except Exception, e:
+		print 'ERROR:', e
+		try:
+			do_client_dbdump_teardown(cfg)
+		except:
+			pass
+		sys.exit(1)
+
+	try:
+		do_client_dbdump_teardown(cfg)
+	except Exception, e:
+		print 'ERROR:', e
+		sys.exit(1)
+
+	print 'DONE'
+	sys.exit(0)
 
 def do_server():
-    ls = os.listdir(config_dir)
-    for ent in ls:
-        fn = config_dir + '/' + ent
-        if not os.path.isfile(fn):
-            continue
-        if not ent.endswith('.cfg'):
-            continue
-        dom = xml.dom.minidom.parse(fn)
-        cfg = parse_config(dom.documentElement)
-        dom.unlink()
-    	print "lbs: Do server backup as " + cfg['user'] + " on " + cfg['host']
-	(ci, co) = os.popen2("ssh " + cfg['user'] + '@' + cfg['host'])
-	ci.write("LABACKUP\n")
-	ci.write(open(fn).read())
-	ci.flush()
-	while True:
-	    reply = co.readline()
-	    if not reply:
-	        print "lbs: Client died before start, problem"
-		break
-	    elif reply.find("READY") != -1:
-	    	print "lbs: Launch rdiff-backup"
-		do_server_rdiff(cfg)
-		ci.write("CLEANUP\n")
-	        ci.flush()
-	    elif reply.find("DONE") != -1:
-	    	print "lbs: Client successfully ended"
-		break
-	    else:
-	        print reply
-	print "lbs: Server backup done"
+	if not os.path.exists(config_dir):
+		print 'lbs: config dir', config_dir, 'does not exist'
+		sys.exit(1)
+
+	ls = os.listdir(config_dir)
+	for ent in ls:
+		fn = config_dir + '/' + ent
+		if not os.path.isfile(fn):
+			continue
+		if not ent.endswith('.cfg'):
+			continue
+
+		try:
+			dom = xml.dom.minidom.parse(fn)
+			cfg = parse_config(dom.documentElement)
+			dom.unlink()
+		except Exception, e:
+			print 'lbs: config file error:', e
+			sys.exit(1)
+
+		log('lbs: Do server backup as ' + cfg['user'] + ' on ' + cfg['host'])
+		p = pexpect.spawn('ssh ' + cfg['user'] + '@' + cfg['host'])
+		p.send(open(fn).read())
+		retcode = 0
+		while True:
+			try:
+				i = p.expect(['READY', 'DONE', re.compile('\nERROR: (.*)\n')])
+				if i == 0:
+					try:
+						do_server_rdiff(cfg)
+					except Exception, e:
+						print 'lbs: Error in (server side) rdiff-backup: ', e
+						retcode = 1
+					p.sendline('CLEANUP')
+				elif i == 1:
+					log('lbs: Client successfully ended')
+					break
+				elif i == 2:
+					print 'lbs: Client error:', p.match.group(1)
+					retcode = 1
+					break
+			except pexpect.EOF:
+				print 'lbs: Client died unexpectedly'
+				retcode = 1
+				break
+		if retcode != 0:
+			sys.exit(retcode)
+		log('lbs: Do server backup as ' + cfg['user'] + ' on ' + cfg['host'] + ' done')
+	log('lbs: Server backup done')
+
+######################################################################
+# Main routine
+######################################################################
+
+def usage():
+	print 'usage: %s [options]' % (sys.argv[0])
+	print
+	print 'options:'
+	print '-h, --help			 show this help message and exit'
+	print '-s, --server			 launch in server mode (default)'
+	print '-c, --client			 launch in client mode'
 
 def main():
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], "hsc", ["help", "server", "client"])
-    except getopt.GetoptError:
-        usage()
-        sys.exit(2)
-    mode = "server"
-    for o, a in opts:
-        if o in ("-h", "--help"):
-            usage()
-            sys.exit()
-        elif o in ("-s", "--server"):
-	    mode = "server"
-	elif o in ("-c", "--client"):
-	    mode = "client"
-    if mode == "server":
-        do_server()
-    else:
-        do_client()
+	try:
+		opts, args = getopt.getopt(sys.argv[1:], 'hsc', ['help', 'server', 'client'])
+	except getopt.GetoptError:
+		usage()
+		sys.exit(2)
+	mode = 'server'
+	for o, a in opts:
+		if o in ('-h', '--help'):
+			usage()
+			sys.exit()
+		elif o in ('-s', '--server'):
+			mode = 'server'
+		elif o in ('-c', '--client'):
+			mode = 'client'
+	if mode == 'server':
+		do_server()
+	else:
+		do_client()
 
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':
+	main()
 
+# vim: ts=4
