@@ -76,7 +76,7 @@ def parse_config(backup_el):
 	for exclude_el in exclude_els:
 		excludes.append(parse_include(exclude_el))
 
-	return { 'host' : host, 'user' : user, 'dir' : dir,
+	return { 'id': id, 'host' : host, 'user' : user, 'dir' : dir,
 			 'dumps' : dumps, 'snaps' : snaps,
 			 'rootpath' : rootpath,
 			 'includes' : includes, 'excludes' : excludes}
@@ -221,7 +221,7 @@ def do_server():
 			print 'lbs: config file error:', e
 			sys.exit(1)
 
-		log('lbs: Do server backup as ' + cfg['user'] + ' on ' + cfg['host'])
+		log('lbs: Do server backup [' + cfg['id'] + ']')
 		p = pexpect.spawn('ssh ' + cfg['user'] + '@' + cfg['host'])
 		p.send(open(fn).read())
 		retcode = 0
@@ -248,7 +248,7 @@ def do_server():
 				break
 		if retcode != 0:
 			sys.exit(retcode)
-		log('lbs: Do server backup as ' + cfg['user'] + ' on ' + cfg['host'] + ' done')
+		log('lbs: Server backup [' + cfg['id'] + '] done')
 	log('lbs: Server backup done')
 
 ######################################################################
