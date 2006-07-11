@@ -63,14 +63,15 @@ def parse_config(backup_el):
     assert dir != ''
 
     setup_el = backup_el.getElementsByTagName('setup')
-    dump_els = setup_el[0].getElementsByTagName('dump')
     dumps = []
-    for dump_el in dump_els:
-	dumps.append(parse_dump(dump_el))
-    snap_els = setup_el[0].getElementsByTagName('snapshot')
     snaps = []
-    for snap_el in snap_els:
-	snaps.append(parse_snap(snap_el))
+    if len(setup_el) > 0:
+        dump_els = setup_el[0].getElementsByTagName('dump')
+        for dump_el in dump_els:
+            dumps.append(parse_dump(dump_el))
+        snap_els = setup_el[0].getElementsByTagName('snapshot')
+        for snap_el in snap_els:
+            snaps.append(parse_snap(snap_el))
 
     data_el = backup_el.getElementsByTagName('data')
     rootpath = data_el[0].getAttribute('root')
