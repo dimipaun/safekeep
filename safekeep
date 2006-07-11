@@ -13,302 +13,302 @@ lbc_sem = '/tmp/lbc_sem'
 ######################################################################
 
 def log(msg):
-	print >> sys.stderr, msg
-	pass
+    print >> sys.stderr, msg
+    pass
 
 ######################################################################
 # Configuration file parser
 ######################################################################
 
 def parse_dump(dump_el):
-	type = dump_el.getAttribute('type')
-	db = dump_el.getAttribute('db')
-	user = dump_el.getAttribute('user')
-	file = dump_el.getAttribute('file')
-	cleanup = dump_el.getAttribute('cleanup')
-	assert type != None and db != None and file != None
-	return { 'type' : type, 'db' : db, 'user' : user, 
-			 'file' : file, 'cleanup' : cleanup }
+    type = dump_el.getAttribute('type')
+    db = dump_el.getAttribute('db')
+    user = dump_el.getAttribute('user')
+    file = dump_el.getAttribute('file')
+    cleanup = dump_el.getAttribute('cleanup')
+    assert type != None and db != None and file != None
+    return { 'type' : type, 'db' : db, 'user' : user,
+             'file' : file, 'cleanup' : cleanup }
 
 def parse_snap(snap_el):
-	volume = snap_el.getAttribute('volume')
-	assert volume != None
-	return { 'volume' : volume }
+    volume = snap_el.getAttribute('volume')
+    assert volume != None
+    return { 'volume' : volume }
 
 def parse_include(include_el):
-	path = include_el.getAttribute('path')
-	glob = include_el.getAttribute('glob')
-	regexp = include_el.getAttribute('regexp')
-	assert path != None or glob != None or regexp != None
-	return { 'path' : path, 'glob' : glob, 'regexp' : regexp }
+    path = include_el.getAttribute('path')
+    glob = include_el.getAttribute('glob')
+    regexp = include_el.getAttribute('regexp')
+    assert path != None or glob != None or regexp != None
+    return { 'path' : path, 'glob' : glob, 'regexp' : regexp }
 
 def parse_config(backup_el):
-	assert backup_el.tagName == 'backup'
-	id = backup_el.getAttribute('id')
-	assert id != None
+    assert backup_el.tagName == 'backup'
+    id = backup_el.getAttribute('id')
+    assert id != None
 
-	host_el = backup_el.getElementsByTagName('host')
-	host = host_el[0].getAttribute('name')
-	user = host_el[0].getAttribute('user')
-	assert host != None and user != None
+    host_el = backup_el.getElementsByTagName('host')
+    host = host_el[0].getAttribute('name')
+    user = host_el[0].getAttribute('user')
+    assert host != None and user != None
 
-	dir_el = backup_el.getElementsByTagName('dir')
-	dir = dir_el[0].getAttribute('path')
-	assert dir != None
+    dir_el = backup_el.getElementsByTagName('dir')
+    dir = dir_el[0].getAttribute('path')
+    assert dir != None
 
-	setup_el = backup_el.getElementsByTagName('setup')
-	dump_els = setup_el[0].getElementsByTagName('dump')
-	dumps = []
-	for dump_el in dump_els:
-		dumps.append(parse_dump(dump_el))
-	snap_els = setup_el[0].getElementsByTagName('snapshot')
-	snaps = []
-	for snap_el in snap_els:
-		snaps.append(parse_snap(snap_el))
+    setup_el = backup_el.getElementsByTagName('setup')
+    dump_els = setup_el[0].getElementsByTagName('dump')
+    dumps = []
+    for dump_el in dump_els:
+        dumps.append(parse_dump(dump_el))
+    snap_els = setup_el[0].getElementsByTagName('snapshot')
+    snaps = []
+    for snap_el in snap_els:
+        snaps.append(parse_snap(snap_el))
 
-	data_el = backup_el.getElementsByTagName('data')
-	rootpath = data_el[0].getAttribute('root')
-	include_els = data_el[0].getElementsByTagName('include')
-	includes = []
-	for include_el in include_els:
-		includes.append(parse_include(include_el))
-	assert len(includes) > 0
-	exclude_els = data_el[0].getElementsByTagName('exclude')
-	excludes = []
-	for exclude_el in exclude_els:
-		excludes.append(parse_include(exclude_el))
+    data_el = backup_el.getElementsByTagName('data')
+    rootpath = data_el[0].getAttribute('root')
+    include_els = data_el[0].getElementsByTagName('include')
+    includes = []
+    for include_el in include_els:
+        includes.append(parse_include(include_el))
+    assert len(includes) > 0
+    exclude_els = data_el[0].getElementsByTagName('exclude')
+    excludes = []
+    for exclude_el in exclude_els:
+        excludes.append(parse_include(exclude_el))
 
-	return { 'id': id, 'host' : host, 'user' : user, 'dir' : dir,
-			 'dumps' : dumps, 'snaps' : snaps,
-			 'rootpath' : rootpath,
-			 'includes' : includes, 'excludes' : excludes}
+    return { 'id': id, 'host' : host, 'user' : user, 'dir' : dir,
+             'dumps' : dumps, 'snaps' : snaps,
+             'rootpath' : rootpath,
+             'includes' : includes, 'excludes' : excludes}
 
 ######################################################################
 # DB and SNAPSHOT support
 ######################################################################
 
 def do_client_dbdump(cfg):
-	log('lbc: Doing DB dumps')
-	for dump in cfg['dumps']:
-		type = dump['type']
-		if type in ('postgres', 'postgresql', 'pgsql'):
-			args = ['pg_dump', '-f', dump['file']]
-			if dump['user']:
-				args.extend(['-U', dump['user']])
-			args.append(dump['db'])
-		elif type in ('mysql'):
-			args = ['mysqldump', '-r', dump['file']]
-			if dump['user']:
-				args.extend(['-u', dump['user']])
-			args.append(dump['db'])
-		else:
-			raise Exception('lbc: invalid database type: ' + type)
-		ec = os.spawnvp(os.P_WAIT, args[0], args)
-		if ec:
-			raise Exception('lbc: can not dump the database: ' + dump['db'])
+    log('lbc: Doing DB dumps')
+    for dump in cfg['dumps']:
+        type = dump['type']
+        if type in ('postgres', 'postgresql', 'pgsql'):
+            args = ['pg_dump', '-f', dump['file']]
+            if dump['user']:
+                args.extend(['-U', dump['user']])
+            args.append(dump['db'])
+        elif type in ('mysql'):
+            args = ['mysqldump', '-r', dump['file']]
+            if dump['user']:
+                args.extend(['-u', dump['user']])
+            args.append(dump['db'])
+        else:
+            raise Exception('lbc: invalid database type: ' + type)
+        ec = os.spawnvp(os.P_WAIT, args[0], args)
+        if ec:
+            raise Exception('lbc: can not dump the database: ' + dump['db'])
 
 def do_client_dbdump_teardown(cfg):
-	log('lbc: Tear down DB dumps')
-	for dump in cfg['dumps']:
-		if dump['cleanup'] != 'true':
-			continue
-		os.remove(dump['file'])
+    log('lbc: Tear down DB dumps')
+    for dump in cfg['dumps']:
+        if dump['cleanup'] != 'true':
+            continue
+        os.remove(dump['file'])
 
 def do_client_snap(cfg):
-	log('lbc: Doing FS snapshots')
-	#raise Exception('fuck off')
+    log('lbc: Doing FS snapshots')
+    #raise Exception('fuck off')
 
 def do_client_snap_teardown(cfg):
-	log('lbc: Tear down FS snapshots dumps')
-	#raise Exception('fuck off')
+    log('lbc: Tear down FS snapshots dumps')
+    #raise Exception('fuck off')
 
 ######################################################################
 # Client / server implementation
 ######################################################################
 
 def do_client_rdiff():
-	log('lbc: Doing rdiff-backup --server')
-	args = [ 'rdiff-backup', '--server' ]
-	os.execvp(args[0], args)
-	print 'lbc: ERROR'
-	sys.exit(1)
+    log('lbc: Doing rdiff-backup --server')
+    args = [ 'rdiff-backup', '--server' ]
+    os.execvp(args[0], args)
+    print 'lbc: ERROR'
+    sys.exit(1)
 
 def do_server_rdiff(cfg):
-	log('lbs: Doing rdiff-backup')
-	args = ['rdiff-backup',
-			cfg['user'] + '@' + cfg['host'] + '::' + cfg['rootpath'],
-			cfg['dir']]
-	ret = os.spawnvp(os.P_WAIT, args[0], args)
-	if ret:
-		raise Exception('rdiff-backup returned %d' % ret)
+    log('lbs: Doing rdiff-backup')
+    args = ['rdiff-backup',
+            cfg['user'] + '@' + cfg['host'] + '::' + cfg['rootpath'],
+            cfg['dir']]
+    ret = os.spawnvp(os.P_WAIT, args[0], args)
+    if ret:
+        raise Exception('rdiff-backup returned %d' % ret)
 
 def do_client():
-	if os.path.exists(rdiff_sem):
-		try:
-			os.remove(rdiff_sem)
-		except Exception, e:
-			print 'ERROR: ', e
-			sys.exit(1)
-		do_client_rdiff()
-		# no return
+    if os.path.exists(rdiff_sem):
+        try:
+            os.remove(rdiff_sem)
+        except Exception, e:
+            print 'ERROR: ', e
+            sys.exit(1)
+        do_client_rdiff()
+        # no return
 
-	# read config file from server
-	line = ''
-	cfgStr = ''
-	while line.find('</backup>') == -1:
-		line = sys.stdin.readline()
-		if not line:
-			log('lbc: Unexpected end of file')
-			sys.exit(1)
-		cfgStr += line
+    # read config file from server
+    line = ''
+    cfgStr = ''
+    while line.find('</backup>') == -1:
+        line = sys.stdin.readline()
+        if not line:
+            log('lbc: Unexpected end of file')
+            sys.exit(1)
+        cfgStr += line
 
-	# parse it
-	try:
-		dom = xml.dom.minidom.parseString(cfgStr)
-		cfg = parse_config(dom.documentElement)
-		dom.unlink()
-	except Exception, e:
-		print 'ERROR: ', e
-		sys.exit(1)
+    # parse it
+    try:
+        dom = xml.dom.minidom.parseString(cfgStr)
+        cfg = parse_config(dom.documentElement)
+        dom.unlink()
+    except Exception, e:
+        print 'ERROR: ', e
+        sys.exit(1)
 
-	log('lbc: Do backup of ' + cfg['host'])
+    log('lbc: Do backup of ' + cfg['host'])
 
-	# prepare for backup
-	try:
-		do_client_dbdump(cfg)
-	except Exception, e:
-		print 'ERROR:', e
-		sys.exit(1)
+    # prepare for backup
+    try:
+        do_client_dbdump(cfg)
+    except Exception, e:
+        print 'ERROR:', e
+        sys.exit(1)
 
-	try:
-		do_client_snap(cfg)
-	except Exception, e:
-		print 'ERROR:', e
-		try:
-			do_client_dbdump_teardown(cfg)
-		except:
-			pass
-		sys.exit(1)
+    try:
+        do_client_snap(cfg)
+    except Exception, e:
+        print 'ERROR:', e
+        try:
+            do_client_dbdump_teardown(cfg)
+        except:
+            pass
+        sys.exit(1)
 
-	# go !
-	lock = open(rdiff_sem, 'w')
-	lock.close()
-	print 'READY'
+    # go !
+    lock = open(rdiff_sem, 'w')
+    lock.close()
+    print 'READY'
 
-	# wait for rdiff-backup to end
-	while line.find('CLEANUP') == -1:
-		line = sys.stdin.readline()
-		if not line:
-			print 'ERROR: Unexpected end of file'
-			break
+    # wait for rdiff-backup to end
+    while line.find('CLEANUP') == -1:
+        line = sys.stdin.readline()
+        if not line:
+            print 'ERROR: Unexpected end of file'
+            break
 
-	# tear down...
-	if os.path.exists(rdiff_sem):
-		os.remove(rdiff_sem)
+    # tear down...
+    if os.path.exists(rdiff_sem):
+        os.remove(rdiff_sem)
 
-	try:
-		do_client_snap_teardown(cfg)
-	except Exception, e:
-		print 'ERROR:', e
-		try:
-			do_client_dbdump_teardown(cfg)
-		except:
-			pass
-		sys.exit(1)
+    try:
+        do_client_snap_teardown(cfg)
+    except Exception, e:
+        print 'ERROR:', e
+        try:
+            do_client_dbdump_teardown(cfg)
+        except:
+            pass
+        sys.exit(1)
 
-	try:
-		do_client_dbdump_teardown(cfg)
-	except Exception, e:
-		print 'ERROR:', e
-		sys.exit(1)
+    try:
+        do_client_dbdump_teardown(cfg)
+    except Exception, e:
+        print 'ERROR:', e
+        sys.exit(1)
 
-	print 'DONE'
-	sys.exit(0)
+    print 'DONE'
+    sys.exit(0)
 
 def do_server():
-	if not os.path.exists(config_dir):
-		print 'lbs: config dir', config_dir, 'does not exist'
-		sys.exit(1)
+    if not os.path.exists(config_dir):
+        print 'lbs: config dir', config_dir, 'does not exist'
+        sys.exit(1)
 
-	ls = os.listdir(config_dir)
-	for ent in ls:
-		fn = config_dir + '/' + ent
-		if not os.path.isfile(fn):
-			continue
-		if not ent.endswith('.cfg'):
-			continue
+    ls = os.listdir(config_dir)
+    for ent in ls:
+        fn = config_dir + '/' + ent
+        if not os.path.isfile(fn):
+            continue
+        if not ent.endswith('.cfg'):
+            continue
 
-		try:
-			dom = xml.dom.minidom.parse(fn)
-			cfg = parse_config(dom.documentElement)
-			dom.unlink()
-		except Exception, e:
-			print 'lbs: config file error:', e
-			sys.exit(1)
+        try:
+            dom = xml.dom.minidom.parse(fn)
+            cfg = parse_config(dom.documentElement)
+            dom.unlink()
+        except Exception, e:
+            print 'lbs: config file error:', e
+            sys.exit(1)
 
-		log('lbs: Do server backup [' + cfg['id'] + ']')
-		p = pexpect.spawn('ssh ' + cfg['user'] + '@' + cfg['host'])
-		p.send(open(fn).read())
-		retcode = 0
-		while True:
-			try:
-				i = p.expect(['READY', 'DONE', re.compile('\nERROR: (.*)\n')])
-				if i == 0:
-					try:
-						do_server_rdiff(cfg)
-					except Exception, e:
-						print 'lbs: Error in (server side) rdiff-backup: ', e
-						retcode = 1
-					p.sendline('CLEANUP')
-				elif i == 1:
-					log('lbs: Client successfully ended')
-					break
-				elif i == 2:
-					print 'lbs: Client error:', p.match.group(1)
-					retcode = 1
-					break
-			except pexpect.EOF:
-				print 'lbs: Client died unexpectedly'
-				retcode = 1
-				break
-		if retcode != 0:
-			sys.exit(retcode)
-		log('lbs: Server backup [' + cfg['id'] + '] done')
-	log('lbs: Server backup done')
+        log('lbs: Do server backup [' + cfg['id'] + ']')
+        p = pexpect.spawn('ssh ' + cfg['user'] + '@' + cfg['host'])
+        p.send(open(fn).read())
+        retcode = 0
+        while True:
+            try:
+                i = p.expect(['READY', 'DONE', re.compile('\nERROR: (.*)\n')])
+                if i == 0:
+                    try:
+                        do_server_rdiff(cfg)
+                    except Exception, e:
+                        print 'lbs: Error in (server side) rdiff-backup: ', e
+                        retcode = 1
+                    p.sendline('CLEANUP')
+                elif i == 1:
+                    log('lbs: Client successfully ended')
+                    break
+                elif i == 2:
+                    print 'lbs: Client error:', p.match.group(1)
+                    retcode = 1
+                    break
+            except pexpect.EOF:
+                print 'lbs: Client died unexpectedly'
+                retcode = 1
+                break
+        if retcode != 0:
+            sys.exit(retcode)
+        log('lbs: Server backup [' + cfg['id'] + '] done')
+    log('lbs: Server backup done')
 
 ######################################################################
 # Main routine
 ######################################################################
 
 def usage():
-	print 'usage: %s [options]' % (sys.argv[0])
-	print
-	print 'options:'
-	print '-h, --help			 show this help message and exit'
-	print '-s, --server			 launch in server mode (default)'
-	print '-c, --client			 launch in client mode'
+    print 'usage: %s [options]' % (sys.argv[0])
+    print
+    print 'options:'
+    print '-h, --help            show this help message and exit'
+    print '-s, --server          launch in server mode (default)'
+    print '-c, --client          launch in client mode'
 
 def main():
-	try:
-		opts, args = getopt.getopt(sys.argv[1:], 'hsc', ['help', 'server', 'client'])
-	except getopt.GetoptError:
-		usage()
-		sys.exit(2)
-	mode = 'server'
-	for o, a in opts:
-		if o in ('-h', '--help'):
-			usage()
-			sys.exit()
-		elif o in ('-s', '--server'):
-			mode = 'server'
-		elif o in ('-c', '--client'):
-			mode = 'client'
-	if mode == 'server':
-		do_server()
-	else:
-		do_client()
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], 'hsc', ['help', 'server', 'client'])
+    except getopt.GetoptError:
+        usage()
+        sys.exit(2)
+    mode = 'server'
+    for o, a in opts:
+        if o in ('-h', '--help'):
+            usage()
+            sys.exit()
+        elif o in ('-s', '--server'):
+            mode = 'server'
+        elif o in ('-c', '--client'):
+            mode = 'client'
+    if mode == 'server':
+        do_server()
+    else:
+        do_client()
 
 if __name__ == '__main__':
-	main()
+    main()
 
-# vim: ts=4
+# vim: ts=4 et sw=4 sts=4
