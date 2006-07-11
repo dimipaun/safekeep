@@ -2,7 +2,7 @@
 
 import getopt, os, sys, re, traceback
 import xml.dom.minidom
-import pexpect, tempfile
+import popen2, tempfile
 
 config_dir = './etc/labackup'
 rdiff_sem = '/tmp/rdiff_sem'
@@ -14,7 +14,8 @@ temp_dir = ''
 ######################################################################
 
 def log(msg):
-    print >> sys.stderr, msg
+    print msg
+    sys.stderr.flush()
     pass
 
 ######################################################################
@@ -169,7 +170,7 @@ def do_client_rdiff():
     log('lbc: Doing rdiff-backup --server')
     args = [ 'rdiff-backup', '--server' ]
     os.execvp(args[0], args)
-    print 'lbc: ERROR'
+    print 'ERROR'
     sys.exit(1)
 
 def do_server_rdiff(cfg):
@@ -247,12 +248,14 @@ def do_client():
     lock = open(rdiff_sem, 'w')
     lock.close()
     print 'READY'
+    sys.stdout.flush()
 
     # wait for rdiff-backup to end
     while line.find('CLEANUP') == -1:
 	line = sys.stdin.readline()
 	if not line:
 	    print 'ERROR: Unexpected end of file'
+	    sys.stdout.flush()
 	    break
 
     # tear down...
@@ -288,30 +291,33 @@ def do_server():
 	    sys.exit(1)
 
 	log('lbs: Do server backup [' + cfg['id'] + ']')
-	p = pexpect.spawn('ssh ' + cfg['user'] + '@' + cfg['host'])
-	p.send(open(fn).read())
+	(cout, cin) = popen2.popen4('ssh -T ' + cfg['user'] + '@' + cfg['host'])
+	cin.write(open(fn).read())
+	cin.flush()
 	retcode = 0
 	while True:
-	    try:
-		i = p.expect(['READY', 'DONE', re.compile('\nERROR: (.*)\n')])
-		if i == 0:
-		    try:
-			do_server_rdiff(cfg)
-		    except Exception, e:
-			print 'lbs: Error in (server side) rdiff-backup: ', e
-			retcode = 1
-		    p.sendline('CLEANUP')
-		elif i == 1:
-		    log('lbs: Client successfully ended')
-		    break
-		elif i == 2:
-		    print 'lbs: Client error:', p.match.group(1)
+	    line = cout.readline()
+	    if line.startswith('READY'):
+		try:
+		    do_server_rdiff(cfg)
+		except Exception, e:
+		    print 'lbs: Error in (server side) rdiff-backup: ', e
 		    retcode = 1
-		    break
-	    except pexpect.EOF:
+		cin.write('CLEANUP\n')
+		cin.flush()
+	    elif line.startswith('DONE'):
+		log('lbs: Client successfully ended')
+		break
+	    elif line.startswith('ERROR'):
+		print 'lbs: Client error:', line
+		retcode = 1
+		break
+	    elif line == '':
 		print 'lbs: Client died unexpectedly'
 		retcode = 1
 		break
+	    else:
+		print 'lbs: client says: ' + line[:-1]
 	if retcode != 0:
 	    sys.exit(retcode)
 	log('lbs: Server backup [' + cfg['id'] + '] done')
