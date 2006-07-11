@@ -23,10 +23,12 @@ def log(msg):
 def parse_dump(dump_el):
 	type = dump_el.getAttribute('type')
 	db = dump_el.getAttribute('db')
+	user = dump_el.getAttribute('user')
 	file = dump_el.getAttribute('file')
 	cleanup = dump_el.getAttribute('cleanup')
 	assert type != None and db != None and file != None
-	return { 'type' : type, 'db' : db, 'file' : file, 'cleanup' : cleanup }
+	return { 'type' : type, 'db' : db, 'user' : user, 
+             'file' : file, 'cleanup' : cleanup }
 
 def parse_snap(snap_el):
 	volume = snap_el.getAttribute('volume')
@@ -88,6 +90,25 @@ def parse_config(backup_el):
 
 def do_client_dbdump(cfg):
 	log('lbc: Doing DB dumps')
+    for dump in dumps:
+		type = dump['type']
+		if type in ('postgres', 'postgresql', 'pgsql'):
+			args = ['pg_dump', '-f', dump['file']]
+			if dump['user']:
+				args.extend(['-U', dump['user'])
+			args.append(dump['db'])
+		elif type in ('mysql'):
+			args = ['mysqldump', '-r', dump['file']]
+			if dump['user']:
+				args.extend(['-u', dump['user'])
+			args.append(dump['db'])
+		else:
+			log('lbc: invalid database type: ' + type)
+			assert None
+		ec = os.spawnvp(os.P_WAIT, args[0], args)
+		if ec:
+			log('lbc: can not dump the database: ' + dump['db'])
+			pass # FIXME: what do we do here, should we quit?
 
 def do_client_dbdump_teardown(cfg):
 	log('lbc: Tear down DB dumps')
