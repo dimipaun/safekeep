@@ -31,9 +31,12 @@ def parse_dump(dump_el):
 	     'file' : file, 'cleanup' : cleanup }
 
 def parse_snap(snap_el):
-    volume = snap_el.getAttribute('volume')
-    assert volume != ''
-    return { 'volume' : volume }
+    device = snap_el.getAttribute('device')
+    assert device != ''
+    assert device.rfind('/') != -1 and not device.endswith('/')
+    size = snap_el.getAttribute('size')
+    assert size != ''
+    return { 'device' : device, 'size' : size }
 
 def parse_include(include_el):
     path = include_el.getAttribute('path')
@@ -86,6 +89,8 @@ def parse_config(backup_el):
 
 ######################################################################
 # DB and SNAPSHOT support
+#   setup methods can raise exception to signal errors
+#   teardown methods must succeed and cleanup the state
 ######################################################################
 
 def do_client_dbdump(cfg):
@@ -113,15 +118,40 @@ def do_client_dbdump_teardown(cfg):
     for dump in cfg['dumps']:
 	if dump['cleanup'] != 'true':
 	    continue
-	os.remove(dump['file'])
+	try:
+	    os.remove(dump['file'])
+	except:
+	    pass
 
 def do_client_snap(cfg):
     log('lbc: Doing FS snapshots')
-    #raise Exception('fuck off')
+    for snap in cfg['snaps']:
+	snapdir = snap['device'][:snap['device'].rfind('/')]
+	snapname = snap['device'][snap['device'].rfind('/') + 1 :] + '-snap'
+	args = ['lvcreate', '-s', '-L', snap['size'], '-n', snapname, snap['device']]
+	log('lbc: [' + ' '.join(args) + ']')
+	ec = os.spawnvp(os.P_WAIT, args[0], args)
+	if ec:
+	    raise Exception('lbc: can not snapshot the device: ' + snap['device'])
+	os.mkdir('/mnt/' + snapname)
+	args = ['mount', snapdir + '/' + snapname, '/mnt/' + snapname ]
+	ec = os.spawnvp(os.P_WAIT, args[0], args)
+	if ec:
+	    raise Exception('lbc: can not snapshot the device: ' + snap['device'])
 
 def do_client_snap_teardown(cfg):
     log('lbc: Tear down FS snapshots dumps')
-    #raise Exception('fuck off')
+    for snap in cfg['snaps']:
+	snapdir = snap['device'][:snap['device'].rfind('/')]
+	snapname = snap['device'][snap['device'].rfind('/') + 1 :] + '-snap'
+	args = ['umount', '/mnt/' + snapname ]
+	os.spawnvp(os.P_WAIT, args[0], args)
+	try:
+	    os.rmdir('/mnt/' + snapname)
+	except:
+	    pass
+	args = ['lvremove', snapdir + '/' + snapname ]
+	os.spawnvp(os.P_WAIT, args[0], args)
 
 ######################################################################
 # Client / server implementation
@@ -194,16 +224,15 @@ def do_client():
 	do_client_dbdump(cfg)
     except Exception, e:
 	print 'ERROR:', e
+	do_client_dbdump_teardown(cfg)
 	sys.exit(1)
 
     try:
 	do_client_snap(cfg)
     except Exception, e:
 	print 'ERROR:', e
-	try:
-	    do_client_dbdump_teardown(cfg)
-	except:
-	    pass
+	do_client_dbdump_teardown(cfg)
+	do_client_snap_teardown(cfg)
 	sys.exit(1)
 
     # go !
@@ -222,21 +251,8 @@ def do_client():
     if os.path.exists(rdiff_sem):
 	os.remove(rdiff_sem)
 
-    try:
-	do_client_snap_teardown(cfg)
-    except Exception, e:
-	print 'ERROR:', e
-	try:
-	    do_client_dbdump_teardown(cfg)
-	except:
-	    pass
-	sys.exit(1)
-
-    try:
-	do_client_dbdump_teardown(cfg)
-    except Exception, e:
-	print 'ERROR:', e
-	sys.exit(1)
+    do_client_snap_teardown(cfg)
+    do_client_dbdump_teardown(cfg)
 
     print 'DONE'
     sys.exit(0)
