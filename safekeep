@@ -26,35 +26,37 @@ def parse_dump(dump_el):
     user = dump_el.getAttribute('user')
     file = dump_el.getAttribute('file')
     cleanup = dump_el.getAttribute('cleanup')
-    assert type != None and db != None and file != None
+    assert type != '' and db != '' and file != ''
     return { 'type' : type, 'db' : db, 'user' : user,
 	     'file' : file, 'cleanup' : cleanup }
 
 def parse_snap(snap_el):
     volume = snap_el.getAttribute('volume')
-    assert volume != None
+    assert volume != ''
     return { 'volume' : volume }
 
 def parse_include(include_el):
     path = include_el.getAttribute('path')
+    path = path.replace('*', '\*').replace('?', '\?')
+    path = path.replace('[', '\[').replace(']', '\]')
     glob = include_el.getAttribute('glob')
     regexp = include_el.getAttribute('regexp')
-    assert path != None or glob != None or regexp != None
+    assert path != '' or glob != '' or regexp != ''
     return { 'path' : path, 'glob' : glob, 'regexp' : regexp }
 
 def parse_config(backup_el):
     assert backup_el.tagName == 'backup'
     id = backup_el.getAttribute('id')
-    assert id != None
+    assert id != ''
 
     host_el = backup_el.getElementsByTagName('host')
     host = host_el[0].getAttribute('name')
     user = host_el[0].getAttribute('user')
-    assert host != None and user != None
+    assert host != '' and user != ''
 
     dir_el = backup_el.getElementsByTagName('dir')
     dir = dir_el[0].getAttribute('path')
-    assert dir != None
+    assert dir != ''
 
     setup_el = backup_el.getElementsByTagName('setup')
     dump_els = setup_el[0].getElementsByTagName('dump')
@@ -72,7 +74,6 @@ def parse_config(backup_el):
     includes = []
     for include_el in include_els:
 	includes.append(parse_include(include_el))
-    assert len(includes) > 0
     exclude_els = data_el[0].getElementsByTagName('exclude')
     excludes = []
     for exclude_el in exclude_els:
@@ -134,10 +135,25 @@ def do_client_rdiff():
     sys.exit(1)
 
 def do_server_rdiff(cfg):
-    log('lbs: Doing rdiff-backup')
-    args = ['rdiff-backup',
-	    cfg['user'] + '@' + cfg['host'] + '::' + cfg['rootpath'],
-	    cfg['dir']]
+    args = ['rdiff-backup']
+    #args.extend([ '-v', '6'])
+    for include in cfg['includes']:
+	if include['path'] != '':
+	    args.extend(['--include', include['path']])
+	if include['glob'] != '':
+	    args.extend(['--include', include['glob']])
+	if include['regexp'] != '':
+	    args.extend(['--include-regexp', include['regexp']])
+    for exclude in cfg['excludes']:
+	if exclude['path'] != '':
+	    args.extend(['--exclude', exclude['path']])
+	elif exclude['glob'] != '':
+	    args.extend(['--exclude', exclude['glob']])
+	else:
+	    args.extend(['--exclude-regexp', exclude['regexp']])
+    args.extend([ cfg['user'] + '@' + cfg['host'] + '::' + cfg['rootpath'],
+		  cfg['dir']])
+    log('lbs: Doing rdiff-backup [' + ' '.join(args) + ']')
     ret = os.spawnvp(os.P_WAIT, args[0], args)
     if ret:
 	raise Exception('rdiff-backup returned %d' % ret)
