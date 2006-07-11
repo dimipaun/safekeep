@@ -2,11 +2,12 @@
 
 import getopt, os, sys, re
 import xml.dom.minidom
-import pexpect
+import pexpect, tempfile
 
 config_dir = './etc/labackup'
 rdiff_sem = '/tmp/rdiff_sem'
 lbc_sem = '/tmp/lbc_sem'
+temp_dir = ''
 
 ######################################################################
 # Miscellaneous
@@ -125,6 +126,8 @@ def do_client_dbdump_teardown(cfg):
 
 def do_client_snap(cfg):
     log('lbc: Doing FS snapshots')
+    global temp_dir
+    temp_dir = tempfile.mkdtemp()
     for snap in cfg['snaps']:
 	snapdir = snap['device'][:snap['device'].rfind('/')]
 	snapname = snap['device'][snap['device'].rfind('/') + 1 :] + '-snap'
@@ -133,8 +136,8 @@ def do_client_snap(cfg):
 	ec = os.spawnvp(os.P_WAIT, args[0], args)
 	if ec:
 	    raise Exception('lbc: can not snapshot the device: ' + snap['device'])
-	os.mkdir('/mnt/' + snapname)
-	args = ['mount', snapdir + '/' + snapname, '/mnt/' + snapname ]
+	os.mkdir(temp_dir + '/' + snapname)
+	args = ['mount', snapdir + '/' + snapname, temp_dir + '/' + snapname ]
 	ec = os.spawnvp(os.P_WAIT, args[0], args)
 	if ec:
 	    raise Exception('lbc: can not snapshot the device: ' + snap['device'])
@@ -144,14 +147,18 @@ def do_client_snap_teardown(cfg):
     for snap in cfg['snaps']:
 	snapdir = snap['device'][:snap['device'].rfind('/')]
 	snapname = snap['device'][snap['device'].rfind('/') + 1 :] + '-snap'
-	args = ['umount', '/mnt/' + snapname ]
+	args = ['umount', temp_dir + '/' + snapname ]
 	os.spawnvp(os.P_WAIT, args[0], args)
 	try:
-	    os.rmdir('/mnt/' + snapname)
+	    os.rmdir(temp_dir + '/' + snapname)
 	except:
 	    pass
 	args = ['lvremove', snapdir + '/' + snapname ]
 	os.spawnvp(os.P_WAIT, args[0], args)
+    try:
+	os.rmdir(temp_dir)
+    except Exception, e:
+	pass
 
 ######################################################################
 # Client / server implementation
