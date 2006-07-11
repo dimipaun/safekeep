@@ -67,8 +67,7 @@ def parse_config(backup_el):
 		snaps.append(parse_snap(snap_el))
 
 	data_el = backup_el.getElementsByTagName('data')
-	root_el = data_el[0].getElementsByTagName('root')
-	rootpath = root_el[0].getAttribute('path')
+	rootpath = data_el.getAttribute('root')
 	include_els = data_el[0].getElementsByTagName('include')
 	includes = []
 	for include_el in include_els:
