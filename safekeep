@@ -28,7 +28,7 @@ def parse_dump(dump_el):
 	cleanup = dump_el.getAttribute('cleanup')
 	assert type != None and db != None and file != None
 	return { 'type' : type, 'db' : db, 'user' : user, 
-             'file' : file, 'cleanup' : cleanup }
+			 'file' : file, 'cleanup' : cleanup }
 
 def parse_snap(snap_el):
 	volume = snap_el.getAttribute('volume')
@@ -67,7 +67,7 @@ def parse_config(backup_el):
 		snaps.append(parse_snap(snap_el))
 
 	data_el = backup_el.getElementsByTagName('data')
-	rootpath = data_el.getAttribute('root')
+	rootpath = data_el[0].getAttribute('root')
 	include_els = data_el[0].getElementsByTagName('include')
 	includes = []
 	for include_el in include_els:
@@ -89,29 +89,27 @@ def parse_config(backup_el):
 
 def do_client_dbdump(cfg):
 	log('lbc: Doing DB dumps')
-    for dump in dumps:
+	for dump in cfg['dumps']:
 		type = dump['type']
 		if type in ('postgres', 'postgresql', 'pgsql'):
 			args = ['pg_dump', '-f', dump['file']]
 			if dump['user']:
-				args.extend(['-U', dump['user'])
+				args.extend(['-U', dump['user']])
 			args.append(dump['db'])
 		elif type in ('mysql'):
 			args = ['mysqldump', '-r', dump['file']]
 			if dump['user']:
-				args.extend(['-u', dump['user'])
+				args.extend(['-u', dump['user']])
 			args.append(dump['db'])
 		else:
-			log('lbc: invalid database type: ' + type)
-			assert None
+			raise Exception('lbc: invalid database type: ' + type)
 		ec = os.spawnvp(os.P_WAIT, args[0], args)
 		if ec:
-			log('lbc: can not dump the database: ' + dump['db'])
-			pass # FIXME: what do we do here, should we quit?
+			raise Exception('lbc: can not dump the database: ' + dump['db'])
 
 def do_client_dbdump_teardown(cfg):
 	log('lbc: Tear down DB dumps')
-    for dump in dumps:
+	for dump in cfg['dumps']:
 		if dump['cleanup'] != 'true':
 			continue
 		os.remove(dump['file'])
@@ -130,16 +128,18 @@ def do_client_snap_teardown(cfg):
 
 def do_client_rdiff():
 	log('lbc: Doing rdiff-backup --server')
-	os.execlp('rdiff-backup', 'rdiff-backup', '--server')
+	args = [ 'rdiff-backup', '--server' ]
+	os.execvp(args[0], args)
 	print 'lbc: ERROR'
 	sys.exit(1)
 
 def do_server_rdiff(cfg):
 	log('lbs: Doing rdiff-backup')
-	ret = os.spawnlp(os.P_WAIT, 'rdiff-backup', 'rdiff-backup',
-		cfg['user'] + '@' + cfg['host'] + '::' +
-		cfg['rootpath'], cfg['dir'])
-	if ret != 0:
+	args = ['rdiff-backup',
+			cfg['user'] + '@' + cfg['host'] + '::' + cfg['rootpath'],
+			cfg['dir']]
+	ret = os.spawnvp(os.P_WAIT, args[0], args)
+	if ret:
 		raise Exception('rdiff-backup returned %d' % ret)
 
 def do_client():
