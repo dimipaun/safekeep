@@ -40,14 +40,14 @@ def parse_snap(snap_el):
     assert size != ''
     return { 'device' : device, 'size' : size }
 
-def parse_include(include_el):
-    path = include_el.getAttribute('path')
+def parse_clude(clude_el):
+    path = clude_el.getAttribute('path')
     path = path.replace('*', '\*').replace('?', '\?')
     path = path.replace('[', '\[').replace(']', '\]')
-    glob = include_el.getAttribute('glob')
-    regexp = include_el.getAttribute('regexp')
+    glob = clude_el.getAttribute('glob')
+    regexp = clude_el.getAttribute('regexp')
     assert path != '' or glob != '' or regexp != ''
-    return { 'path' : path, 'glob' : glob, 'regexp' : regexp }
+    return { 'type' : clude_el.tagName, 'path' : path, 'glob' : glob, 'regexp' : regexp }
 
 def parse_config(backup_el):
     assert backup_el.tagName == 'backup'
@@ -77,19 +77,20 @@ def parse_config(backup_el):
 
     data_el = backup_el.getElementsByTagName('data')
     rootpath = data_el[0].getAttribute('root')
-    include_els = data_el[0].getElementsByTagName('include')
-    includes = []
-    for include_el in include_els:
-	includes.append(parse_include(include_el))
-    exclude_els = data_el[0].getElementsByTagName('exclude')
-    excludes = []
-    for exclude_el in exclude_els:
-	excludes.append(parse_include(exclude_el))
+
+
+    child_els = data_el[0].childNodes
+    cludes = []
+    for child_el in child_els:
+	if child_el.nodeType != child_el.ELEMENT_NODE:
+	    continue
+	if child_el.tagName not in ('include', 'exclude'):
+	    continue
+	cludes.append(parse_clude(child_el))
 
     return { 'id': id, 'host' : host, 'user' : user, 'dir' : dir,
 	     'dumps' : dumps, 'snaps' : snaps,
-	     'rootpath' : rootpath,
-	     'includes' : includes, 'excludes' : excludes}
+	     'rootpath' : rootpath, 'cludes' : cludes}
 
 ######################################################################
 # DB and SNAPSHOT support
@@ -177,20 +178,15 @@ def do_client_rdiff():
 def do_server_rdiff(cfg):
     args = ['rdiff-backup']
     #args.extend([ '-v', '6'])
-    for include in cfg['includes']:
-	if include['path'] != '':
-	    args.extend(['--include', include['path']])
-	if include['glob'] != '':
-	    args.extend(['--include', include['glob']])
-	if include['regexp'] != '':
-	    args.extend(['--include-regexp', include['regexp']])
-    for exclude in cfg['excludes']:
-	if exclude['path'] != '':
-	    args.extend(['--exclude', exclude['path']])
-	elif exclude['glob'] != '':
-	    args.extend(['--exclude', exclude['glob']])
-	else:
-	    args.extend(['--exclude-regexp', exclude['regexp']])
+    for clude in cfg['cludes']:
+	opt = '--' + clude['type']
+	if clude['path'] != '':
+	    args.extend([opt, clude['path']])
+	if clude['glob'] != '':
+	    args.extend([opt, clude['glob']])
+	if clude['regexp'] != '':
+	    args.extend([opt + '-regexp', clude['regexp']])
+
     args.extend([ cfg['user'] + '@' + cfg['host'] + '::' + cfg['rootpath'],
 		  cfg['dir']])
     log('lbs: Doing rdiff-backup [' + ' '.join(args) + ']')
