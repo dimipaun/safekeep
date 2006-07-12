@@ -76,8 +76,6 @@ def parse_config(backup_el):
             snaps.append(parse_snap(snap_el))
 
     data_el = backup_el.getElementsByTagName('data')
-    rootpath = data_el[0].getAttribute('root')
-
 
     child_els = data_el[0].childNodes
     cludes = []
@@ -89,8 +87,7 @@ def parse_config(backup_el):
 	cludes.append(parse_clude(child_el))
 
     return { 'id': id, 'host' : host, 'user' : user, 'dir' : dir,
-	     'dumps' : dumps, 'snaps' : snaps,
-	     'rootpath' : rootpath, 'cludes' : cludes}
+	     'dumps' : dumps, 'snaps' : snaps, 'cludes' : cludes}
 
 ######################################################################
 # DB and SNAPSHOT support
@@ -187,8 +184,7 @@ def do_server_rdiff(cfg):
 	if clude['regexp'] != '':
 	    args.extend([opt + '-regexp', clude['regexp']])
 
-    args.extend([ cfg['user'] + '@' + cfg['host'] + '::' + cfg['rootpath'],
-		  cfg['dir']])
+    args.extend([cfg['user'] + '@' + cfg['host'] + '::/', cfg['dir']])
     log('lbs: Doing rdiff-backup [' + ' '.join(args) + ']')
     ret = os.spawnvp(os.P_WAIT, args[0], args)
     if ret:
