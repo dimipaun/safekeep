@@ -85,6 +85,7 @@ def parse_config(backup_el):
 	if child_el.tagName not in ('include', 'exclude'):
 	    continue
 	cludes.append(parse_clude(child_el))
+    cludes.append({ 'type' : 'exclude', 'path' : '', 'glob' : '', 'regexp' : '.*' })
 
     return { 'id': id, 'host' : host, 'user' : user, 'dir' : dir,
 	     'dumps' : dumps, 'snaps' : snaps, 'cludes' : cludes}
@@ -294,6 +295,7 @@ def do_server():
 		try:
 		    do_server_rdiff(cfg)
 		except Exception, e:
+		    traceback.print_exc()
 		    print 'lbs: Error in (server side) rdiff-backup: ', e
 		    retcode = 1
 		cin.write('CLEANUP\n')
