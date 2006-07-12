@@ -56,9 +56,9 @@ def parse_config(backup_el):
 
     host_el = backup_el.getElementsByTagName('host')
     host = host_el[0].getAttribute('name')
+    if not host: host = 'localhost'
     user = host_el[0].getAttribute('user')
-    if user == None or user == '': user = 'root'
-    assert host != '' and user != ''
+    if not user: user = 'root'
 
     dir_el = backup_el.getElementsByTagName('dir')
     dir = dir_el[0].getAttribute('path')
