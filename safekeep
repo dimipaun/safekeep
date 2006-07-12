@@ -197,6 +197,21 @@ def do_server_rdiff(cfg):
     if ret:
 	raise Exception('rdiff-backup returned %d' % ret)
 
+def do_client_config(cmd):
+    cfgStr = ''
+
+    count = int(cmd[cmd.index(':') + 1].strip())
+    for i in xrange(count):
+        line = sys.stdin.readline()
+        if not line: raise Exception('Unexpected end of file')
+        cfgStr += line
+
+    dom = xml.dom.minidom.parseString(cfgStr)
+    try:
+        return parse_config(dom.documentElement)
+    finally:
+        dom.unlink()
+
 def do_client():
     if os.path.exists(rdiff_sem):
 	try:
@@ -207,23 +222,13 @@ def do_client():
 	do_client_rdiff()
 	# no return
 
-    # read config file from server
-    line = ''
-    cfgStr = ''
-    while line.find('</backup>') == -1:
-	line = sys.stdin.readline()
-	if not line:
-	    fatal('lbc: Unexpected end of file')
-	cfgStr += line
 
-    # parse it
-    try:
-	dom = xml.dom.minidom.parseString(cfgStr)
-	cfg = parse_config(dom.documentElement)
-	dom.unlink()
-    except Exception, e:
-	print 'ERROR: ', e
-	fatal('lbc: invalid configuration', e)
+    # read command from server
+    line = sys.stdin.readline()
+    if line.startswith('CONFIG'):
+	cfg = do_client_config(line)
+    else:
+	fatal('Unknown command: ' + line)
 
     log('lbc: Do backup of ' + cfg['host'])
 
@@ -288,8 +293,15 @@ def do_server():
 
 	log('lbs: Do server backup [' + cfg['id'] + ']')
 	(cout, cin) = popen2.popen4('ssh -T ' + cfg['user'] + '@' + cfg['host'])
-	cin.write(open(fn).read())
+
+	cfg_in = open(fn)
+	cfg_lines = cfg_in.readlines()
+	cfg_in.close()
+
+	cin.write("CONFIG: %d\n" % (len(cfg_lines)))
+	cin.writelines(cfg_lines)
 	cin.flush()
+
 	retcode = 0
 	while True:
 	    line = cout.readline()
