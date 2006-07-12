@@ -62,7 +62,7 @@ def parse_config(backup_el):
 
     dir_el = backup_el.getElementsByTagName('dir')
     dir = dir_el[0].getAttribute('path')
-    assert dir != ''
+    if not dir: dir = './' + id
 
     setup_el = backup_el.getElementsByTagName('setup')
     dumps = []
