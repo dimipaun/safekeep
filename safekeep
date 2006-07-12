@@ -349,8 +349,7 @@ def main():
         log(mode + ': %s' % (e), e)
         sys.exit(1)
 
-
 if __name__ == '__main__':
     main()
 
-# vim: ts=8 sw=4 sts=4
+# vim: et ts=8 sw=4 sts=4
