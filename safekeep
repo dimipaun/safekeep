@@ -61,6 +61,7 @@ def parse_config(backup_el):
     if not host: host = 'localhost'
     user = host_el[0].getAttribute('user')
     if not user: user = 'root'
+    key = host_el[0].getAttribute('key')
 
     dir_el = backup_el.getElementsByTagName('dir')
     if len(dir_el) > 0:
@@ -91,7 +92,7 @@ def parse_config(backup_el):
         cludes.append(parse_clude(child_el))
     cludes.append({ 'type' : 'exclude', 'path' : '', 'glob' : '', 'regexp' : '.*' })
 
-    return { 'id': id, 'host' : host, 'user' : user, 'dir' : dir,
+    return { 'id': id, 'host' : host, 'user' : user, 'key' : key, 'dir' : dir,
              'dumps' : dumps, 'snaps' : snaps, 'cludes' : cludes}
 
 ######################################################################
@@ -272,7 +273,14 @@ def do_server():
             dom.unlink()
 
         log('lbs: Do server backup [' + cfg['id'] + ']')
-        (cout, cin) = popen2.popen4('ssh -T ' + cfg['user'] + '@' + cfg['host'])
+
+	ssh = 'ssh -T'
+	if cfg['key']:
+	    ssh += ' -i ' + cfg['key']
+	ssh += ' -l ' + cfg['user'] + ' ' + cfg['host']
+
+	log('lbs: ssh=' + ssh)
+        (cout, cin) = popen2.popen4(ssh)
 
         cfg_in = open(fn)
         cfg_lines = cfg_in.readlines()
