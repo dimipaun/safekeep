@@ -198,7 +198,7 @@ def do_server_rdiff(cfg):
 def do_client_config(cmd):
     cfgStr = ''
 
-    cnt_str = cmd[cmd.index(':') + 1, -1].strip()
+    cnt_str = cmd[cmd.index(':') + 1:].strip()
     for i in xrange(int(cnt_str)):
         line = sys.stdin.readline()
         if not line: raise Exception('Unexpected end of file')
