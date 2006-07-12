@@ -239,7 +239,7 @@ def do_client():
 	        # wait for rdiff-backup to end
 		while line.find('CLEANUP') == -1:
 		    line = sys.stdin.readline()
-		  if not line: raise Exception('Unexpected end of file')
+		    if not line: raise Exception('Unexpected end of file')
 
 		print 'DONE'
 	    finally:
