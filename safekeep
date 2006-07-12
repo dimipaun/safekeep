@@ -352,7 +352,6 @@ def main():
             do_server()
         else:
             do_client()
-        sys.exit(0)
     except Exception, e:
         log(mode + ': %s' % (e), e)
         sys.exit(1)
