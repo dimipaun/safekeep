@@ -16,7 +16,7 @@ temp_dir = ''
 def log(msg, ex=None):
     print msg
     if ex:
-	traceback.print_exc(file=sys.stdout)
+        traceback.print_exc(file=sys.stdout)
     sys.stdout.flush()
     pass
 
@@ -32,7 +32,7 @@ def parse_dump(dump_el):
     cleanup = dump_el.getAttribute('cleanup')
     assert type and db and file
     return { 'type' : type, 'db' : db, 'user' : user,
-	     'file' : file, 'cleanup' : cleanup }
+             'file' : file, 'cleanup' : cleanup }
 
 def parse_snap(snap_el):
     device = snap_el.getAttribute('device')
@@ -64,7 +64,7 @@ def parse_config(backup_el):
 
     dir_el = backup_el.getElementsByTagName('dir')
     if len(dir_el) > 0:
-	dir = dir_el[0].getAttribute('path')
+        dir = dir_el[0].getAttribute('path')
     else: dir = None
     if not dir: dir = './' + id
 
@@ -84,15 +84,15 @@ def parse_config(backup_el):
     child_els = data_el[0].childNodes
     cludes = []
     for child_el in child_els:
-	if child_el.nodeType != child_el.ELEMENT_NODE:
-	    continue
-	if child_el.tagName not in ('include', 'exclude'):
-	    continue
-	cludes.append(parse_clude(child_el))
+        if child_el.nodeType != child_el.ELEMENT_NODE:
+            continue
+        if child_el.tagName not in ('include', 'exclude'):
+            continue
+        cludes.append(parse_clude(child_el))
     cludes.append({ 'type' : 'exclude', 'path' : '', 'glob' : '', 'regexp' : '.*' })
 
     return { 'id': id, 'host' : host, 'user' : user, 'dir' : dir,
-	     'dumps' : dumps, 'snaps' : snaps, 'cludes' : cludes}
+             'dumps' : dumps, 'snaps' : snaps, 'cludes' : cludes}
 
 ######################################################################
 # DB and SNAPSHOT support
@@ -103,68 +103,68 @@ def parse_config(backup_el):
 def do_client_dbdump(cfg):
     log('lbc: Doing DB dumps')
     for dump in cfg['dumps']:
-	type = dump['type']
-	if type in ('postgres', 'postgresql', 'pgsql'):
-	    args = ['pg_dump', '-f', dump['file']]
-	    if dump['user']:
-		args.extend(['-U', dump['user']])
-	    args.append(dump['db'])
-	elif type in ('mysql'):
-	    args = ['mysqldump', '-r', dump['file']]
-	    if dump['user']:
-		args.extend(['-u', dump['user']])
-	    args.append(dump['db'])
-	else:
-	    raise Exception('lbc: invalid database type: ' + type)
-	ec = os.spawnvp(os.P_WAIT, args[0], args)
-	if ec:
-	    raise Exception('lbc: can not dump the database: ' + dump['db'])
+        type = dump['type']
+        if type in ('postgres', 'postgresql', 'pgsql'):
+            args = ['pg_dump', '-f', dump['file']]
+            if dump['user']:
+                args.extend(['-U', dump['user']])
+            args.append(dump['db'])
+        elif type in ('mysql'):
+            args = ['mysqldump', '-r', dump['file']]
+            if dump['user']:
+                args.extend(['-u', dump['user']])
+            args.append(dump['db'])
+        else:
+            raise Exception('lbc: invalid database type: ' + type)
+        ec = os.spawnvp(os.P_WAIT, args[0], args)
+        if ec:
+            raise Exception('lbc: can not dump the database: ' + dump['db'])
 
 def do_client_dbdump_teardown(cfg):
     log('lbc: Tear down DB dumps')
     for dump in cfg['dumps']:
-	if dump['cleanup'] != 'true':
-	    continue
-	try:
-	    os.remove(dump['file'])
-	except:
-	    pass
+        if dump['cleanup'] != 'true':
+            continue
+        try:
+            os.remove(dump['file'])
+        except:
+            pass
 
 def do_client_snap(cfg):
     log('lbc: Doing FS snapshots')
     global temp_dir
     temp_dir = tempfile.mkdtemp()
     for snap in cfg['snaps']:
-	snapdir = snap['device'][:snap['device'].rfind('/')]
-	snapname = snap['device'][snap['device'].rfind('/') + 1 :] + '-snap'
-	args = ['lvcreate', '-s', '-L', snap['size'], '-n', snapname, snap['device']]
-	log('lbc: [' + ' '.join(args) + ']')
-	ec = os.spawnvp(os.P_WAIT, args[0], args)
-	if ec:
-	    raise Exception('lbc: can not snapshot the device: ' + snap['device'])
-	os.mkdir(temp_dir + '/' + snapname)
-	args = ['mount', snapdir + '/' + snapname, temp_dir + '/' + snapname ]
-	ec = os.spawnvp(os.P_WAIT, args[0], args)
-	if ec:
-	    raise Exception('lbc: can not snapshot the device: ' + snap['device'])
+        snapdir = snap['device'][:snap['device'].rfind('/')]
+        snapname = snap['device'][snap['device'].rfind('/') + 1 :] + '-snap'
+        args = ['lvcreate', '-s', '-L', snap['size'], '-n', snapname, snap['device']]
+        log('lbc: [' + ' '.join(args) + ']')
+        ec = os.spawnvp(os.P_WAIT, args[0], args)
+        if ec:
+            raise Exception('lbc: can not snapshot the device: ' + snap['device'])
+        os.mkdir(temp_dir + '/' + snapname)
+        args = ['mount', snapdir + '/' + snapname, temp_dir + '/' + snapname ]
+        ec = os.spawnvp(os.P_WAIT, args[0], args)
+        if ec:
+            raise Exception('lbc: can not snapshot the device: ' + snap['device'])
 
 def do_client_snap_teardown(cfg):
     log('lbc: Tear down FS snapshots dumps')
     for snap in cfg['snaps']:
-	snapdir = snap['device'][:snap['device'].rfind('/')]
-	snapname = snap['device'][snap['device'].rfind('/') + 1 :] + '-snap'
-	args = ['umount', temp_dir + '/' + snapname ]
-	os.spawnvp(os.P_WAIT, args[0], args)
-	try:
-	    os.rmdir(temp_dir + '/' + snapname)
-	except:
-	    pass
-	args = ['lvremove', snapdir + '/' + snapname ]
-	os.spawnvp(os.P_WAIT, args[0], args)
+        snapdir = snap['device'][:snap['device'].rfind('/')]
+        snapname = snap['device'][snap['device'].rfind('/') + 1 :] + '-snap'
+        args = ['umount', temp_dir + '/' + snapname ]
+        os.spawnvp(os.P_WAIT, args[0], args)
+        try:
+            os.rmdir(temp_dir + '/' + snapname)
+        except:
+            pass
+        args = ['lvremove', snapdir + '/' + snapname ]
+        os.spawnvp(os.P_WAIT, args[0], args)
     try:
-	os.rmdir(temp_dir)
+        os.rmdir(temp_dir)
     except Exception, e:
-	pass
+        pass
 
 ######################################################################
 # Client / server implementation
@@ -180,19 +180,19 @@ def do_server_rdiff(cfg):
     args = ['rdiff-backup']
     #args.extend([ '-v', '6'])
     for clude in cfg['cludes']:
-	opt = '--' + clude['type']
-	if clude['path']:
-	    args.extend([opt, clude['path']])
-	if clude['glob']:
-	    args.extend([opt, clude['glob']])
-	if clude['regexp']:
-	    args.extend([opt + '-regexp', clude['regexp']])
+        opt = '--' + clude['type']
+        if clude['path']:
+            args.extend([opt, clude['path']])
+        if clude['glob']:
+            args.extend([opt, clude['glob']])
+        if clude['regexp']:
+            args.extend([opt + '-regexp', clude['regexp']])
 
     args.extend([cfg['user'] + '@' + cfg['host'] + '::/', cfg['dir']])
     log('lbs: Doing rdiff-backup [' + ' '.join(args) + ']')
     ret = os.spawnvp(os.P_WAIT, args[0], args)
     if ret:
-	raise Exception('rdiff-backup returned %d' % ret)
+        raise Exception('rdiff-backup returned %d' % ret)
 
 def do_client_config(cmd):
     cfgStr = ''
@@ -211,15 +211,15 @@ def do_client_config(cmd):
 
 def do_client():
     if os.path.exists(rdiff_sem):
-	os.remove(rdiff_sem)
-	do_client_rdiff()
-	# no return
+        os.remove(rdiff_sem)
+        do_client_rdiff()
+        # no return
 
 
     # read command from server
     line = sys.stdin.readline()
     if line.startswith('CONFIG'):
-	cfg = do_client_config(line)
+        cfg = do_client_config(line)
     else:
         raise Exception('Unknown command: ' + line)
 
@@ -227,88 +227,88 @@ def do_client():
 
     # prepare for backup
     try:
-	do_client_dbdump(cfg)
+        do_client_dbdump(cfg)
         try:
-	    do_client_snap(cfg)
+            do_client_snap(cfg)
 
             # go !
             lock = open(rdiff_sem, 'w')
             lock.close()
-	    try:
+            try:
                 print 'READY'
-	        sys.stdout.flush()
+                sys.stdout.flush()
 
-	        # wait for rdiff-backup to end
-		while line.find('CLEANUP') == -1:
-		    line = sys.stdin.readline()
-		    if not line: raise Exception('Unexpected end of file')
+                # wait for rdiff-backup to end
+                while line.find('CLEANUP') == -1:
+                    line = sys.stdin.readline()
+                    if not line: raise Exception('Unexpected end of file')
 
-		print 'DONE'
-	    finally:
-		os.remove(rdiff_sem)
+                print 'DONE'
+            finally:
+                os.remove(rdiff_sem)
 
         finally:
-	    do_client_dbdump_teardown(cfg)
+            do_client_dbdump_teardown(cfg)
     finally:
-	do_client_dbdump_teardown(cfg)
+        do_client_dbdump_teardown(cfg)
 
 
 def do_server():
     if not os.path.exists(config_dir):
-	raise Exception('lbs: config dir "' + config_dir + '" does not exist')
+        raise Exception('lbs: config dir "' + config_dir + '" does not exist')
 
     ls = os.listdir(config_dir)
     for ent in ls:
-	fn = config_dir + '/' + ent
-	if not os.path.isfile(fn):
-	    continue
-	if not ent.endswith('.cfg'):
-	    continue
+        fn = config_dir + '/' + ent
+        if not os.path.isfile(fn):
+            continue
+        if not ent.endswith('.cfg'):
+            continue
 
-	dom = xml.dom.minidom.parse(fn)
-	try:
-	    cfg = parse_config(dom.documentElement)
-	finally:
-	    dom.unlink()
+        dom = xml.dom.minidom.parse(fn)
+        try:
+            cfg = parse_config(dom.documentElement)
+        finally:
+            dom.unlink()
 
-	log('lbs: Do server backup [' + cfg['id'] + ']')
-	(cout, cin) = popen2.popen4('ssh -T ' + cfg['user'] + '@' + cfg['host'])
+        log('lbs: Do server backup [' + cfg['id'] + ']')
+        (cout, cin) = popen2.popen4('ssh -T ' + cfg['user'] + '@' + cfg['host'])
 
-	cfg_in = open(fn)
-	cfg_lines = cfg_in.readlines()
-	cfg_in.close()
+        cfg_in = open(fn)
+        cfg_lines = cfg_in.readlines()
+        cfg_in.close()
 
-	cin.write("CONFIG: %d\n" % (len(cfg_lines)))
-	cin.writelines(cfg_lines)
-	cin.flush()
+        cin.write("CONFIG: %d\n" % (len(cfg_lines)))
+        cin.writelines(cfg_lines)
+        cin.flush()
 
-	retcode = 0
-	while True:
-	    line = cout.readline()
-	    if line.startswith('READY'):
-		try:
-		    do_server_rdiff(cfg)
-		except Exception, e:
-		    log('lbs: Error in (server side) rdiff-backup: ', e)
-		    retcode = 1
-		cin.write('CLEANUP\n')
-		cin.flush()
-	    elif line.startswith('DONE'):
-		log('lbs: Client successfully ended')
-		break
-	    elif line.startswith('ERROR'):
-		log('lbs: Client error: '+ line)
-		retcode = 1
-		break
-	    elif not line:
-		log('lbs: Client died unexpectedly')
-		retcode = 1
-		break
-	    else:
-		log('lbs: client says: ' + line[:-1])
-	if retcode:
-	    sys.exit(retcode)
-	log('lbs: Server backup [' + cfg['id'] + '] done')
+        retcode = 0
+        while True:
+            line = cout.readline()
+            if line.startswith('READY'):
+                try:
+                    do_server_rdiff(cfg)
+                except Exception, e:
+                    log('lbs: Error in (server side) rdiff-backup: ', e)
+                    retcode = 1
+                cin.write('CLEANUP\n')
+                cin.flush()
+            elif line.startswith('DONE'):
+                log('lbs: Client successfully ended')
+                break
+            elif line.startswith('ERROR'):
+                log('lbs: Client error: '+ line)
+                retcode = 1
+                break
+            elif not line:
+                log('lbs: Client died unexpectedly')
+                retcode = 1
+                break
+            else:
+                log('lbs: client says: ' + line[:-1])
+        if retcode:
+            sys.exit(retcode)
+        log('lbs: Server backup [' + cfg['id'] + '] done')
     log('lbs: Server backup done')
 
 ######################################################################
@@ -319,31 +319,31 @@ def usage():
     print 'usage: %s [options]' % (sys.argv[0])
     print
     print 'options:'
-    print '-h, --help		 show this help message and exit'
-    print '-s, --server		 launch in server mode (default)'
-    print '-c, --client		 launch in client mode'
+    print '-h, --help            show this help message and exit'
+    print '-s, --server          launch in server mode (default)'
+    print '-c, --client          launch in client mode'
 
 def main():
     try:
-	opts, args = getopt.getopt(sys.argv[1:], 'hsc', ['help', 'server', 'client'])
+        opts, args = getopt.getopt(sys.argv[1:], 'hsc', ['help', 'server', 'client'])
     except getopt.GetoptError:
-	usage()
-	sys.exit(2)
+        usage()
+        sys.exit(2)
     mode = 'server'
     for o, a in opts:
-	if o in ('-h', '--help'):
-	    usage()
-	    sys.exit()
-	elif o in ('-s', '--server'):
-	    mode = 'server'
-	elif o in ('-c', '--client'):
-	    mode = 'client'
+        if o in ('-h', '--help'):
+            usage()
+            sys.exit()
+        elif o in ('-s', '--server'):
+            mode = 'server'
+        elif o in ('-c', '--client'):
+            mode = 'client'
 
     try:
         if mode == 'server':
-	    do_server()
+            do_server()
         else:
-	    do_client()
+            do_client()
         sys.exit(0)
     except Exception, e:
         log(mode + ': %s' % (e), e)
