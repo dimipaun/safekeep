@@ -13,10 +13,16 @@ temp_dir = ''
 # Miscellaneous
 ######################################################################
 
-def log(msg):
+def log(msg, ex=None):
     print msg
-    sys.stderr.flush()
+    if ex:
+	traceback.print_exc(ex)
+    sys.stdout.flush()
     pass
+
+def fatal(msg, ex=None):
+    log(msg, ex)
+    sys.exit(1)
 
 ######################################################################
 # Configuration file parser
@@ -171,7 +177,7 @@ def do_client_rdiff():
     args = [ 'rdiff-backup', '--server' ]
     os.execvp(args[0], args)
     print 'ERROR'
-    sys.exit(1)
+    fatal('lbc: failed to execute rdiff-backup')
 
 def do_server_rdiff(cfg):
     args = ['rdiff-backup']
@@ -197,7 +203,7 @@ def do_client():
 	    os.remove(rdiff_sem)
 	except Exception, e:
 	    print 'ERROR: ', e
-	    sys.exit(1)
+	    fatal('lbc: can not remove the semaphore file', e)
 	do_client_rdiff()
 	# no return
 
@@ -207,8 +213,7 @@ def do_client():
     while line.find('</backup>') == -1:
 	line = sys.stdin.readline()
 	if not line:
-	    log('lbc: Unexpected end of file')
-	    sys.exit(1)
+	    fatal('lbc: Unexpected end of file')
 	cfgStr += line
 
     # parse it
@@ -218,7 +223,7 @@ def do_client():
 	dom.unlink()
     except Exception, e:
 	print 'ERROR: ', e
-	sys.exit(1)
+	fatal('lbc: invalid configuration', e)
 
     log('lbc: Do backup of ' + cfg['host'])
 
@@ -228,7 +233,7 @@ def do_client():
     except Exception, e:
 	print 'ERROR:', e
 	do_client_dbdump_teardown(cfg)
-	sys.exit(1)
+	fatal('lbc: failed to dump the database(s)', e)
 
     try:
 	do_client_snap(cfg)
@@ -236,7 +241,7 @@ def do_client():
 	print 'ERROR:', e
 	do_client_dbdump_teardown(cfg)
 	do_client_snap_teardown(cfg)
-	sys.exit(1)
+	fatal('lbc: failed to create snapshot(s)', e)
 
     # go !
     lock = open(rdiff_sem, 'w')
@@ -264,8 +269,7 @@ def do_client():
 
 def do_server():
     if not os.path.exists(config_dir):
-	print 'lbs: config dir', config_dir, 'does not exist'
-	sys.exit(1)
+	fatal ('lbs: config dir "' + config_dir + '" does not exist')
 
     ls = os.listdir(config_dir)
     for ent in ls:
@@ -280,9 +284,7 @@ def do_server():
 	    cfg = parse_config(dom.documentElement)
 	    dom.unlink()
 	except Exception, e:
-	    traceback.print_exc()
-	    print 'lbs: config file error:', e
-	    sys.exit(1)
+	    fatal('lbs: config file error:', e)
 
 	log('lbs: Do server backup [' + cfg['id'] + ']')
 	(cout, cin) = popen2.popen4('ssh -T ' + cfg['user'] + '@' + cfg['host'])
@@ -295,8 +297,7 @@ def do_server():
 		try:
 		    do_server_rdiff(cfg)
 		except Exception, e:
-		    traceback.print_exc()
-		    print 'lbs: Error in (server side) rdiff-backup: ', e
+		    log('lbs: Error in (server side) rdiff-backup: ', e)
 		    retcode = 1
 		cin.write('CLEANUP\n')
 		cin.flush()
@@ -304,15 +305,15 @@ def do_server():
 		log('lbs: Client successfully ended')
 		break
 	    elif line.startswith('ERROR'):
-		print 'lbs: Client error:', line
+		log('lbs: Client error: '+ line)
 		retcode = 1
 		break
 	    elif not line:
-		print 'lbs: Client died unexpectedly'
+		log('lbs: Client died unexpectedly')
 		retcode = 1
 		break
 	    else:
-		print 'lbs: client says: ' + line[:-1]
+		log('lbs: client says: ' + line[:-1])
 	if retcode:
 	    sys.exit(retcode)
 	log('lbs: Server backup [' + cfg['id'] + '] done')
