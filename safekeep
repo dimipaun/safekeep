@@ -5,7 +5,6 @@ import xml.dom.minidom
 import popen2, tempfile
 
 config_dir = './etc/labackup'
-rdiff_sem = '/tmp/rdiff_sem'
 temp_dir = ''
 
 ######################################################################
@@ -171,12 +170,6 @@ def do_client_snap_teardown(cfg):
 # Client / server implementation
 ######################################################################
 
-def do_client_rdiff():
-    log('lbc: Doing rdiff-backup --server')
-    args = [ 'rdiff-backup', '--server' ]
-    os.execvp(args[0], args)
-    raise Exception('failed to execute rdiff-backup')
-
 def do_server_rdiff(cfg):
     args = ['rdiff-backup']
 
@@ -218,12 +211,6 @@ def do_client_config(cmd):
         dom.unlink()
 
 def do_client():
-    if os.path.exists(rdiff_sem):
-        os.remove(rdiff_sem)
-        do_client_rdiff()
-        # no return
-
-
     # read command from server
     line = sys.stdin.readline()
     if line.startswith('CONFIG'):
@@ -239,21 +226,15 @@ def do_client():
         try:
             do_client_snap(cfg)
 
-            # go !
-            lock = open(rdiff_sem, 'w')
-            lock.close()
-            try:
-                print 'READY'
-                sys.stdout.flush()
+            print 'READY'
+            sys.stdout.flush()
 
-                # wait for rdiff-backup to end
-                while line.find('CLEANUP') == -1:
-                    line = sys.stdin.readline()
-                    if not line: raise Exception('Unexpected end of file')
+            # wait for rdiff-backup to end
+            while line.find('CLEANUP') == -1:
+                line = sys.stdin.readline()
+                if not line: raise Exception('Unexpected end of file')
 
-                print 'DONE'
-            finally:
-                os.remove(rdiff_sem)
+            print 'DONE'
 
         finally:
             do_client_dbdump_teardown(cfg)
