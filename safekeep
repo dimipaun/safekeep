@@ -20,17 +20,23 @@ def debug(msg):
 # Configuration file parser
 ######################################################################
 
+class ConfigException (Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
+
 def parse_dump(dump_el):
     type = dump_el.getAttribute('type')
     if not type:
-        raise Exception('You need to specify the database type')
+        raise ConfigException('You need to specify the database type')
     db = dump_el.getAttribute('db')
     if not db:
-        raise Exception('You need to specify the database name')
+        raise ConfigException('You need to specify the database name')
     user = dump_el.getAttribute('user')
     file = dump_el.getAttribute('file')
     if not file:
-        raise Exception('You need to specify where the database should be dumped')
+        raise ConfigException('You need to specify where the database should be dumped')
     cleanup = dump_el.getAttribute('cleanup')
     return { 'type' : type, 'db' : db, 'user' : user,
              'file' : file, 'cleanup' : cleanup }
@@ -38,12 +44,12 @@ def parse_dump(dump_el):
 def parse_snap(snap_el):
     device = snap_el.getAttribute('device')
     if not device:
-        raise Exception('Please specify the device to be snapshot')
+        raise ConfigException('Please specify the device to be snapshot')
     if device.rfind('/') == -1 or device.endswith('/'):
-        raise Exception('The device name seems incorrect: ' + device)
+        raise ConfigException('The device name seems incorrect: ' + device)
     size = snap_el.getAttribute('size')
     if not size:
-        raise Exception('Please specify the size for the snapshot') 
+        raise ConfigException('Please specify the size for the snapshot') 
     return { 'device' : device, 'size' : size }
 
 def parse_clude(clude_el):
@@ -53,12 +59,12 @@ def parse_clude(clude_el):
     glob = clude_el.getAttribute('glob')
     regexp = clude_el.getAttribute('regexp')
     if not path and not glob and not regexp:
-        raise Exception('Empty ' + clude_el.tagName)
+        raise ConfigException('Empty ' + clude_el.tagName)
     return { 'type' : clude_el.tagName, 'path' : path, 'glob' : glob, 'regexp' : regexp }
 
 def parse_config(backup_el, filename):
     if backup_el.tagName != 'backup': 
-        raise Exception('Invalid config file')
+        raise ConfigException('Invalid config file, the top level element must be <backup>')
     id = backup_el.getAttribute('id')
     if not id: id = filename
 
