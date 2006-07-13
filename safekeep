@@ -217,9 +217,23 @@ def do_client_config(cmd):
     finally:
         dom.unlink()
 
-def do_client_backup(cfg):
+def do_client():
+    if os.path.exists(rdiff_sem):
+        os.remove(rdiff_sem)
+        do_client_rdiff()
+        # no return
+
+
+    # read command from server
+    line = sys.stdin.readline()
+    if line.startswith('CONFIG'):
+        cfg = do_client_config(line)
+    else:
+        raise Exception('Unknown command: ' + line)
+
     log('lbc: Do backup of ' + cfg['host'])
 
+    # prepare for backup
     try:
         do_client_dbdump(cfg)
         try:
@@ -245,22 +259,6 @@ def do_client_backup(cfg):
             do_client_dbdump_teardown(cfg)
     finally:
         do_client_dbdump_teardown(cfg)
-
-
-def do_client():
-    if os.path.exists(rdiff_sem):
-        os.remove(rdiff_sem)
-        do_client_rdiff()
-        # no return
-
-
-    # read command from server
-    line = sys.stdin.readline()
-    if line.startswith('CONFIG'):
-        cfg = do_client_config(line)
-        do_client_backup(cfg)
-    else:
-        raise Exception('Unknown command: ' + line)
 
 
 def do_server():
