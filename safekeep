@@ -136,7 +136,7 @@ def snap_dev_to_mp(device):
     cin.close()
     for line in lines:
         if line.startswith(device):
-            return (line.split(' ')[1], line.split(' ')[2])
+            return (line.split(' ')[1], line.split(' ')[3])
     return (None, None)
 
 def do_client_snap(cfg, bdir):
