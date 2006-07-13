@@ -6,7 +6,6 @@ import popen2, tempfile
 
 config_dir = './etc/labackup'
 rdiff_sem = '/tmp/rdiff_sem'
-lbc_sem = '/tmp/lbc_sem'
 temp_dir = ''
 
 ######################################################################
