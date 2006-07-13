@@ -177,7 +177,7 @@ def do_client_snap_teardown(cfg, bdir):
         ret = os.spawnvp(os.P_WAIT, args[0], args)
         if ret:
             print 'umount', bdir + mp, 'returned', ret
-        args = ['lvremove', snapdir + '/' + snapname ]
+        args = ['lvremove', '-f', snapdir + '/' + snapname ]
         debug('Run [' + ' '.join(args) + ']')
         ret = os.spawnvp(os.P_WAIT, args[0], args)
         if ret:
