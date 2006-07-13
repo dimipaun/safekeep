@@ -128,7 +128,7 @@ def do_client_dbdump_teardown(cfg):
         except Exception, e:
             print 'Unable to remove', dump['file'], e
 
-def snap_dev_to_mp(device):
+def map_device_to_mountpoint(device):
     device = device.strip() + ' '
     (cout, cin) = popen2.popen4('mount')
     lines = cout.readlines()
@@ -145,7 +145,7 @@ def do_client_snap(cfg, bdir):
         snapdev = '/dev/' + snap['device'].replace('/dev/mapper/','').replace('-','/')
         snapdir = snapdev[:snapdev.rfind('/')]
         snapname = snapdev[snapdev.rfind('/') + 1 :] + '-snap'
-        (mp, mt) = snap_dev_to_mp(snap['device'])
+        (mp, mt) = map_device_to_mountpoint(snap['device'])
         if not mp:
             raise Exception('Cannot find the mountpoint for: ' + snap['device'])
 
@@ -167,7 +167,7 @@ def do_client_snap_teardown(cfg, bdir):
         snapdev = '/dev/' + snap['device'].replace('/dev/mapper/','').replace('-','/')
         snapdir = snapdev[:snapdev.rfind('/')]
         snapname = snapdev[snapdev.rfind('/') + 1 :] + '-snap'
-        (mp, mt) = snap_dev_to_mp(snap['device'])
+        (mp, mt) = map_device_to_mountpoint(snap['device'])
         if not mp:
             print 'Cannot find the mountpoint for: ' + snap['device']
             return
