@@ -1,8 +1,8 @@
 #!/usr/bin/python
 
-import getopt, os, sys, re, traceback
+import getopt, os, sys, re
+import tempfile, traceback
 import xml.dom.minidom
-import popen2, tempfile
 
 config_dir = './etc/labackup'
 config_ext = '.cfg'
@@ -131,7 +131,7 @@ def do_client_dbdump_teardown(cfg):
 
 def map_device_to_mountpoint(device):
     device = device.strip() + ' '
-    (cout, cin) = popen2.popen4('mount')
+    (cin, cout) = os.popen4('mount')
     lines = cout.readlines()
     cout.close()
     cin.close()
@@ -333,7 +333,7 @@ def do_server():
         ssh += ' -l ' + cfg['user'] + ' ' + cfg['host']
         debug('lbs: Run [' + ssh + ']')
 
-        (cout, cin) = popen2.popen4(ssh)
+        (cin, cout) = os.popen4(ssh)
 
         cin.write('CONFIG: %d\n' % (len(cfg_str.splitlines())))
         cin.write(cfg_str)
