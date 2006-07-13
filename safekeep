@@ -130,7 +130,11 @@ def do_client_dbdump_teardown(cfg):
 
 def snap_dev_to_mp(device):
     device = device.strip() + ' '
-    for line in open('/proc/mounts'):
+    (cout, cin) = popen2.popen4('mount')
+    lines = cout.readlines()
+    cout.close()
+    cin.close()
+    for line in lines:
         if line.startswith(device):
             return (line.split(' ')[1], line.split(' ')[2])
     return (None, None)
