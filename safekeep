@@ -62,6 +62,7 @@ def parse_config(backup_el):
     user = host_el[0].getAttribute('user')
     if not user: user = 'root'
     key = host_el[0].getAttribute('key')
+    key2 = host_el[0].getAttribute('key2')
 
     dir_el = backup_el.getElementsByTagName('dir')
     if len(dir_el) > 0:
@@ -92,8 +93,8 @@ def parse_config(backup_el):
         cludes.append(parse_clude(child_el))
     cludes.append({ 'type' : 'exclude', 'path' : '', 'glob' : '', 'regexp' : '.*' })
 
-    return { 'id': id, 'host' : host, 'user' : user, 'key' : key, 'dir' : dir,
-             'dumps' : dumps, 'snaps' : snaps, 'cludes' : cludes}
+    return { 'id': id, 'host' : host, 'user' : user, 'key' : key, 'key2' : key2,
+             'dir' : dir, 'dumps' : dumps, 'snaps' : snaps, 'cludes' : cludes}
 
 ######################################################################
 # DB and SNAPSHOT support
@@ -179,6 +180,13 @@ def do_client_rdiff():
 
 def do_server_rdiff(cfg):
     args = ['rdiff-backup']
+
+    schema = 'ssh -C'
+    if cfg['key2']:
+        schema += ' -i ' + cfg['key2']
+    schema += ' %s rdiff-backup --server'
+    args.extend(['--remote-schema', schema])
+
     #args.extend([ '-v', '6'])
     for clude in cfg['cludes']:
         opt = '--' + clude['type']
