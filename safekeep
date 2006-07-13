@@ -146,7 +146,7 @@ def do_client_snap(cfg, bdir):
     debug('Doing FS snapshots')
     for snap in cfg['snaps']:
         snapdir = snap['device'][:snap['device'].rfind('/')]
-        snapname = snap['device'][snap['device'].rfind('/') + 1 :] + '-snap'
+        snapname = snap['device'][snap['device'].rfind('/') + 1 :] + 'snap'
         (mp, mt) = snap_dev_to_mp(snap['device'])
         if not mp:
             raise Exception('Cannot find the mountpoint for: ' + snap['device'])
@@ -167,7 +167,7 @@ def do_client_snap_teardown(cfg, bdir):
     debug('Tear down FS snapshots dumps')
     for snap in cfg['snaps']:
         snapdir = snap['device'][:snap['device'].rfind('/')]
-        snapname = snap['device'][snap['device'].rfind('/') + 1 :] + '-snap'
+        snapname = snap['device'][snap['device'].rfind('/') + 1 :] + 'snap'
         (mp, mt) = snap_dev_to_mp(snap['device'])
         if not mp:
             print 'Cannot find the mountpoint for: ' + snap['device']
