@@ -11,10 +11,8 @@ temp_dir = ''
 # Miscellaneous
 ######################################################################
 
-def log(msg, ex=None):
+def debug(msg):
     print msg
-    if ex:
-        traceback.print_exc(file=sys.stdout)
     sys.stdout.flush()
     pass
 
@@ -101,7 +99,7 @@ def parse_config(backup_el):
 ######################################################################
 
 def do_client_dbdump(cfg):
-    log('lbc: Doing DB dumps')
+    debug('lbc: Doing DB dumps')
     for dump in cfg['dumps']:
         type = dump['type']
         if type in ('postgres', 'postgresql', 'pgsql'):
@@ -121,7 +119,7 @@ def do_client_dbdump(cfg):
             raise Exception('lbc: can not dump the database: ' + dump['db'])
 
 def do_client_dbdump_teardown(cfg):
-    log('lbc: Tear down DB dumps')
+    debug('lbc: Tear down DB dumps')
     for dump in cfg['dumps']:
         if dump['cleanup'] != 'true':
             continue
@@ -131,14 +129,14 @@ def do_client_dbdump_teardown(cfg):
             pass
 
 def do_client_snap(cfg):
-    log('lbc: Doing FS snapshots')
+    debug('lbc: Doing FS snapshots')
     global temp_dir
     temp_dir = tempfile.mkdtemp()
     for snap in cfg['snaps']:
         snapdir = snap['device'][:snap['device'].rfind('/')]
         snapname = snap['device'][snap['device'].rfind('/') + 1 :] + '-snap'
         args = ['lvcreate', '-s', '-L', snap['size'], '-n', snapname, snap['device']]
-        log('lbc: [' + ' '.join(args) + ']')
+        debug('lbc: [' + ' '.join(args) + ']')
         ec = os.spawnvp(os.P_WAIT, args[0], args)
         if ec:
             raise Exception('lbc: can not snapshot the device: ' + snap['device'])
@@ -149,7 +147,7 @@ def do_client_snap(cfg):
             raise Exception('lbc: can not snapshot the device: ' + snap['device'])
 
 def do_client_snap_teardown(cfg):
-    log('lbc: Tear down FS snapshots dumps')
+    debug('lbc: Tear down FS snapshots dumps')
     for snap in cfg['snaps']:
         snapdir = snap['device'][:snap['device'].rfind('/')]
         snapname = snap['device'][snap['device'].rfind('/') + 1 :] + '-snap'
@@ -167,8 +165,107 @@ def do_client_snap_teardown(cfg):
         pass
 
 ######################################################################
-# Client / server implementation
+# Client implementation
 ######################################################################
+
+def do_client_config(cmd):
+    cfgStr = ''
+
+    cnt_str = cmd[cmd.index(':') + 1:].strip()
+    for i in xrange(int(cnt_str)):
+        line = sys.stdin.readline()
+        if not line: raise Exception('Unexpected end of file')
+        cfgStr += line
+
+    dom = xml.dom.minidom.parseString(cfgStr)
+    try:
+        cfg = parse_config(dom.documentElement)
+        print 'OK'
+        sys.stdout.flush()
+        return cfg
+    finally:
+        dom.unlink()
+
+def do_client_setup(cfg):
+    debug('lbc: Do setup of ' + cfg['host'])
+    try:
+        do_client_dbdump(cfg)
+        try:
+            do_client_snap(cfg)
+            print 'OK'
+            sys.stdout.flush()
+        finally:
+            do_client_snap_teardown(cfg)
+    finally:
+        do_client_dbdump_teardown(cfg)
+
+def do_client_cleanup(cfg):
+    debug('lbc: Do cleanup of ' + cfg['host'])
+    do_client_snap_teardown(cfg)
+    do_client_dbdump_teardown(cfg)
+    print 'OK'
+    sys.stdout.flush()
+
+def do_client():
+    line = sys.stdin.readline()
+    if line.startswith('CONFIG'):
+        cfg = do_client_config(line)
+    else:
+        raise Exception('Unknown command: ' + line)
+
+    line = sys.stdin.readline()
+    if line.startswith('SETUP'):
+        do_client_setup(cfg)
+    elif line.startswith('CLEANUP'):
+        do_client_cleanup(cfg)
+    else:
+        raise Exception('Unknown command: ' + line)
+
+######################################################################
+# Server implementation
+######################################################################
+
+def do_server_openconn(cfg):
+    ssh = 'ssh -T'
+    if cfg['key']:
+        ssh += ' -i ' + cfg['key']
+    ssh += ' -l ' + cfg['user'] + ' ' + cfg['host']
+
+    debug('lbs: ssh=' + ssh)
+    (cout, cin) = popen2.popen4(ssh)
+    return (cout, cin)
+
+def do_server_getanswer(cout):
+    while True:
+        line = cout.readline()
+        if line.startswith('OK'):
+            return line
+        elif line.startswith('ERROR'):
+            # read full traceback from client
+            line = line[5:] + cout.read()
+            raise Exception(line)
+        elif not line:
+            raise Exception('client died unexpectedly')
+        else:
+            debug('lbs: ' + line[:-1])
+
+def do_server_sendconfig(cout, cin, fn):
+    cfg_lines = open(fn).readlines()
+    cin.write("CONFIG: %d\n" % (len(cfg_lines)))
+    cin.writelines(cfg_lines)
+    cin.flush()
+    do_server_getanswer(cout)
+
+def do_server_setup(cfg, fn):
+    debug('lbs: Do setup of ' + cfg['host'])
+
+    (cout, cin) = do_server_openconn(cfg)
+
+    do_server_sendconfig(cout, cin, fn)
+
+    cin.write("SETUP\n")
+    cin.flush()
+    do_server_getanswer(cout)
 
 def do_server_rdiff(cfg):
     args = ['rdiff-backup']
@@ -190,57 +287,21 @@ def do_server_rdiff(cfg):
             args.extend([opt + '-regexp', clude['regexp']])
 
     args.extend([cfg['user'] + '@' + cfg['host'] + '::/', cfg['dir']])
-    log('lbs: Doing rdiff-backup [' + ' '.join(args) + ']')
+    debug('lbs: Do rdiff-backup [' + ' '.join(args) + ']')
     ret = os.spawnvp(os.P_WAIT, args[0], args)
     if ret:
         raise Exception('rdiff-backup returned %d' % ret)
 
-def do_client_config(cmd):
-    cfgStr = ''
+def do_server_cleanup(cfg, fn):
+    debug('lbs: Do cleanup of ' + cfg['host'])
 
-    cnt_str = cmd[cmd.index(':') + 1:].strip()
-    for i in xrange(int(cnt_str)):
-        line = sys.stdin.readline()
-        if not line: raise Exception('Unexpected end of file')
-        cfgStr += line
+    (cout, cin) = do_server_openconn(cfg)
 
-    dom = xml.dom.minidom.parseString(cfgStr)
-    try:
-        return parse_config(dom.documentElement)
-    finally:
-        dom.unlink()
+    do_server_sendconfig(cout, cin, fn)
 
-def do_client():
-    # read command from server
-    line = sys.stdin.readline()
-    if line.startswith('CONFIG'):
-        cfg = do_client_config(line)
-    else:
-        raise Exception('Unknown command: ' + line)
-
-    log('lbc: Do backup of ' + cfg['host'])
-
-    # prepare for backup
-    try:
-        do_client_dbdump(cfg)
-        try:
-            do_client_snap(cfg)
-
-            print 'READY'
-            sys.stdout.flush()
-
-            # wait for rdiff-backup to end
-            while line.find('CLEANUP') == -1:
-                line = sys.stdin.readline()
-                if not line: raise Exception('Unexpected end of file')
-
-            print 'DONE'
-
-        finally:
-            do_client_dbdump_teardown(cfg)
-    finally:
-        do_client_dbdump_teardown(cfg)
-
+    cin.write("CLEANUP\n")
+    cin.flush()
+    do_server_getanswer(cout)
 
 def do_server():
     if not os.path.exists(config_dir):
@@ -260,52 +321,17 @@ def do_server():
         finally:
             dom.unlink()
 
-        log('lbs: Do server backup [' + cfg['id'] + ']')
+        debug('lbs: Do server backup [' + cfg['id'] + ']')
 
-	ssh = 'ssh -T'
-	if cfg['key']:
-	    ssh += ' -i ' + cfg['key']
-	ssh += ' -l ' + cfg['user'] + ' ' + cfg['host']
+        try:
+            do_server_setup(cfg, fn)
 
-	log('lbs: ssh=' + ssh)
-        (cout, cin) = popen2.popen4(ssh)
+            do_server_rdiff(cfg)
+        finally:
+            do_server_cleanup(cfg, fn)
 
-        cfg_in = open(fn)
-        cfg_lines = cfg_in.readlines()
-        cfg_in.close()
-
-        cin.write("CONFIG: %d\n" % (len(cfg_lines)))
-        cin.writelines(cfg_lines)
-        cin.flush()
-
-        retcode = 0
-        while True:
-            line = cout.readline()
-            if line.startswith('READY'):
-                try:
-                    do_server_rdiff(cfg)
-                except Exception, e:
-                    log('lbs: Error in (server side) rdiff-backup: ', e)
-                    retcode = 1
-                cin.write('CLEANUP\n')
-                cin.flush()
-            elif line.startswith('DONE'):
-                log('lbs: Client successfully ended')
-                break
-            elif line.startswith('ERROR'):
-                log('lbs: Client error: '+ line)
-                retcode = 1
-                break
-            elif not line:
-                log('lbs: Client died unexpectedly')
-                retcode = 1
-                break
-            else:
-                log('lbs: client says: ' + line[:-1])
-        if retcode:
-            sys.exit(retcode)
-        log('lbs: Server backup [' + cfg['id'] + '] done')
-    log('lbs: Server backup done')
+        debug('lbs: Server backup [' + cfg['id'] + '] done')
+    debug('lbs: Server backup done')
 
 ######################################################################
 # Main routine
@@ -341,7 +367,10 @@ def main():
         else:
             do_client()
     except Exception, e:
-        log(mode + ': %s' % (e), e)
+        if (mode == 'client'):
+            print 'ERROR',
+        traceback.print_exc(file=sys.stdout)
+        sys.stdout.flush()
         sys.exit(1)
 
 if __name__ == '__main__':
