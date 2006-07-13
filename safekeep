@@ -137,7 +137,6 @@ def snap_dev_to_mp(device):
     for line in lines:
         if line.startswith(device):
             mp = line.split(' ')[1]
-            mp = '/dev/' + mp.replace('/dev/mapper/','').replace('-','/')
             mt = line.split(' ')[3]
             return (line.split(' ')[1], line.split(' ')[3])
     return (None, None)
@@ -145,17 +144,18 @@ def snap_dev_to_mp(device):
 def do_client_snap(cfg, bdir):
     debug('Doing FS snapshots')
     for snap in cfg['snaps']:
-        snapdir = snap['device'][:snap['device'].rfind('/')]
-        snapname = snap['device'][snap['device'].rfind('/') + 1 :] + 'snap'
+        snapdev = '/dev/' + snap['device'].replace('/dev/mapper/','').replace('-','/')
+        snapdir = snapdev[:snapdev.rfind('/')]
+        snapname = snapdev[snapdev.rfind('/') + 1 :] + '-snap'
         (mp, mt) = snap_dev_to_mp(snap['device'])
         if not mp:
             raise Exception('Cannot find the mountpoint for: ' + snap['device'])
 
-        args = ['lvcreate', '-s', '-L', snap['size'], '-n', snapname, snap['device']]
+        args = ['lvcreate', '-s', '-L', snap['size'], '-n', snapname, snapdev]
         debug('Run [' + ' '.join(args) + ']')
         ec = os.spawnvp(os.P_WAIT, args[0], args)
         if ec:
-            raise Exception('Can not snapshot the device: ' + snap['device'])
+            raise Exception('Can not snapshot the device: ' + snapdev)
         # no need to mkdir since the mountpoint already exists
         args = ['mount', '-t', mt, snapdir + '/' + snapname, bdir + mp ]
         debug('Run [' + ' '.join(args) + ']')
@@ -166,8 +166,9 @@ def do_client_snap(cfg, bdir):
 def do_client_snap_teardown(cfg, bdir):
     debug('Tear down FS snapshots dumps')
     for snap in cfg['snaps']:
-        snapdir = snap['device'][:snap['device'].rfind('/')]
-        snapname = snap['device'][snap['device'].rfind('/') + 1 :] + 'snap'
+        snapdev = '/dev/' + snap['device'].replace('/dev/mapper/','').replace('-','/')
+        snapdir = snapdev[:snapdev.rfind('/')]
+        snapname = snapdev[snapdev.rfind('/') + 1 :] + '-snap'
         (mp, mt) = snap_dev_to_mp(snap['device'])
         if not mp:
             print 'Cannot find the mountpoint for: ' + snap['device']
