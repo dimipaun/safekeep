@@ -33,6 +33,8 @@ def parse_dump(dump_el):
     db = dump_el.getAttribute('db')
     if not db:
         raise ConfigException('You need to specify the database name')
+    if db not in ('postgres', 'postgresql', 'pgsql', 'mysql'):
+        raise ConfigException('Invalid database type: ' + type)
     user = dump_el.getAttribute('user')
     file = dump_el.getAttribute('file')
     if not file:
