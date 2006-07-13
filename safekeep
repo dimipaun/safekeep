@@ -256,28 +256,36 @@ def do_client_cleanup(cfg, bdir):
     sys.stdout.flush()
 
 def do_client():
-    while True:
-        try:
-            line = sys.stdin.readline()
-            if line.startswith('CONFIG'):
-                cfg = do_client_config(line)
-            elif line.startswith('BDIR'):
-                bdir = tempfile.mkdtemp("", "lbc")
-                if not bdir.endswith('/'): bdir += '/'
-                print 'OK ' + bdir
+    cleanup = True
+    try:
+        while True:
+            try:
+                line = sys.stdin.readline()
+                if line.startswith('CONFIG'):
+                    cfg = do_client_config(line)
+                elif line.startswith('BDIR'):
+                    bdir = tempfile.mkdtemp("", "lbc")
+                    if not bdir.endswith('/'): bdir += '/'
+                    print 'OK ' + bdir
+                    sys.stdout.flush()
+                elif line.startswith('SETUP'):
+                    do_client_setup(cfg, line[5:].strip())
+                elif line.startswith('CLEANUP'):
+                    dir = line[7:].strip()
+                    cleanup = (dir == bdir)
+                    do_client_cleanup(cfg, dir)
+                elif not line:
+                    break
+                else:
+                    raise Exception('Unknown command: ' + line)
+            except Exception, e:
+                traceback.print_exc(file=sys.stdout)
+                print 'ERROR', e
                 sys.stdout.flush()
-            elif line.startswith('SETUP'):
-                do_client_setup(cfg, line[5:].strip())
-            elif line.startswith('CLEANUP'):
-                do_client_cleanup(cfg, line[7:].strip())
-            elif not line:
-                break
-            else:
-                raise Exception('Unknown command: ' + line)
-        except Exception, e:
-            traceback.print_exc(file=sys.stdout)
-            print 'ERROR', e
-            sys.stdout.flush()
+    finally:
+        if cleanup:
+            do_client_cleanup(cfg, bdir)
+
 
 ######################################################################
 # Server implementation
