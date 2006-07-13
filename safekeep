@@ -5,6 +5,7 @@ import xml.dom.minidom
 import popen2, tempfile
 
 config_dir = './etc/labackup'
+config_ext = '.cfg'
 
 ######################################################################
 # Miscellaneous
@@ -46,10 +47,10 @@ def parse_clude(clude_el):
     assert path or glob or regexp
     return { 'type' : clude_el.tagName, 'path' : path, 'glob' : glob, 'regexp' : regexp }
 
-def parse_config(backup_el):
+def parse_config(backup_el, filename):
     assert backup_el.tagName == 'backup'
     id = backup_el.getAttribute('id')
-    assert id
+    if not id: id = filename
 
     host_el = backup_el.getElementsByTagName('host')
     host = host_el[0].getAttribute('name')
@@ -197,7 +198,7 @@ def do_client_config(cmd):
 
     dom = xml.dom.minidom.parseString(cfgStr)
     try:
-        cfg = parse_config(dom.documentElement)
+        cfg = parse_config(dom.documentElement, None)
         print 'OK'
         sys.stdout.flush()
         return cfg
@@ -310,12 +311,13 @@ def do_server():
         fn = config_dir + '/' + ent
         if not os.path.isfile(fn):
             continue
-        if not ent.endswith('.cfg'):
+        if not ent.endswith(config_ext):
             continue
+        filename = ent[0, -len(config_ext)]
 
         dom = xml.dom.minidom.parse(fn)
         try:
-            cfg = parse_config(dom.documentElement)
+            cfg = parse_config(dom.documentElement, filename)
         finally:
             dom.unlink()
 
