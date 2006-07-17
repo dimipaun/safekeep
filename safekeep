@@ -36,11 +36,12 @@ def parse_dump(dump_el):
     if not db:
         raise ConfigException('You need to specify the database name')
     user = dump_el.getAttribute('user')
+    dbuser = dump_el.getAttribute('dbuser')
     file = dump_el.getAttribute('file')
     if not file:
         raise ConfigException('You need to specify where the database should be dumped')
     cleanup = dump_el.getAttribute('cleanup')
-    return { 'type' : type, 'db' : db, 'user' : user,
+    return { 'type' : type, 'db' : db, 'user' : user, 'dbuser' : dbuser,
              'file' : file, 'cleanup' : cleanup }
 
 def parse_snap(snap_el):
@@ -122,17 +123,20 @@ def do_client_dbdump(cfg):
         type = dump['type']
         if type in ('postgres', 'postgresql', 'pgsql'):
             args = ['pg_dump', '-f', dump['file']]
-            if dump['user']:
-                args.extend(['-U', dump['user']])
+            if dump['dbuser']:
+                args.extend(['-U', dump['dbuser']])
             args.append(dump['db'])
         elif type in ('mysql'):
             args = ['mysqldump', '-r', dump['file']]
-            if dump['user']:
-                args.extend(['-u', dump['user']])
+            if dump['dbuser']:
+                args.extend(['-u', dump['dbuser']])
             args.append(dump['db'])
         else:
             raise Exception('Invalid database type: ' + type)
         debug('Run [' + ' '.join(args) + ']')
+        if dump['user']:
+            cmd = ' '.join(args)   # FIXME: we need proper quoting  
+            args = [ 'su', '-c', cmd, '-', dump['user'] ]
         ec = os.spawnvp(os.P_WAIT, args[0], args)
         if ec:
             raise Exception('Can not dump the database: ' + dump['db'])
