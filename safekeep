@@ -16,6 +16,10 @@ def debug(msg):
     sys.stdout.flush()
     pass
 
+def warn(msg):
+    print 'WARN:', msg
+    sys.stdout.flush()
+
 ######################################################################
 # Configuration file parser
 ######################################################################
@@ -132,14 +136,15 @@ def do_client_dbdump(cfg):
                 args.extend(['-u', dump['dbuser']])
             args.append(dump['db'])
         else:
-            raise Exception('Invalid database type: ' + type)
+            warn('Invalid database type: ' + type)
+            continue
         debug('Run [' + ' '.join(args) + ']')
         if dump['user']:
             cmd = ' '.join(args)   # FIXME: we need proper quoting  
             args = [ 'su', '-c', cmd, '-', dump['user'] ]
         ec = os.spawnvp(os.P_WAIT, args[0], args)
         if ec:
-            raise Exception('Can not dump the database: ' + dump['db'])
+            warn('Can not dump the database: ' + dump['db'])
 
 def do_client_dbdump_teardown(cfg):
     debug('Tear down DB dumps')
@@ -149,7 +154,8 @@ def do_client_dbdump_teardown(cfg):
         try:
             os.remove(dump['file'])
         except Exception, e:
-            print 'Unable to remove', dump['file'], e
+            warn('Unable to remove dump file: %s for database %s because: %s' %
+                 (dump['file'], dump['db'], e))
 
 def map_device_to_mountpoint(device):
     device = device.strip() + ' '
@@ -236,8 +242,13 @@ def do_client_setup(cfg, bdir):
     if ret:
         raise Exception('mount --rbind returned %d' % ret)
 
-    do_client_dbdump(cfg)
+    try:
+        do_client_dbdump(cfg)
+    except Exception, e:
+        warn('Serious problem during database dump: %s' % (e))
+    
     do_client_snap(cfg, bdir)
+    
     print 'OK'
     sys.stdout.flush()
 
