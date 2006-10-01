@@ -4,7 +4,7 @@ import getopt, os, sys, re
 import tempfile, traceback
 import xml.dom.minidom
 
-config_dir = './etc/labackup'
+config_dir = '/etc/labackup'
 config_ext = '.cfg'
 
 ######################################################################
