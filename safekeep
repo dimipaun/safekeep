@@ -3,21 +3,27 @@
 import getopt, os, sys, re
 import tempfile, traceback
 import xml.dom.minidom
+import socket, smtplib
 
 config_dir = '/etc/labackup'
 config_ext = '.cfg'
+log = ''
 
 ######################################################################
 # Miscellaneous
 ######################################################################
 
 def debug(msg):
+    global log
     print msg
+    log += msg + '\n'
     sys.stdout.flush()
     pass
 
 def warn(msg):
+    global log
     print 'WARN:', msg
+    log += 'WARN: ' + msg + '\n'
     sys.stdout.flush()
 
 ######################################################################
@@ -343,7 +349,7 @@ def do_server_rdiff(cfg, bdir):
     if ret:
         raise Exception('rdiff-backup returned %d' % ret)
 
-def do_server():
+def do_server(email):
     if not os.path.exists(config_dir):
         raise Exception('lbs: config dir "' + config_dir + '" does not exist')
 
@@ -399,6 +405,16 @@ def do_server():
         debug('lbs: Server backup [' + cfg['id'] + '] done')
     debug('lbs: Server backup done')
 
+    if email:
+        global log
+        log = 'From: LaBackup@' + socket.gethostname() + \
+              '\r\nTo: ' + email + '\r\n\r\n' + log
+        server = smtplib.SMTP('localhost')
+        server.sendmail('LaBackup@' + socket.gethostname(),
+                        email,
+                        log)
+        server.quit()
+
 ######################################################################
 # Main routine
 ######################################################################
@@ -407,19 +423,23 @@ def usage():
     print 'usage: %s [options]' % (sys.argv[0])
     print
     print 'options:'
+    print '-e, --email=EMAIL     send results by email'
     print '-h, --help            show this help message and exit'
     print '-s, --server          launch in server mode (default)'
     print '-c, --client          launch in client mode'
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'hsc', ['help', 'server', 'client'])
+        opts, args = getopt.getopt(sys.argv[1:], 'e:hsc', ['email', 'help', 'server', 'client'])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
     mode = 'server'
+    email = None
     for o, a in opts:
-        if o in ('-h', '--help'):
+        if o in ('-e', '--email'):
+            email = a
+        elif o in ('-h', '--help'):
             usage()
             sys.exit()
         elif o in ('-s', '--server'):
@@ -428,7 +448,7 @@ def main():
             mode = 'client'
 
     if mode == 'server':
-        do_server()
+        do_server(email)
     else:
         do_client()
 
