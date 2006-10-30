@@ -190,7 +190,7 @@ def do_client_snap(cfg, bdir):
         debug('Run [' + ' '.join(args) + ']')
         ec = os.spawnvp(os.P_WAIT, args[0], args)
         if ec:
-            raise Exception('Can not snapshot the device: ' + snapdev)
+            raise Exception('Can not snapshot the device: ' + snap['device'])
         # no need to mkdir since the mountpoint already exists
         args = ['mount', '-t', mt,
                 '/dev/mapper/' + group + '-' + volume + '_snap', bdir + mp]
