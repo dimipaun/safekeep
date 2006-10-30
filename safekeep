@@ -186,14 +186,14 @@ def do_client_snap(cfg, bdir):
             raise Exception('Cannot find the mountpoint for: ' + snap['device'])
         args = ['lvcreate', '-s', '-L', snap['size'], '-n',
                 volume + '_snap',
-                '/dev/mapper/' + group + '-' + volume]
+                '/dev/' + group + '/' + volume]
         debug('Run [' + ' '.join(args) + ']')
         ec = os.spawnvp(os.P_WAIT, args[0], args)
         if ec:
             raise Exception('Can not snapshot the device: ' + snap['device'])
         # no need to mkdir since the mountpoint already exists
         args = ['mount', '-t', mt,
-                '/dev/mapper/' + group + '-' + volume + '_snap', bdir + mp]
+                '/dev/' + group + '/' + volume + '_snap', bdir + mp]
         debug('Run [' + ' '.join(args) + ']')
         ec = os.spawnvp(os.P_WAIT, args[0], args)
         if ec:
@@ -211,7 +211,7 @@ def do_client_snap_teardown(cfg, bdir):
         ret = os.spawnvp(os.P_WAIT, args[0], args)
         if ret:
             print 'umount', bdir + mp, 'returned', ret
-        args = ['lvremove', '-f', '/dev/mapper/' + group + '-' + volume + '_snap']
+        args = ['lvremove', '-f', '/dev/' + group + '/' + volume + '_snap']
         debug('Run [' + ' '.join(args) + ']')
         ret = os.spawnvp(os.P_WAIT, args[0], args)
         if ret:
