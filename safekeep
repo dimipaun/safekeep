@@ -349,7 +349,7 @@ def do_server_rdiff(cfg, bdir):
     if ret:
         raise Exception('rdiff-backup returned %d' % ret)
 
-def do_server(email):
+def do_server(email, smtp):
     if not os.path.exists(config_dir):
         raise Exception('lbs: config dir "' + config_dir + '" does not exist')
 
@@ -411,7 +411,7 @@ def do_server(email):
               '\r\nTo: ' + email + \
               '\r\nSubject: LaBackup results on ' + socket.gethostname() + \
               '\r\n\r\n' + log
-        server = smtplib.SMTP('localhost')
+        server = smtplib.SMTP(smtp)
         server.sendmail('LaBackup@' + socket.gethostname(),
                         email,
                         log)
@@ -427,30 +427,34 @@ def usage():
     print 'options:'
     print '-e, --email=EMAIL     send results by email'
     print '-h, --help            show this help message and exit'
+    print '-m, --smtp=SMTP       SMTP server to use when sending mails (default localhost)'
     print '-s, --server          launch in server mode (default)'
     print '-c, --client          launch in client mode'
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'e:hsc', ['email', 'help', 'server', 'client'])
+        opts, args = getopt.getopt(sys.argv[1:], 'e:hm:sc', ['email', 'help', 'smtp', 'server', 'client'])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
     mode = 'server'
     email = None
+    smtp = 'localhost'
     for o, a in opts:
         if o in ('-e', '--email'):
             email = a
         elif o in ('-h', '--help'):
             usage()
             sys.exit()
+        if o in ('-m', '--smtp'):
+            smtp = a
         elif o in ('-s', '--server'):
             mode = 'server'
         elif o in ('-c', '--client'):
             mode = 'client'
 
     if mode == 'server':
-        do_server(email)
+        do_server(email, smtp)
     else:
         do_client()
 
