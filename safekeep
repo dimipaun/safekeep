@@ -409,7 +409,8 @@ def do_server(email):
         global log
         log = 'From: LaBackup@' + socket.gethostname() + \
               '\r\nTo: ' + email + \
-              '\r\nSubject: LaBackup results\r\n\r\n' + log
+              '\r\nSubject: LaBackup results on ' + socket.gethostname() + \
+              '\r\n\r\n' + log
         server = smtplib.SMTP('localhost')
         server.sendmail('LaBackup@' + socket.gethostname(),
                         email,
