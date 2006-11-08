@@ -349,18 +349,25 @@ def do_server_rdiff(cfg, bdir):
     if ret:
         raise Exception('rdiff-backup returned %d' % ret)
 
-def do_server(email, smtp):
-    if not os.path.exists(config_dir):
-        raise Exception('lbs: config dir "' + config_dir + '" does not exist')
+def do_server(email, smtp, cfgs):
+    # First compute the set of configuration files
+    cfgfiles = []
+    for cfg in cfgs:
+        if os.path.isdir(cfg):
+            for ent in os.listdir(cfg):
+                if not ent.endswith(config_ext):
+                    continue
+                filepath = os.path.join(cfg, ent)
+                if not os.path.isfile(filepath):
+                    continue
+                cfgfiles.append(filepath)
+        elif os.path.isfile(cfg):
+            cfgfiles.append(cfg)
+        else:
+            print >> sys.stderr, 'Inaccessible configuration, ignoring:', cfg
 
-    ls = os.listdir(config_dir)
-    for ent in ls:
-        filepath = config_dir + '/' + ent
-        if not os.path.isfile(filepath):
-            continue
-        if not ent.endswith(config_ext):
-            continue
-        filename = ent[0: -len(config_ext)]
+    for filepath in cfgfiles:
+        filename = os.path.splitext(os.path.basename(filepath))[0]
 
         cfg_file = open(filepath)
         cfg_str = cfg_file.read()
@@ -425,6 +432,7 @@ def usage():
     print 'usage: %s [options]' % (sys.argv[0])
     print
     print 'options:'
+    print '-C, --cfg=<file|dir>  use the given configuration file/directory'
     print '-e, --email=EMAIL     send results by email'
     print '-h, --help            show this help message and exit'
     print '-m, --smtp=SMTP       SMTP server to use when sending mails (default localhost)'
@@ -433,28 +441,34 @@ def usage():
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'e:hm:sc', ['email', 'help', 'smtp', 'server', 'client'])
+        opts, args = getopt.getopt(sys.argv[1:], 'C:e:hm:sc', ['cfg=', 'email=', 'help', 'smtp=', 'server', 'client'])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
     mode = 'server'
     email = None
     smtp = 'localhost'
+    cfgs = []
     for o, a in opts:
-        if o in ('-e', '--email'):
+        if o in ('-C', '--cfg'):
+            cfgs.append(a)
+        elif o in ('-e', '--email'):
             email = a
         elif o in ('-h', '--help'):
             usage()
             sys.exit()
-        if o in ('-m', '--smtp'):
+        elif o in ('-m', '--smtp'):
             smtp = a
         elif o in ('-s', '--server'):
             mode = 'server'
         elif o in ('-c', '--client'):
             mode = 'client'
 
+    if len(cfgs) == 0:
+        cfgs.append(config_dir)
+
     if mode == 'server':
-        do_server(email, smtp)
+        do_server(email, smtp, cfgs)
     else:
         do_client()
 
