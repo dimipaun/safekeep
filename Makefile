@@ -1,10 +1,10 @@
 name        = LaBackup
 timestamp   = $(shell LANG=C date)
 version_num = $(shell grep 'VERSION *=' LaBackup | sed s'/[^"]*"\([^"].*\)".*/\1/')
-version_ts  = $(shell date -d '$(timestamp)' '+%Y%m%d-%H%M-%Z')
+version_ts  = $(shell date -d '$(timestamp)' '+%Y%m%d_%H%M_%Z')
 version     = $(version_num)
 releasename = $(name)-$(version)
-snapshotname= $(name)-$(version)-$(version_ts)
+snapshotname= $(name)-$(version)_$(version_ts)
 tagname     = $(shell echo Release-$(releasename) | tr . _)
 dirname     = $(shell basename $(PWD))
 rpmroot     = $(shell grep '%_topdir' ~/.rpmmacros | sed 's/^[^ \t]*[ \t]*//')
@@ -53,29 +53,29 @@ tar: tar-snapshot
 
 tar-release:
 	cvs -Q -d '$(cvsroot)' export -d $(releasename) -r '$(tagname)' '$(cvsmodule)'
-	cat LaBackup.spec.in | sed 's/^%define version.*/%define version $(version)/' > LaBackup.spec
-	cat debian/changelog.in | sed 's/^labackup.*/labackup ($(version)-1) unstable; urgency=low/' > debian/changelog
+	cat $(releasename)/LaBackup.spec.in | sed 's/^%define version.*/%define version $(version)/' > $(releasename)/LaBackup.spec
+	cat $(releasename)/debian/changelog.in | sed 's/^labackup.*/labackup ($(version)-1) unstable; urgency=low/' > $(releasename)/debian/changelog
 	tar cz -f $(releasename).tar.gz $(releasename)
 	rm -rf $(releasename)
 
 tar-snapshot:
 	cvs -Q -d '$(cvsroot)' export -d $(snapshotname) -D '$(timestamp)' '$(cvsmodule)'
-	cat LaBackup.spec.in | sed 's/^%define version.*/%define version $(version)-$(version_ts)/' > LaBackup.spec
-	cat debian/changelog.in | sed 's/^labackup.*/labackup ($(version)-$(version_ts)-1) unstable; urgency=low/' > debian/changelog
+	cat $(snapshotname)/LaBackup.spec.in | sed 's/^%define version.*/%define version $(version)_$(version_ts)/' > $(snapshotname)/LaBackup.spec
+	cat $(snapshotname)/debian/changelog.in | sed 's/^labackup.*/labackup ($(version)_$(version_ts)-1) unstable; urgency=low/' > $(snapshotname)/debian/changelog
 	tar cz -f $(snapshotname).tar.gz $(snapshotname)
 	rm -rf $(snapshotname)
 
 deb: deb-snapshot
 
 deb-release: tar-release
-	tar xfz $(releasename).tar.gz
-	cd $(releasename) && debuild
-	rm -rf $(releasename)
+	tar xz -f $(releasename).tar.gz
+	cd $(releasename) && debuild --check-dirname-regex 'LaBackup(-.*)?'
+	rm -rf $(releasename) $(releasename).tar.gz
 
 deb-snapshot: tar-snapshot
-	tar xfz $(snapshotname).tar.gz
-	cd $(snapshotname) && debuild
-	rm -rf $(snapshotname)
+	tar xz -f $(snapshotname).tar.gz
+	cd $(snapshotname) && debuild --check-dirname-regex 'LaBackup(-.*)?'
+	rm -rf $(snapshotname) $(snapshotname).tar.gz
 
 rpm: rpm-snapshot
 
@@ -88,7 +88,3 @@ rpm-snapshot: tar-snapshot
 clean:
 	rm -rf `find -name "*.py[co]" -o -name "*~"```
 	rm -f LaBackup.spec debian/changelog
-
-foobar:
-	cat LaBackup.spec.in | sed 's/^%define version.*/%define version $(version)-$(version_ts)/' > LaBackup.spec
-	cat debian/changelog.in | sed 's/^labackup.*/labackup ($(version)-$(version_ts)-1) unstable; urgency=low/' > debian/changelog
