@@ -9,6 +9,8 @@ config_dir = '/etc/labackup'
 config_ext = '.cfg'
 log = ''
 
+VERSION = "0.0.1"
+
 ######################################################################
 # Miscellaneous
 ######################################################################
@@ -438,10 +440,11 @@ def usage():
     print '-m, --smtp=SMTP       SMTP server to use when sending mails (default localhost)'
     print '-s, --server          launch in server mode (default)'
     print '-c, --client          launch in client mode'
+    print '-v, --version         show the version number'
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'C:e:hm:sc', ['cfg=', 'email=', 'help', 'smtp=', 'server', 'client'])
+        opts, args = getopt.getopt(sys.argv[1:], 'C:e:hm:scv', ['cfg=', 'email=', 'help', 'smtp=', 'server', 'client', 'version'])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -463,6 +466,9 @@ def main():
             mode = 'server'
         elif o in ('-c', '--client'):
             mode = 'client'
+        elif o in ('-v', '--version'):
+            print 'LaBackup', VERSION
+            return
 
     if len(cfgs) == 0:
         cfgs.append(config_dir)

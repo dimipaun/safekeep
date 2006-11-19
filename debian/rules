@@ -1,0 +1,32 @@
+#!/usr/bin/make -f
+INSTALL = install
+
+clean:
+	dh_testdir
+	dh_testroot
+	dh_clean
+
+install:
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	install -m 755 -D LaBackup $(CURDIR)/debian/labackup/usr/bin
+	install -m 755 -D lbc-copy-id $(CURDIR)/debian/labackup/usr/bin
+	install -m 755 -d $(CURDIR)/debian/labackup/etc/labackup
+
+binary-indep: install
+	dh_testdir
+	dh_testroot
+	dh_installchangelogs
+	dh_compress
+	dh_fixperms
+	dh_pysupport
+	dh_installdeb
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep
+.PHONY: build clean binary-indep binary install
