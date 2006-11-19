@@ -1,15 +1,15 @@
-name        = LaBackup
-timestamp   = $(shell LANG=C date)
-version_num = $(shell grep 'VERSION *=' LaBackup | sed s'/[^"]*"\([^"].*\)".*/\1/')
-version_ts  = $(shell date -d '$(timestamp)' '+%Y%m%d_%H%M_%Z')
-version     = $(version_num)
-releasename = $(name)-$(version)
-snapshotname= $(name)-$(version)_$(version_ts)
-tagname     = $(shell echo Release-$(releasename) | tr . _)
-dirname     = $(shell basename $(PWD))
-rpmroot     = $(shell grep '%_topdir' ~/.rpmmacros | sed 's/^[^ \t]*[ \t]*//')
-cvsroot     = $(shell cat CVS/Root)
-cvsmodule   = $(shell cat CVS/Repository)
+name        := LaBackup
+timestamp   := $(shell LANG=C date)
+version_num := $(shell grep 'VERSION *=' LaBackup | sed s'/[^"]*"\([^"].*\)".*/\1/')
+version_ts  := $(shell date -d '$(timestamp)' '+%Y%m%d+%H%M+%Z')
+version     := $(version_num)
+releasename := $(name)-$(version)
+snapshotname:= $(name)-$(version)+$(version_ts)
+tagname     := $(shell echo Release-$(releasename) | tr . _)
+dirname     := $(shell basename $(PWD))
+rpmroot     := $(shell grep '%_topdir' ~/.rpmmacros | sed 's/^[^ \t]*[ \t]*//')
+cvsroot     := $(shell cat CVS/Root)
+cvsmodule   := $(shell cat CVS/Repository)
 
 all: help
 
@@ -60,8 +60,8 @@ tar-release:
 
 tar-snapshot:
 	cvs -Q -d '$(cvsroot)' export -d $(snapshotname) -D '$(timestamp)' '$(cvsmodule)'
-	cat $(snapshotname)/LaBackup.spec.in | sed 's/^%define version.*/%define version $(version)_$(version_ts)/' > $(snapshotname)/LaBackup.spec
-	cat $(snapshotname)/debian/changelog.in | sed 's/^labackup.*/labackup ($(version)_$(version_ts)-1) unstable; urgency=low/' > $(snapshotname)/debian/changelog
+	cat $(snapshotname)/LaBackup.spec.in | sed 's/^%define version.*/%define version $(version)+$(version_ts)/' > $(snapshotname)/LaBackup.spec
+	cat $(snapshotname)/debian/changelog.in | sed 's/^labackup.*/labackup ($(version)+$(version_ts)-1) unstable; urgency=low/' > $(snapshotname)/debian/changelog
 	tar cz -f $(snapshotname).tar.gz $(snapshotname)
 	rm -rf $(snapshotname)
 
