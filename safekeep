@@ -308,7 +308,9 @@ def do_client():
                 elif not line:
                     break
                 else:
-                    raise Exception('Unknown command: ' + line)
+                    print 'ERROR', 'Unknown command:', line 
+                    sys.stdout.flush()
+                    break
             except Exception, e:
                 traceback.print_exc(file=sys.stdout)
                 print 'ERROR', e
