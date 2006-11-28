@@ -15,17 +15,26 @@ VERSION = "0.0.1"
 # Miscellaneous
 ######################################################################
 
+def send(msg):
+    print msg
+    sys.stdout.flush()
+
 def debug(msg):
     global log
     print msg
     log += msg + '\n'
     sys.stdout.flush()
-    pass
 
 def warn(msg):
     global log
     print 'WARN:', msg
     log += 'WARN: ' + msg + '\n'
+    sys.stdout.flush()
+
+def error(msg):
+    global log
+    print 'ERROR:', msg
+    log += 'ERROR: ' + msg + '\n'
     sys.stdout.flush()
 
 ######################################################################
@@ -241,8 +250,7 @@ def do_client_config(cmd):
     dom = xml.dom.minidom.parseString(cfgStr)
     try:
         cfg = parse_config(dom.documentElement, None)
-        print 'OK'
-        sys.stdout.flush()
+        send('OK')
         return cfg
     finally:
         dom.unlink()
@@ -265,8 +273,7 @@ def do_client_setup(cfg, bdir):
     if bdir:
         do_client_snap(cfg, bdir)
 
-    print 'OK'
-    sys.stdout.flush()
+    send('OK')
 
 def do_client_cleanup(cfg, bdir):
     debug('Do cleanup of ' + cfg['host'] + ' in ' + bdir)
@@ -283,8 +290,7 @@ def do_client_cleanup(cfg, bdir):
         os.rmdir(bdir)
     except Exception, e:
         print 'Unable to remove ', bdir, e
-    print 'OK'
-    sys.stdout.flush()
+    send('OK')
 
 def do_client():
     cleanup = True
@@ -297,8 +303,7 @@ def do_client():
                 elif line.startswith('BDIR'):
                     bdir = tempfile.mkdtemp("", "lbc")
                     if not bdir.endswith('/'): bdir += '/'
-                    print 'OK ' + bdir
-                    sys.stdout.flush()
+                    send('OK ' + bdir)
                 elif line.startswith('SETUP'):
                     do_client_setup(cfg, line[5:].strip())
                 elif line.startswith('CLEANUP'):
@@ -308,13 +313,11 @@ def do_client():
                 elif not line:
                     break
                 else:
-                    print 'ERROR', 'Unknown command:', line 
-                    sys.stdout.flush()
+                    send('ERROR Unknown command: ' + line)
                     break
             except Exception, e:
                 traceback.print_exc(file=sys.stdout)
-                print 'ERROR', e
-                sys.stdout.flush()
+                send('ERROR ' + e)
     finally:
         if cleanup:
             do_client_cleanup(cfg, bdir)
