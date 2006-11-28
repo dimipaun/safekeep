@@ -256,11 +256,7 @@ def do_client_setup(cfg, bdir):
     if ret:
         raise Exception('mount --rbind returned %d' % ret)
 
-    try:
-        do_client_dbdump(cfg)
-    except Exception, e:
-        warn('Serious problem during database dump: %s' % (e))
-
+    do_client_dbdump(cfg)
     do_client_snap(cfg, bdir)
 
     print 'OK'
