@@ -291,7 +291,7 @@ def do_client_cleanup(cfg, bdir):
     send('OK')
 
 def do_client():
-    cleanup = True
+    should_cleanup = True
     try:
         while True:
             try:
@@ -306,7 +306,7 @@ def do_client():
                     do_client_setup(cfg, line[5:].strip())
                 elif line.startswith('CLEANUP'):
                     dir = line[7:].strip()
-                    cleanup = (dir == bdir)
+                    if dir == bdir: should_cleanup = False
                     do_client_cleanup(cfg, dir)
                 elif not line:
                     break
@@ -317,7 +317,7 @@ def do_client():
                 traceback.print_exc(file=sys.stdout)
                 send('ERROR ' + e)
     finally:
-        if cleanup:
+        if should_cleanup:
             do_client_cleanup(cfg, bdir)
 
 
