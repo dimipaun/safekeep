@@ -185,39 +185,45 @@ def do_client_snap(cfg, bdir):
     for snap in cfg['snaps']:
         (group, volume, mp, mt) = gather_lvm_information(snap['device'])
         if not mp:
-            raise Exception('Cannot find the mountpoint for: ' + snap['device'])
+            warn('Cannot find the mountpoint for: ' + snap['device'])
+            continue
         args = ['lvcreate', '-s', '-L', snap['size'], '-n',
                 volume + '_snap',
                 '/dev/' + group + '/' + volume]
         debug('Run [' + ' '.join(args) + ']')
         ec = os.spawnvp(os.P_WAIT, args[0], args)
         if ec:
-            raise Exception('Can not snapshot the device: ' + snap['device'])
+            warn('Can not snapshot the device: ' + snap['device'])
+            continue
         # no need to mkdir since the mountpoint already exists
         args = ['mount', '-t', mt,
                 '/dev/' + group + '/' + volume + '_snap', bdir + mp]
         debug('Run [' + ' '.join(args) + ']')
         ec = os.spawnvp(os.P_WAIT, args[0], args)
         if ec:
-            raise Exception('Can not snapshot the device: ' + snap['device'])
+            warn('Can not mount the snapshot: ' + snap['device'])
+            args = ['lvremove', '-f', '/dev/' + group + '/' + volume + '_snap']
+            ret = os.spawnvp(os.P_WAIT, args[0], args)
+            if ret:
+                warn('Can not tear down snapshot: ' + snap['device'])
 
 def do_client_snap_teardown(cfg, bdir):
     debug('Tear down FS snapshots dumps')
     for snap in cfg['snaps']:
         (group, volume, mp, mt) = gather_lvm_information(snap['device'])
         if not mp:
-            print 'Cannot find the mountpoint for: ' + snap['device']
-            return
+            warn('Can not find the mountpoint for: ' + snap['device'])
+            continue
         args = ['umount', bdir + mp]
         debug('Run [' + ' '.join(args) + ']')
         ret = os.spawnvp(os.P_WAIT, args[0], args)
         if ret:
-            print 'umount', bdir + mp, 'returned', ret
+            warn('umount %s %s returned %s' % (bdir, mp, ret))
         args = ['lvremove', '-f', '/dev/' + group + '/' + volume + '_snap']
         debug('Run [' + ' '.join(args) + ']')
         ret = os.spawnvp(os.P_WAIT, args[0], args)
         if ret:
-            print ' '.join(args), 'returned', ret
+            warn('Can not tear down snapshot: ' + snap['device'])
 
 ######################################################################
 # Client implementation
