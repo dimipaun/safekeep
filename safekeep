@@ -256,11 +256,7 @@ def do_client_config(cmd):
         dom.unlink()
 
 def do_client_setup(cfg, bdir):
-    if bdir:
-        debug('Do setup of ' + cfg['host'] + ' in ' + bdir)
-    else:
-        debug('Do setup of ' + cfg['host'] + ' in /')
-
+    debug('Do setup of %s in %s' % (cfg['host'], bdir))
     if bdir:
         args = ['mount', '--rbind', '/', bdir]
         debug('Run: [' + ' '.join(args) + ']')
@@ -276,20 +272,21 @@ def do_client_setup(cfg, bdir):
     send('OK')
 
 def do_client_cleanup(cfg, bdir):
-    debug('Do cleanup of ' + cfg['host'] + ' in ' + bdir)
+    debug('Do cleanup of %s in %s' % (cfg['host'], bdir))
     do_client_snap_teardown(cfg, bdir)
     do_client_dbdump_teardown(cfg)
 
-    args = ['umount', '-l', bdir]
-    debug('Run: [' + ' '.join(args) + ']')
-    ret = os.spawnvp(os.P_WAIT, args[0], args)
-    if ret:
-        print 'umount --rbind returned', ret
-
-    try:
-        os.rmdir(bdir)
-    except Exception, e:
-        print 'Unable to remove ', bdir, e
+    if bdir:
+        args = ['umount', '-l', bdir]
+        debug('Run: [' + ' '.join(args) + ']')
+        ret = os.spawnvp(os.P_WAIT, args[0], args)
+        if ret:
+            warn('Failed to unmount: ' + bdir)
+        else:
+            try:
+                os.rmdir(bdir)
+            except Exception, e:
+                warn('Unable to remove: ' + bdir)
     send('OK')
 
 def do_client():
