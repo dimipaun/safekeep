@@ -218,7 +218,7 @@ def do_client_snap_teardown(cfg, bdir):
         debug('Run [' + ' '.join(args) + ']')
         ret = os.spawnvp(os.P_WAIT, args[0], args)
         if ret:
-            warn('umount %s %s returned %s' % (bdir, mp, ret))
+            warn('umount %s%s returned %s' % (bdir, mp, ret))
         args = ['lvremove', '-f', '/dev/' + group + '/' + volume + '_snap']
         debug('Run [' + ' '.join(args) + ']')
         ret = os.spawnvp(os.P_WAIT, args[0], args)
@@ -248,16 +248,22 @@ def do_client_config(cmd):
         dom.unlink()
 
 def do_client_setup(cfg, bdir):
-    debug('Do setup of ' + cfg['host'] + ' in ' + bdir)
+    if bdir:
+        debug('Do setup of ' + cfg['host'] + ' in ' + bdir)
+    else:
+        debug('Do setup of ' + cfg['host'] + ' in /')
 
-    args = ['mount', '--rbind', '/', bdir]
-    debug('Run: [' + ' '.join(args) + ']')
-    ret = os.spawnvp(os.P_WAIT, args[0], args)
-    if ret:
-        raise Exception('mount --rbind returned %d' % ret)
+    if bdir:
+        args = ['mount', '--rbind', '/', bdir]
+        debug('Run: [' + ' '.join(args) + ']')
+        ret = os.spawnvp(os.P_WAIT, args[0], args)
+        if ret:
+            warn('mount --rbind failed with %d, snapshotting will be disabled' % ret)
+            bdir = None
 
     do_client_dbdump(cfg)
-    do_client_snap(cfg, bdir)
+    if bdir:
+        do_client_snap(cfg, bdir)
 
     print 'OK'
     sys.stdout.flush()
