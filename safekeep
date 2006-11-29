@@ -33,8 +33,8 @@ def warn(msg):
 
 def error(msg):
     global log
-    print 'ERROR:', msg
-    log += 'ERROR: ' + msg + '\n'
+    print 'ERR:', msg
+    log += 'ERR: ' + msg + '\n'
     sys.stdout.flush()
 
 def spawn(args):
