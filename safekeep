@@ -196,7 +196,8 @@ def gather_snap_information(device, bdir):
     (group, volume, mp, mt) = gather_lvm_information(device)
     if not mp: return (None, None, None, None)
     lvmdev =  os.path.join('/dev', group, volume)
-    snapname = volume + '_snap'
+    if bdir[-1] == '/': bdir = bdir[:-1]
+    snapname = volume + '_snap_' + os.path.basename(bdir)
     snapdev = os.path.join('/dev', group, snapname)
     if mp[0] == '/': mp = mp[1:]
     return (lvmdev, snapdev, os.path.join(bdir, mp), mt)
