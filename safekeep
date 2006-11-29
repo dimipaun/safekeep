@@ -192,7 +192,7 @@ def gather_lvm_information(device):
             return (group, volume, line.split(' ')[2], line.split(' ')[4])
     return (None, None, None, None)
 
-def gather_snap_information(device):
+def gather_snap_information(device, bdir):
     (group, volume, mp, mt) = gather_lvm_information(device)
     if not mp: return (None, None, None, None)
     lvmdev =  os.path.join('/dev', group, volume)
