@@ -490,7 +490,7 @@ def main():
         else:
             do_client()
     except Exception, ex:
-        error('%s' % ex)
+        error('ERROR: %s' % ex)
 
     if email:
         send_notification(email, smtp)
