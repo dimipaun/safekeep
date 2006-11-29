@@ -448,7 +448,7 @@ def usage():
     print '-C, --cfg=<file|dir>  use the given configuration file/directory'
     print '-e, --email=EMAIL     send results by email'
     print '-h, --help            show this help message and exit'
-    print '-m, --smtp=SMTP       SMTP server to use when sending mails (default localhost)'
+    print '-m, --smtp=SMTP       SMTP server to use when sending mails (default: built-in SMTP server)'
     print '-s, --server          launch in server mode (default)'
     print '-c, --client          launch in client mode'
     print '-v, --version         show the version number'
@@ -461,7 +461,7 @@ def main():
         sys.exit(2)
     mode = 'server'
     email = None
-    smtp = 'localhost'
+    smtp = ''
     cfgs = []
     for o, a in opts:
         if o in ('-C', '--cfg'):
