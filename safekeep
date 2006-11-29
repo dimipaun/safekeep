@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import getopt, os, sys, re
+import getopt, os, os.path, sys, re
 import tempfile, traceback
 import xml.dom.minidom
 import socket, smtplib
@@ -192,47 +192,51 @@ def gather_lvm_information(device):
 def do_client_snap(cfg, bdir):
     debug('Doing FS snapshots')
     for snap in cfg['snaps']:
-        (group, volume, mp, mt) = gather_lvm_information(snap['device'])
+        device = snap['device']
+        (group, volume, mp, mt) = gather_lvm_information(device)
         if not mp:
             warn('Cannot find the mountpoint for: ' + snap['device'])
             continue
+        snapname = volume + '_snap'
+        snapdev = os.path.join('/dev', group, snapname)
         args = ['lvcreate', '-s', '-L', snap['size'], '-n',
-                volume + '_snap',
-                '/dev/' + group + '/' + volume]
+                snapname, os.path.join('/dev', group, volume)]
         debug('Run [' + ' '.join(args) + ']')
         ec = os.spawnvp(os.P_WAIT, args[0], args)
         if ec:
-            warn('Can not snapshot the device: ' + snap['device'])
+            warn('Can not snapshot the device: ' + device)
             continue
         # no need to mkdir since the mountpoint already exists
-        args = ['mount', '-t', mt,
-                '/dev/' + group + '/' + volume + '_snap', bdir + mp]
+        args = ['mount', '-t', mt, snapdev, os.path.join(bdir, mp)]
         debug('Run [' + ' '.join(args) + ']')
         ec = os.spawnvp(os.P_WAIT, args[0], args)
         if ec:
-            warn('Can not mount the snapshot: ' + snap['device'])
-            args = ['lvremove', '-f', '/dev/' + group + '/' + volume + '_snap']
+            warn('Can not mount the snapshot: ' + device)
+            args = ['lvremove', '-f', snapdev]
             ret = os.spawnvp(os.P_WAIT, args[0], args)
             if ret:
-                warn('Can not tear down snapshot: ' + snap['device'])
+                warn('Can not tear down snapshot: ' + device)
 
 def do_client_snap_teardown(cfg, bdir):
     debug('Tear down FS snapshots dumps')
     for snap in cfg['snaps']:
-        (group, volume, mp, mt) = gather_lvm_information(snap['device'])
+        device = snap['device']
+        (group, volume, mp, mt) = gather_lvm_information(device)
         if not mp:
-            warn('Can not find the mountpoint for: ' + snap['device'])
+            warn('Can not find the mountpoint for: ' + device)
             continue
-        args = ['umount', bdir + mp]
+        args = ['umount', os.path.join(bdir, mp)]
         debug('Run [' + ' '.join(args) + ']')
         ret = os.spawnvp(os.P_WAIT, args[0], args)
         if ret:
             warn('umount %s%s returned %s' % (bdir, mp, ret))
-        args = ['lvremove', '-f', '/dev/' + group + '/' + volume + '_snap']
+        snapname = volume + '_snap'
+        snapdev = os.path.join('/dev', group, snapname)
+        args = ['lvremove', '-f', snapdev]
         debug('Run [' + ' '.join(args) + ']')
         ret = os.spawnvp(os.P_WAIT, args[0], args)
         if ret:
-            warn('Can not tear down snapshot: ' + snap['device'])
+            warn('Can not tear down snapshot: ' + device)
 
 ######################################################################
 # Client implementation
