@@ -363,7 +363,7 @@ def do_server_rdiff(cfg, bdir):
     if ret:
         raise Exception('rdiff-backup returned %d' % ret)
 
-def do_server(email, smtp, cfgs):
+def do_server(cfgs):
     # First compute the set of configuration files
     cfgfiles = []
     for cfg in cfgs:
@@ -426,16 +426,16 @@ def do_server(email, smtp, cfgs):
         debug('lbs: Server backup [' + cfg['id'] + '] done')
     debug('lbs: Server backup done')
 
-    if email:
-        global log
-        hostname = socket.gethostname()
-        msg = 'From: LaBackup@' + hostname + \
-              '\r\nTo: ' + email + \
-              '\r\nSubject: LaBackup results on ' + hostname + \
-              '\r\n\r\n' + log
-        server = smtplib.SMTP(smtp)
-        server.sendmail('LaBackup@' + hostname, email, msg)
-        server.quit()
+def send_notification(email, smtp):
+    global log
+    hostname = socket.gethostname()
+    msg = 'From: LaBackup@' + hostname + \
+          '\r\nTo: ' + email + \
+          '\r\nSubject: LaBackup results on ' + hostname + \
+          '\r\n\r\n' + log
+    server = smtplib.SMTP(smtp)
+    server.sendmail('LaBackup@' + hostname, email, msg)
+    server.quit()
 
 ######################################################################
 # Main routine
@@ -484,10 +484,16 @@ def main():
     if len(cfgs) == 0:
         cfgs.append(config_dir)
 
-    if mode == 'server':
-        do_server(email, smtp, cfgs)
-    else:
-        do_client()
+    try:
+        if mode == 'server':
+            do_server(cfgs)
+        else:
+            do_client()
+    except Exception, ex:
+        error('%s' % ex)
+
+    if email:
+        send_notification(email, smtp)
 
 if __name__ == '__main__':
     main()
