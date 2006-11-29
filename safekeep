@@ -21,8 +21,8 @@ def send(msg):
 
 def debug(msg):
     global log
-    print msg
-    log += msg + '\n'
+    print 'DBG:', msg
+    log += 'DBG: ' + msg + '\n'
     sys.stdout.flush()
 
 def warn(msg):
@@ -428,14 +428,13 @@ def do_server(email, smtp, cfgs):
 
     if email:
         global log
-        log = 'From: LaBackup@' + socket.gethostname() + \
+        hostname = socket.gethostname()
+        msg = 'From: LaBackup@' + hostname + \
               '\r\nTo: ' + email + \
-              '\r\nSubject: LaBackup results on ' + socket.gethostname() + \
+              '\r\nSubject: LaBackup results on ' + hostname + \
               '\r\n\r\n' + log
         server = smtplib.SMTP(smtp)
-        server.sendmail('LaBackup@' + socket.gethostname(),
-                        email,
-                        log)
+        server.sendmail('LaBackup@' + hostname, email, msg)
         server.quit()
 
 ######################################################################
