@@ -37,6 +37,10 @@ def error(msg):
     log += 'ERROR: ' + msg + '\n'
     sys.stdout.flush()
 
+def spawn(args):
+    debug('Run [' + ' '.join(args) + ']')
+    return os.spawnvp(os.P_WAIT, args[0], args)
+
 ######################################################################
 # Configuration file parser
 ######################################################################
@@ -155,11 +159,10 @@ def do_client_dbdump(cfg):
         else:
             warn('Invalid database type: ' + type)
             continue
-        debug('Run [' + ' '.join(args) + ']')
         if dump['user']:
             cmd = ' '.join(args)   # FIXME: we need proper quoting
             args = [ 'su', '-c', cmd, '-', dump['user'] ]
-        ec = os.spawnvp(os.P_WAIT, args[0], args)
+        ec = spawn(args)
         if ec:
             warn('Can not dump the database: ' + dump['db'])
 
@@ -201,19 +204,16 @@ def do_client_snap(cfg, bdir):
         snapdev = os.path.join('/dev', group, snapname)
         args = ['lvcreate', '-s', '-L', snap['size'], '-n',
                 snapname, os.path.join('/dev', group, volume)]
-        debug('Run [' + ' '.join(args) + ']')
-        ec = os.spawnvp(os.P_WAIT, args[0], args)
+        ec = spawn(args)
         if ec:
             warn('Can not snapshot the device: ' + device)
             continue
         # no need to mkdir since the mountpoint already exists
         args = ['mount', '-t', mt, snapdev, os.path.join(bdir, mp)]
-        debug('Run [' + ' '.join(args) + ']')
-        ec = os.spawnvp(os.P_WAIT, args[0], args)
+        ec = spawn(args)
         if ec:
             warn('Can not mount the snapshot: ' + device)
-            args = ['lvremove', '-f', snapdev]
-            ret = os.spawnvp(os.P_WAIT, args[0], args)
+            ret = spawn(['lvremove', '-f', snapdev])
             if ret:
                 warn('Can not tear down snapshot: ' + device)
 
@@ -225,16 +225,12 @@ def do_client_snap_teardown(cfg, bdir):
         if not mp:
             warn('Can not find the mountpoint for: ' + device)
             continue
-        args = ['umount', os.path.join(bdir, mp)]
-        debug('Run [' + ' '.join(args) + ']')
-        ret = os.spawnvp(os.P_WAIT, args[0], args)
+        ret = spawn(['umount', os.path.join(bdir, mp)])
         if ret:
             warn('umount %s%s returned %s' % (bdir, mp, ret))
         snapname = volume + '_snap'
         snapdev = os.path.join('/dev', group, snapname)
-        args = ['lvremove', '-f', snapdev]
-        debug('Run [' + ' '.join(args) + ']')
-        ret = os.spawnvp(os.P_WAIT, args[0], args)
+        ret = spawn(['lvremove', '-f', snapdev])
         if ret:
             warn('Can not tear down snapshot: ' + device)
 
@@ -262,9 +258,7 @@ def do_client_config(cmd):
 def do_client_setup(cfg, bdir):
     debug('Do setup of %s in %s' % (cfg['host'], bdir))
     if bdir:
-        args = ['mount', '--rbind', '/', bdir]
-        debug('Run: [' + ' '.join(args) + ']')
-        ret = os.spawnvp(os.P_WAIT, args[0], args)
+        ret = spawn(['mount', '--rbind', '/', bdir])
         if ret:
             warn('mount --rbind failed with %d, snapshotting will be disabled' % ret)
             bdir = None
@@ -281,9 +275,7 @@ def do_client_cleanup(cfg, bdir):
     do_client_dbdump_teardown(cfg)
 
     if bdir:
-        args = ['umount', '-l', bdir]
-        debug('Run: [' + ' '.join(args) + ']')
-        ret = os.spawnvp(os.P_WAIT, args[0], args)
+        ret = spawn(['umount', '-l', bdir])
         if ret:
             warn('Failed to unmount: ' + bdir)
         else:
@@ -361,8 +353,7 @@ def do_server_rdiff(cfg, bdir):
             args.extend([opt + '-regexp', bdir + clude['regexp']])
 
     args.extend([cfg['user'] + '@' + cfg['host'] + '::' + bdir, cfg['dir']])
-    debug('lbs: Run [' + ' '.join(args) + ']')
-    ret = os.spawnvp(os.P_WAIT, args[0], args)
+    ret = spawn(args)
     if ret:
         raise Exception('rdiff-backup returned %d' % ret)
 
