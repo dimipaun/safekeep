@@ -450,7 +450,7 @@ def usage():
     print '-m, --smtp=SMTP     SMTP server to use when sending mails (default: built-in SMTP)'
     print '-s, --server        launch in server mode (default)'
     print '-c, --client        launch in client mode'
-    print '-v, --version       show the version number'
+    print '-v, --version       show the version number and exit'
 
 def main():
     try:
