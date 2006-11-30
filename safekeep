@@ -50,6 +50,16 @@ def send_notification(email, smtp):
     server.sendmail('LaBackup@' + hostname, email, msg)
     server.quit()
 
+def dump_file(file):
+    log('################################################')
+    log('## Dump of: ' + file)
+    log('################################################')
+    fin = open(file, 'r')
+    try:
+        log(fin.readlines())
+    finally:
+        fin.close()
+
 ######################################################################
 # Configuration file parser
 ######################################################################
