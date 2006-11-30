@@ -413,13 +413,13 @@ def do_server(cfgs):
         finally:
             dom.unlink()
 
-        debug('lbs: Do server backup [' + cfg['id'] + ']')
+        debug('Do server backup [' + cfg['id'] + ']')
 
         ssh = 'ssh -T'
         if cfg['key']:
             ssh += ' -i ' + cfg['key']
         ssh += ' -l ' + cfg['user'] + ' ' + cfg['host']
-        debug('lbs: Run [' + ssh + ']')
+        debug('Run [' + ssh + ']')
 
         (cin, cout) = os.popen4(ssh)
 
@@ -443,8 +443,8 @@ def do_server(cfgs):
             cin.flush()
             do_server_getanswer(cout)
 
-        debug('lbs: Server backup [' + cfg['id'] + '] done')
-    debug('lbs: Server backup done')
+        debug('Server backup [' + cfg['id'] + '] done')
+    debug('Server backup done')
 
 ######################################################################
 # Main routine
