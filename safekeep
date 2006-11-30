@@ -452,25 +452,24 @@ def do_server(cfgs):
         cin.flush()
         do_server_getanswer(cout)
 
-        try:
-            cin.write('SETUP\n')
-            cin.flush()
-            bdir = do_server_getanswer(cout)
+        cin.write('SETUP\n')
+        cin.flush()
+        bdir = do_server_getanswer(cout)
 
-            rdiff_logdir = os.path.join(cfg['dir'], 'rdiff-backup-data')
-            rdiff_logpre = os.listdir(rdiff_logdir)
+        rdiff_logdir = os.path.join(cfg['dir'], 'rdiff-backup-data')
+        rdiff_logpre = os.listdir(rdiff_logdir)
     
-            do_server_rdiff(cfg, bdir)
+        do_server_rdiff(cfg, bdir)
 
-            log_file(os.path.join(rdiff_logdir, 'backup.log'))
-            rdiff_logpost = os.listdir(rdiff_logdir)
-            for lfn in rdiff_logpost:
-                if lfn.startswith('session_statistics.') and lfn.endswith('.data') and lfn not in rdiff_logpre:
-                    log_file(os.path.join(rdiff_logdir, lfn))
-        finally:
-            cin.write('CLEANUP %s\n' % bdir)
-            cin.flush()
-            do_server_getanswer(cout)
+        log_file(os.path.join(rdiff_logdir, 'backup.log'))
+        rdiff_logpost = os.listdir(rdiff_logdir)
+        for lfn in rdiff_logpost:
+            if lfn.startswith('session_statistics.') and lfn.endswith('.data') and lfn not in rdiff_logpre:
+                log_file(os.path.join(rdiff_logdir, lfn))
+
+        cin.write('CLEANUP %s\n' % bdir)
+        cin.flush()
+        do_server_getanswer(cout)
 
         debug('Server backup [' + cfg['id'] + '] done')
     debug('Server backup done')
