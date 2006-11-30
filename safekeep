@@ -472,6 +472,7 @@ def do_server(cfgs):
         do_server_getanswer(cout)
 
         debug('Server backup [' + cfg['id'] + '] done')
+
     debug('Server backup done')
 
 ######################################################################
