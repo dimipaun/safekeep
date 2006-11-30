@@ -123,10 +123,14 @@ def parse_config(backup_el, filename):
     key = host_el[0].getAttribute('key')
     key2 = host_el[0].getAttribute('key2')
 
-    dir_el = backup_el.getElementsByTagName('dir')
-    if len(dir_el) > 0:
-        dir = dir_el[0].getAttribute('path')
-    else: dir = None
+    repo_el = backup_el.getElementsByTagName('repo')
+    dir = None
+    retention = None
+    if len(repo_el) == 1:
+        dir = repo_el[0].getAttribute('path')
+        retention = repo_el[0].getAttribute('retention')
+    elif len(repo_el) > 1:
+        raise ConfigException('Can not have more than a repo element')
     if not dir: dir = id
 
     setup_el = backup_el.getElementsByTagName('setup')
@@ -153,7 +157,8 @@ def parse_config(backup_el, filename):
     cludes.append({ 'type' : 'exclude', 'path' : '', 'glob' : '', 'regexp' : '.*' })
 
     return { 'id': id, 'host' : host, 'user' : user, 'key' : key, 'key2' : key2,
-             'dir' : dir, 'dumps' : dumps, 'snaps' : snaps, 'cludes' : cludes}
+             'dir' : dir, 'retention' : retention, 'dumps' : dumps, 'snaps' : snaps, 
+             'cludes' : cludes}
 
 ######################################################################
 # DB and SNAPSHOT support
@@ -381,6 +386,12 @@ def do_server_rdiff(cfg, bdir):
     if ret:
         raise Exception('rdiff-backup returned %d' % ret)
 
+def do_server_data_cleanup(cfgs):
+    args = ['rdiff-backup', '--remove-older-than', cfg['retention'], cfg['dir']]
+    ret = spawn(args)
+    if ret:
+        warn('Failed to cleanup old data, please fix the problem manually'
+
 def do_server(cfgs):
     # First compute the set of configuration files
     cfgfiles = []
@@ -410,6 +421,9 @@ def do_server(cfgs):
             cfg = parse_config(dom.documentElement, filename)
         finally:
             dom.unlink()
+
+        if cfg['retention']:
+            do_server_data_cleanup(cfg)
 
         debug('Do server backup [' + cfg['id'] + ']')
 
