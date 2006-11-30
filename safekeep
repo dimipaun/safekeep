@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import getopt, os, os.path, sys, re
-import tempfile, traceback
+import commands, tempfile, traceback
 import xml.dom.minidom
 import socket, smtplib
 
@@ -187,7 +187,7 @@ def do_client_dbdump(cfg):
             warn('Invalid database type: ' + type)
             continue
         if dump['user']:
-            cmd = ' '.join(args)   # FIXME: we need proper quoting
+            cmd = ' '.join([commands.mkarg(arg) for arg in args])
             args = [ 'su', '-c', cmd, '-', dump['user'] ]
         ec = spawn(args)
         if ec:
