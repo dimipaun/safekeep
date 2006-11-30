@@ -452,13 +452,14 @@ def do_server(cfgs):
         cin.flush()
         do_server_getanswer(cout)
 
-        rdiff_logdir = os.path.join(cfg['dir'], 'rdiff-backup-data')
-        rdiff_logpre = os.listdir(rdiff_logdir)
         try:
             cin.write('SETUP\n')
             cin.flush()
             bdir = do_server_getanswer(cout)
 
+            rdiff_logdir = os.path.join(cfg['dir'], 'rdiff-backup-data')
+            rdiff_logpre = os.listdir(rdiff_logdir)
+    
             do_server_rdiff(cfg, bdir)
 
             log_file(os.path.join(rdiff_logdir, 'backup.log'))
