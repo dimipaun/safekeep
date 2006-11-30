@@ -60,6 +60,9 @@ def log_file(file):
     finally:
         fin.close()
 
+def is_temp_root(dir):
+    return dir != '/'
+
 ######################################################################
 # Configuration file parser
 ######################################################################
@@ -220,12 +223,13 @@ def gather_snap_information(device, bdir):
     if not mp: return (None, None, None, None)
     lvmdev =  os.path.join('/dev', group, volume)
     if bdir[-1] == '/': bdir = bdir[:-1]
-    snapname = volume + '_snap_' + os.path.basename(bdir)
+    snapname = '%s_snap_%s' % (volume, os.path.basename(bdir))
     snapdev = os.path.join('/dev', group, snapname)
     if os.path.isabs(mp[0]): mp = mp[1:]
     return (lvmdev, snapdev, os.path.join(bdir, mp), mt)
 
 def do_client_snap(cfg, bdir):
+    assert is_temp_root(bdir)
     debug('Doing FS snapshots')
     for snap in cfg['snaps']:
         device = snap['device']
@@ -249,6 +253,7 @@ def do_client_snap(cfg, bdir):
                 warn('Can not tear down snapshot: ' + device)
 
 def do_client_snap_teardown(cfg, bdir):
+    assert is_temp_root(bdir)
     debug('Tear down FS snapshots dumps')
     for snap in cfg['snaps']:
         device = snap['device']
@@ -278,32 +283,38 @@ def do_client_config(cmd):
 
     dom = xml.dom.minidom.parseString(cfgStr)
     try:
-        cfg = parse_config(dom.documentElement, None)
-        send('OK')
-        return cfg
+        return parse_config(dom.documentElement, None)
     finally:
         dom.unlink()
 
-def do_client_setup(cfg, bdir):
-    debug('Do setup of %s in %s' % (cfg['host'], bdir))
-    if bdir:
+def do_client_setup(cfg):
+    debug('Do setup of %s' % cfg['host'])
+
+    do_client_dbdump(cfg)
+
+    if len(cfg['snaps']) > 0:
+        bdir = tempfile.mkdtemp("", "lbc")
         ret = spawn(['mount', '--rbind', '/', bdir])
         if ret:
             warn('mount --rbind failed with %d, snapshotting will be disabled' % ret)
-            bdir = None
+            try:
+                os.rmdir(bdir)
+            except Exception, e:
+                warn('Failed to remove: ' + bdir)
+            bdir = '/'
+        else:
+            do_client_snap(cfg, bdir)
+    else:
+        bdir = '/'
+    debug('Working root is %s' % bdir)
 
-    do_client_dbdump(cfg)
-    if bdir:
-        do_client_snap(cfg, bdir)
-
-    send('OK')
+    return bdir
 
 def do_client_cleanup(cfg, bdir):
     debug('Do cleanup of %s in %s' % (cfg['host'], bdir))
-    if bdir: do_client_snap_teardown(cfg, bdir)
-    do_client_dbdump_teardown(cfg)
+    if is_temp_root(bdir): 
+        do_client_snap_teardown(cfg, bdir)
 
-    if bdir:
         ret = spawn(['umount', '-l', bdir])
         if ret:
             warn('Failed to unmount: ' + bdir)
@@ -313,25 +324,26 @@ def do_client_cleanup(cfg, bdir):
             except Exception, e:
                 warn('Unable to remove: ' + bdir)
 
-    send('OK')
+    do_client_dbdump_teardown(cfg)
 
 def do_client():
     should_cleanup = True
+    bdir = '/'
     try:
         while True:
             try:
                 line = sys.stdin.readline()
                 if line.startswith('CONFIG'):
                     cfg = do_client_config(line)
-                elif line.startswith('BDIR'):
-                    bdir = tempfile.mkdtemp("", "lbc")
-                    send('OK ' + bdir)
+                    send('OK')
                 elif line.startswith('SETUP'):
-                    do_client_setup(cfg, line[5:].strip())
+                    bdir = do_client_setup(cfg)
+                    send('OK ' + bdir)
                 elif line.startswith('CLEANUP'):
                     dir = line[7:].strip()
                     if dir == bdir: should_cleanup = False
                     do_client_cleanup(cfg, dir)
+                    send('OK')
                 elif not line:
                     break
                 else:
@@ -375,9 +387,9 @@ def do_server_rdiff(cfg, bdir):
     for clude in cfg['cludes']:
         opt = '--' + clude['type']
         if clude['path']:
-            args.extend([opt, bdir + clude['path']])
+            args.extend([opt, os.path.join(bdir, clude['path'])])
         if clude['glob']:
-            args.extend([opt, bdir + clude['glob']])
+            args.extend([opt, os.path.join(bdir, clude['glob'])])
         if clude['regexp']:
             args.extend([opt + '-regexp', bdir + clude['regexp']])
 
@@ -440,16 +452,12 @@ def do_server(cfgs):
         cin.flush()
         do_server_getanswer(cout)
 
-        cin.write('BDIR\n')
-        cin.flush()
-        bdir = do_server_getanswer(cout)
-
         rdiff_logdir = os.path.join(cfg['dir'], 'rdiff-backup-data')
         rdiff_logpre = os.listdir(rdiff_logdir)
         try:
-            cin.write('SETUP ' + bdir + '\n')
+            cin.write('SETUP\n')
             cin.flush()
-            do_server_getanswer(cout)
+            bdir = do_server_getanswer(cout)
 
             do_server_rdiff(cfg, bdir)
 
@@ -459,7 +467,7 @@ def do_server(cfgs):
                 if lfn.startswith('session_statistics.') and lfn.endswith('.data') and lfn not in rdiff_logpre:
                     log_file(os.path.join(rdiff_logdir, lfn))
         finally:
-            cin.write('CLEANUP ' + bdir + '\n')
+            cin.write('CLEANUP %s\n' % bdir)
             cin.flush()
             do_server_getanswer(cout)
 
