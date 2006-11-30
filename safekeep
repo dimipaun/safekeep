@@ -429,7 +429,7 @@ def send_notification(email, smtp):
     global logbuf
     hostname = socket.gethostname()
     msg = 'From: LaBackup@' + hostname + \
-          '\r\nTo: ' + email + \
+          '\r\nTo: ' + ','.join(email) + \
           '\r\nSubject: LaBackup results on ' + hostname + \
           '\r\n\r\n' + logbuf
     server = smtplib.SMTP(smtp)
@@ -444,13 +444,13 @@ def usage():
     print 'usage: %s [options]' % (sys.argv[0])
     print
     print 'options:'
-    print '-C, --cfg=<file|dir>  use the given configuration file/directory'
-    print '-e, --email=EMAIL     send results by email'
-    print '-h, --help            show this help message and exit'
-    print '-m, --smtp=SMTP       SMTP server to use when sending mails (default: built-in SMTP server)'
-    print '-s, --server          launch in server mode (default)'
-    print '-c, --client          launch in client mode'
-    print '-v, --version         show the version number'
+    print '-C, --cfg=FILE|DIR  use the given configuration file/directory'
+    print '-e, --email=EMAIL   send results by email (can appear multiple times)'
+    print '-h, --help          show this help message and exit'
+    print '-m, --smtp=SMTP     SMTP server to use when sending mails (default: built-in SMTP)'
+    print '-s, --server        launch in server mode (default)'
+    print '-c, --client        launch in client mode'
+    print '-v, --version       show the version number'
 
 def main():
     try:
@@ -459,14 +459,14 @@ def main():
         usage()
         sys.exit(2)
     mode = 'server'
-    email = None
+    email = []
     smtp = ''
     cfgs = []
     for o, a in opts:
         if o in ('-C', '--cfg'):
             cfgs.append(a)
         elif o in ('-e', '--email'):
-            email = a
+            email.append(a)
         elif o in ('-h', '--help'):
             usage()
             sys.exit()
