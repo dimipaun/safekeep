@@ -127,7 +127,7 @@ def parse_config(backup_el, filename):
     if len(dir_el) > 0:
         dir = dir_el[0].getAttribute('path')
     else: dir = None
-    if not dir: dir = './' + id
+    if not dir: dir = id
 
     setup_el = backup_el.getElementsByTagName('setup')
     dumps = []
@@ -198,8 +198,7 @@ def do_client_dbdump_teardown(cfg):
 
 def gather_lvm_information(device):
     device = device.replace('/mapper','').replace('-','/')
-    group = device.split('/')[-2]
-    volume = device.split('/')[-1]
+    (group, volume) = device.split('/')[-2:]
     (cin, cout) = os.popen4('mount')
     lines = cout.readlines()
     cout.close()
@@ -218,7 +217,7 @@ def gather_snap_information(device, bdir):
     if bdir[-1] == '/': bdir = bdir[:-1]
     snapname = volume + '_snap_' + os.path.basename(bdir)
     snapdev = os.path.join('/dev', group, snapname)
-    if mp[0] == '/': mp = mp[1:]
+    if os.path.isabs(mp[0]): mp = mp[1:]
     return (lvmdev, snapdev, os.path.join(bdir, mp), mt)
 
 def do_client_snap(cfg, bdir):
@@ -321,7 +320,6 @@ def do_client():
                     cfg = do_client_config(line)
                 elif line.startswith('BDIR'):
                     bdir = tempfile.mkdtemp("", "lbc")
-                    if not bdir.endswith('/'): bdir += '/'
                     send('OK ' + bdir)
                 elif line.startswith('SETUP'):
                     do_client_setup(cfg, line[5:].strip())
