@@ -402,7 +402,7 @@ def do_server_data_cleanup(cfgs):
     args = ['rdiff-backup', '--remove-older-than', cfg['retention'], cfg['dir']]
     ret = spawn(args)
     if ret:
-        warn('Failed to cleanup old data, please fix the problem manually'
+        warn('Failed to cleanup old data, please fix the problem manually')
 
 def do_server(cfgs):
     # First compute the set of configuration files
