@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import getopt, os, os.path, shutil, sys
-import commands, random, tempfile, traceback
+import commands, random, time, tempfile, traceback
 
 class TestFailure(Exception):
     pass
@@ -74,7 +74,8 @@ def localTest(tmproot):
         cmd = "diff -u %(tmproot)s/md5sums.client %(tmproot)s/md5sums.restore"
         if os.system(cmd % params):
             raise TestFailure("The MD5 sums differ")
-        shutil.rmtree(os.path.join(tmproot, 'restore'))    
+        shutil.rmtree(os.path.join(tmproot, 'restore'))
+        time.sleep(1) 
 
 def usage():
     print 'usage: %s [options]' % (sys.argv[0])
