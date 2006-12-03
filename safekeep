@@ -7,7 +7,7 @@ import socket, smtplib
 
 config_dir = '/etc/labackup'
 config_ext = '.cfg'
-logbuf = ''
+logbuf = []
 
 VERSION = "0.0.1"
 
@@ -22,7 +22,7 @@ def send(msg):
 def log(msg, cls=None):
     global logbuf
     if cls: msg = '%s: %s' % (cls, msg) 
-    logbuf +=  msg + '\n'
+    logbuf +=  msg
     print msg
     sys.stdout.flush()
 
@@ -43,9 +43,9 @@ def send_notification(email, smtp):
     global logbuf
     hostname = socket.gethostname()
     msg = 'From: LaBackup@' + hostname + \
-          '\r\nTo: ' + ','.join(email) + \
+          '\r\nTo: ' + ', '.join(email) + \
           '\r\nSubject: LaBackup results on ' + hostname + \
-          '\r\n\r\n' + logbuf
+          '\r\n\r\n' + '\n'.join(logbuf)
     server = smtplib.SMTP(smtp)
     server.sendmail('LaBackup@' + hostname, email, msg)
     server.quit()
@@ -56,7 +56,8 @@ def log_file(file):
     log('################################################')
     fin = open(file, 'r')
     try:
-        log(fin.readlines())
+        for line in fin.readlines():
+            log(line)
     finally:
         fin.close()
 
