@@ -2,6 +2,9 @@
 
 import getopt, os, os.path, shutil, sys
 import commands, random, time, tempfile, traceback
+from commands import mkarg
+
+ssh_id_file = os.path.join(os.environ['HOME'], '.ssh/id_dsa')
 
 class TestFailure(Exception):
     pass
@@ -76,6 +79,80 @@ def localTest(tmproot):
         shutil.rmtree(os.path.join(tmproot, 'restore'))
         time.sleep(1) 
 
+def rcmd(cmd, user, host, error):
+    ssh = 'ssh -i %s %s@%s %s' % (mkarg(ssh_id_file), user, host, cmd)
+    if os.system(ssh):
+        raise TestFailure('Failed to %s on host %s', error, host)
+
+def takeOver(host, role):
+    cmd = 'ssh -o PasswordAuthentication=no root@%s ls /root/LaBackupTestBox' % (host)
+    if not os.system(cmd): return False
+    print 'The box %s does not appear to have been initialized' % (host)
+    print 'for functioning as %s in a LaBackup remote test.' % (role)
+    print 'If you want to use it in such a role, please enter the root'
+    print 'password for the box so that the test can take over it.'
+    print 'WARNING: the test is potentially dangereous, all data on'
+    print '         the box may be lost! Please make SURE this is'
+    print '         the box you REALLY intend to use for the test.'
+    print 'To cancel the test, type Ctrl-C'
+    cmd = 'ssh-copy-id %s root@%s' % (ssh_id_file, host)
+    if os.system(cmd):
+        raise TestFailure('Can not copy SSH ID %s to box %s.' % (ssh_id_file, host))
+    cmd = 'rpm --import http://lattica.com/keys/RPM-GPG-KEY-lattica-devel'
+    rcmd(cmd, 'root', host, 'install Lattica Devel Key')
+    lattica_repo = """
+        [lattica-development]
+        name=Lattica - Development Tree  for Fedora Core $releasever $basearch
+        baseurl=http://lattica.com/repos/lattica/yum/fedora/$releasever/devel/$basearch
+        gpgkey=http://lattica.com/keys/RPM-GPG-KEY-lattica-devel
+        enabled=1
+        gpgcheck=1
+    """
+    lattica_repo = '\n'.join([line.strip() for line in lattica_repo.splitlines])
+    cmd = 'echo %s > /etc/yum.repos.d/lattica.repo' % (mkarg(lattica_repo))
+    rcmd(cmd, 'root', host, 'install Lattica Repo')
+    cmd = 'yum install -y LaBackup'
+    rcmd(cmd, 'root', host, 'install LaBackup')
+    cmd = 'touch /root/LaBackupTestBox'
+    rcmd(cmd, 'root', host, 'create marker')
+    return True
+
+def remoteTest(id_file, client, server):
+    newKeys = False
+    if takeOver(client, 'server'):
+        cmd = 'useradd backup-op'
+        rcmd(cmd, 'root', server, 'create backup-op user')
+        cmd = 'cd ~backup-op; umask 077; test -d .ssh || mkdir .ssh; ' + \
+              'cp /root/.ssh/authorized_keys .ssh/authorized_keys; ' + \
+              'chown -R backup-op.backup-op .ssh'
+        rcmd(cmd, 'root', server, 'install key for backup-op user')
+        cmd = 'ssh-keygen -q -b 1024 -t dsa -N '' -C server -f id-labackup-test-key1'
+        rcmd(cmd, 'backup-op', server, 'create key1 on server')
+        cmd = 'ssh-keygen -q -b 1024 -t dsa -N '' -C server -f id-labackup-test-key2'
+        rcmd(cmd, 'backup-op', server, 'create key2 on server')
+        newKeys = True
+        #FIXME create .cfg file
+ 
+    if takeOver(client, 'client'):
+        pass # no setup should be required for the client
+
+    if newKeys: 
+        pass #FIXME: install the new keys on the client
+
+    while True:
+        # augment files on client
+        # compute MD5 sums on client
+        # scp MD5 sums to server
+        # run LaBackup on server
+        # compute MD5 sums on server
+        # compare MD5 sums, fail if different
+        # list available backups
+        # compare against retention policy, fail if different
+        # check no snaps on client
+        # check --rbind mounts on client
+        # check iff appropriate DB dumps deleted
+        time.sleep(1) 
+
 def usage():
     print 'usage: %s [options]' % (sys.argv[0])
     print
@@ -110,7 +187,7 @@ def main():
     try:
         try:
             if mode == 'remote':
-                raise Exception('Not implemented yet')
+                remoteTest(client, server)
             else:
                 localTest(tmproot)
         except TestFailure, tf:
