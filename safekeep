@@ -8,7 +8,7 @@ import socket, smtplib
 config_dir = '/etc/labackup'
 config_ext = '.cfg'
 logbuf = []
-is_server = True
+is_client = False
 
 VERSION = "0.0.1"
 
@@ -23,8 +23,7 @@ def send(msg):
 def log(msg, cls=None):
     global logbuf
     if cls: 
-        if is_server: cls = cls.upper()
-        else: cls = cls.lower()
+        if is_client: cls = cls.lower()
         msg = '%s: %s' % (cls, msg) 
     logbuf += msg
     print msg
@@ -544,12 +543,12 @@ def main():
         cfgs.append(config_dir)
 
     try:
-        global is_server
+        global is_client
         if mode == 'server':
-            is_server = True
+            is_client = False
             do_server(cfgs)
         else:
-            is_server = False
+            is_client = True
             do_client()
     except Exception, ex:
         traceback.print_exc(file=sys.stdout)
