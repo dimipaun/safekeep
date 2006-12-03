@@ -51,9 +51,7 @@ def send_notification(email, smtp):
     server.quit()
 
 def log_file(file):
-    log('################################################')
     log('## File: ' + file)
-    log('################################################')
     fin = open(file, 'r')
     try:
         for line in fin.readlines():
