@@ -382,11 +382,12 @@ def do_server_getanswer(cout):
 def do_server_rdiff(cfg, bdir):
     args = ['rdiff-backup']
 
-    schema = 'ssh -C'
-    if cfg['key2']:
-        schema += ' -i ' + cfg['key2']
-    schema += ' %s rdiff-backup --server'
-    args.extend(['--remote-schema', schema])
+    if cfg['host']:
+        schema = 'ssh -C'
+        if cfg['key2']:
+            schema += ' -i ' + cfg['key2']
+        schema += ' %s rdiff-backup --server'
+        args.extend(['--remote-schema', schema])
 
     #args.extend([ '-v', '6'])
     for clude in cfg['cludes']:
