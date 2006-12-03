@@ -58,7 +58,7 @@ def localTest(tmproot):
         </backup>
         """
         writefile(os.path.join(tmproot, 'test.cfg'), CONFIG % params)
-        cmd = "cd %(tmproot)s/client; find -type f -a \! -name '*.nobackup' | sort | xargs md5sum > ../md5sums.client"
+        cmd = "cd %(tmproot)s/client; find -type f -a \! -name '*.nobackup' | sort | xargs md5sum > %(tmproot)s/md5sums.client"
         if os.system(cmd % params):
             raise TestFailure("Can't compute the source MD5 sums")
         cmd = "LaBackup --cfg '%(tmproot)s/test.cfg'"
@@ -68,7 +68,7 @@ def localTest(tmproot):
         cmd = "rdiff-backup -r now %(tmproot)s/server %(tmproot)s/restore"
         if os.system(cmd % params):
             raise TestFailure("Can't restore files")
-        cmd = "cd %(tmproot)s/restore; find -type f -a \! -name '*.nobackup' | sort | xargs md5sum > ../md5sums.restore"
+        cmd = "cd %(tmproot)s/restore%(tmproot)s/client; find -type f -a \! -name '*.nobackup' | sort | xargs md5sum > %(tmproot)s/md5sums.restore"
         if os.system(cmd % params):
             raise TestFailure("Can't compute the source MD5 sums")
         cmd = "diff -u %(tmproot)s/md5sums.client %(tmproot)s/md5sums.restore"
