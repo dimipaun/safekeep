@@ -85,6 +85,11 @@ rpm-release: tar-release
 rpm-snapshot: tar-snapshot
 	rpmbuild -ta $(snapshotname).tar.gz
 
+test: test-local
+
+test-local:
+	LaBackupTest --local
+
 clean:
 	rm -rf `find -name "*.py[co]" -o -name "*~"```
 	rm -f LaBackup.spec debian/changelog
