@@ -30,6 +30,15 @@ def log(msg, cls=None):
     print msg
     sys.stdout.flush()
 
+def log_file(file):
+    log('## File: ' + file)
+    fin = open(file, 'r')
+    try:
+        for line in fin.readlines():
+            log(line.rstrip())
+    finally:
+        fin.close()
+
 def debug(msg):
     log(msg, 'DBG')
 
@@ -53,15 +62,6 @@ def send_notification(email, smtp):
     server = smtplib.SMTP(smtp)
     server.sendmail('LaBackup@' + hostname, email, msg)
     server.quit()
-
-def log_file(file):
-    log('## File: ' + file)
-    fin = open(file, 'r')
-    try:
-        for line in fin.readlines():
-            log(line.rstrip())
-    finally:
-        fin.close()
 
 def is_temp_root(dir):
     return dir != '/'
