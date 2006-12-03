@@ -98,8 +98,6 @@ def parse_dump(dump_el):
     if type not in ('postgres', 'postgresql', 'pgsql', 'mysql'):
         raise ConfigException('Invalid database type: ' + type)
     db = dump_el.getAttribute('db')
-    if not db:
-        raise ConfigException('You need to specify the database name')
     user = dump_el.getAttribute('user')
     dbuser = dump_el.getAttribute('dbuser')
     file = dump_el.getAttribute('file')
@@ -193,22 +191,32 @@ def do_client_dbdump(cfg):
     for dump in cfg['dumps']:
         type = dump['type']
         if type in ('postgres', 'postgresql', 'pgsql'):
-            args = ['pg_dump', '-f', dump['file']]
+            if dump['db']:
+                args = ['pg_dump']
+            else:
+                args = ['pg_dumpall']
             if dump['dbuser']:
                 args.extend(['-U', dump['dbuser']])
-            args.append(dump['db'])
+            if dump['db']:
+                args.append(dump['db'])
         elif type in ('mysql'):
-            args = ['mysqldump', '-r', dump['file']]
+            args = ['mysqldump']
             if dump['dbuser']:
                 args.extend(['-u', dump['dbuser']])
-            args.append(dump['db'])
+            if dump['db']:
+                args.append(dump['db'])
+            else:
+                args.append('-A')
         else:
             warn('Invalid database type: ' + type)
             continue
         if dump['user']:
             cmd = ' '.join([commands.mkarg(arg) for arg in args])
             args = [ 'su', '-c', cmd, '-', dump['user'] ]
-        ec = spawn(args)
+        cmd = ' '.join([commands.mkarg(arg) for arg in args])
+        cmd = '%s > %s' % (cmd, commands.mkarg(dump['file']))
+        debug('Run [' + cmd + ']')
+        ec = os.system(cmd)
         if ec:
             warn('Can not dump the database: ' + dump['db'])
 
