@@ -35,6 +35,17 @@ def localTest(tmproot):
     os.mkdir(os.path.join(tmproot, 'client', 'data'))
     os.mkdir(os.path.join(tmproot, 'client', 'home'))
     os.mkdir(os.path.join(tmproot, 'client', 'misc'))
+    os.mkdir(os.path.join(tmproot, 'server'))
+    CONFIG = """
+       <backup id="labackup test for %(tmproot)s">
+          <repo path="%(tmproot)s/server" />
+          <data>
+             <exclude glob="*.nobackup" />
+             <include path="%(tmproot)s/client" />
+          </data>
+        </backup>
+    """
+    writefile(os.path.join(tmproot, 'test.cfg'), CONFIG % params)
     for i in range(5):
         FILES = (
             'data/fileA.out', 
@@ -47,17 +58,6 @@ def localTest(tmproot):
         )
         for file in FILES:
             augmentfile(os.path.join(tmproot, 'client', file))
-        os.mkdir(os.path.join(tmproot, 'server'))
-        CONFIG = """
-        <backup id="labackup test for %(tmproot)s">
-          <repo path="%(tmproot)s/server" />
-          <data>
-             <exclude glob="*.nobackup" />
-             <include path="%(tmproot)s/client" />
-          </data>
-        </backup>
-        """
-        writefile(os.path.join(tmproot, 'test.cfg'), CONFIG % params)
         cmd = "cd %(tmproot)s/client; find -type f -a \! -name '*.nobackup' | sort | xargs md5sum > %(tmproot)s/md5sums.client"
         if os.system(cmd % params):
             raise TestFailure("Can't compute the source MD5 sums")
