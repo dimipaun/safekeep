@@ -21,6 +21,7 @@ help:
 	@echo "    deb         Builds snapshot binary and source DEBs"
 	@echo "    rpm         Buidls snapshot binary and source RPMs"
 	@echo "    tar         Builds snapshot source distribution"
+	@echo "    test        Invokes a quick local test for LaBackup"
 	@echo "    clean       Cleans up the source tree"
 
 info:
