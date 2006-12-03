@@ -9,9 +9,8 @@ class TestFailure(Exception):
 def writefile(file, content, perm=None, mode='w'):
     """
     Creates a file with the given name, content, and mode.
-    The file ay be passed in by name, as an open file object, 
-    or as  file descriptor. d in by name, an open file object, or as
-    file descriptor. If passed as a file object or file descriptor,
+    The file may be passed in by name, as an open file object, 
+    or as  file descriptor. If passed as a file object or file descriptor,
     it will be closed after the content will be written to it.
     """
     fout = open(file, mode)
