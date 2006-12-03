@@ -472,15 +472,21 @@ def do_server(cfgs):
         bdir = do_server_getanswer(cout)
 
         rdiff_logdir = os.path.join(cfg['dir'], 'rdiff-backup-data')
-        rdiff_logpre = os.listdir(rdiff_logdir)
+        if os.path.isdir(rdiff_logdir):
+            rdiff_logpre = os.listdir(rdiff_logdir)
+        else:
+            rdiff_logpre = []
     
         do_server_rdiff(cfg, bdir)
 
-        log_file(os.path.join(rdiff_logdir, 'backup.log'))
-        rdiff_logpost = os.listdir(rdiff_logdir)
-        for lfn in rdiff_logpost:
-            if lfn.startswith('session_statistics.') and lfn.endswith('.data') and lfn not in rdiff_logpre:
-                log_file(os.path.join(rdiff_logdir, lfn))
+        if os.path.isdir(rdiff_logdir):
+            log_file(os.path.join(rdiff_logdir, 'backup.log'))
+            rdiff_logpost = os.listdir(rdiff_logdir)
+            for lfn in rdiff_logpost:
+                if lfn.startswith('session_statistics.') and lfn.endswith('.data') and lfn not in rdiff_logpre:
+                    log_file(os.path.join(rdiff_logdir, lfn))
+        else:
+            warn('Log dir does not exist.')
 
         cin.write('CLEANUP %s\n' % bdir)
         cin.flush()
