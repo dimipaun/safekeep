@@ -119,12 +119,13 @@ def parse_config(backup_el, filename):
     if not id: id = filename
 
     host_el = backup_el.getElementsByTagName('host')
-    host = host_el[0].getAttribute('name')
-    if not host: host = 'localhost'
-    user = host_el[0].getAttribute('user')
-    if not user: user = 'root'
-    key = host_el[0].getAttribute('key')
-    key2 = host_el[0].getAttribute('key2')
+    if host_el:
+        host = host_el[0].getAttribute('name')
+        user = host_el[0].getAttribute('user')
+        key = host_el[0].getAttribute('key')
+        key2 = host_el[0].getAttribute('key2')
+    else:
+        host = user = key = key2 = None
 
     repo_el = backup_el.getElementsByTagName('repo')
     dir = None
@@ -327,6 +328,7 @@ def do_client_cleanup(cfg, bdir):
     do_client_dbdump_teardown(cfg)
 
 def do_client():
+    debug("Do client main loop")
     should_cleanup = True
     bdir = '/'
     try:
@@ -371,8 +373,11 @@ def do_server_getanswer(cout):
         elif not line:
             raise Exception('client died unexpectedly')
         else:
-            (cls, msg) = line[:-1].split(':', 2)
-            log(msg, cls.lower())
+            if ':' in line:
+                (cls, msg) = line[:-1].split(':', 1)
+                log(msg, cls.lower())
+            else:
+                log(line[:-1], 'ukn')
 
 def do_server_rdiff(cfg, bdir):
     args = ['rdiff-backup']
@@ -393,7 +398,12 @@ def do_server_rdiff(cfg, bdir):
         if clude['regexp']:
             args.extend([opt + '-regexp', bdir + clude['regexp']])
 
-    args.extend([cfg['user'] + '@' + cfg['host'] + '::' + bdir, cfg['dir']])
+    userhost = ''
+    if cfg['host']:
+        if cfg['user']: 
+            userhost = cfg['user'] + '@'
+        userhost += cfg['host']
+    args.extend([userhost + '::' + bdir, cfg['dir']])
     ret = spawn(args)
     if ret:
         raise Exception('rdiff-backup returned %d' % ret)
@@ -405,6 +415,7 @@ def do_server_data_cleanup(cfgs):
         warn('Failed to cleanup old data, please fix the problem manually')
 
 def do_server(cfgs):
+    debug("Do server main loop")
     # First compute the set of configuration files
     cfgfiles = []
     for cfg in cfgs:
@@ -425,7 +436,7 @@ def do_server(cfgs):
         filename = os.path.splitext(os.path.basename(filepath))[0]
 
         cfg_file = open(filepath)
-        cfg_str = cfg_file.read()
+        cfg_str = cfg_file.read().strip()
         cfg_file.close()
 
         dom = xml.dom.minidom.parseString(cfg_str)
@@ -439,16 +450,20 @@ def do_server(cfgs):
 
         debug('Do server backup [' + cfg['id'] + ']')
 
-        ssh = 'ssh -T'
-        if cfg['key']:
-            ssh += ' -i ' + cfg['key']
-        ssh += ' -l ' + cfg['user'] + ' ' + cfg['host']
-        debug('Run [' + ssh + ']')
-
-        (cin, cout) = os.popen4(ssh)
+        if cfg['host']:
+            cmd = 'ssh -T'
+            if cfg['key']:
+                cmd += ' -i ' + cfg['key']
+            if cfg['user']:
+                cmd += ' -l ' + cfg['user']
+            cmd += ' ' + cfg['host']
+        else:
+            cmd = 'LaBackup --client'
+        debug('Run [' + cmd + ']')
+        (cin, cout) = os.popen4(cmd)
 
         cin.write('CONFIG: %d\n' % (len(cfg_str.splitlines())))
-        cin.write(cfg_str)
+        cin.write(cfg_str + '\n')
         cin.flush()
         do_server_getanswer(cout)
 
@@ -528,6 +543,7 @@ def main():
         else:
             do_client()
     except Exception, ex:
+        traceback.print_exc(file=sys.stdout)
         error('ERROR: %s' % ex)
 
     if email:
