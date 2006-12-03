@@ -9,8 +9,10 @@ config_dir = '/etc/labackup'
 config_ext = '.cfg'
 logbuf = []
 is_client = False
+verbosity_level = 1
 
 VERSION = "0.0.1"
+VEBOSITY_BY_CLASS = {'DBG': 3, 'INFO': 2, 'WARN': 1, 'ERR': 0}
 
 ######################################################################
 # Miscellaneous support functions
@@ -24,22 +26,36 @@ def log(msg, cls=None):
     global logbuf
     if cls: 
         if is_client: cls = cls.lower()
-        msg = '%s: %s' % (cls, msg) 
-    logbuf += msg
-    print msg
-    sys.stdout.flush()
+        msg = '%s: %s' % (cls, msg)
+    else:
+        for c in VEBOSITY_BY_CLASS.keys():
+            if msg.startswith(c + ': '):
+                cls = c
+                break
+        else:
+            cls = 'UNK'
 
-def log_file(file):
-    log('## File: ' + file)
+    cutoff = VEBOSITY_BY_CLASS.get(cls.upper())
+    if cutoff is None: cutoff = 3
+    if is_client or verbosity_level >= cutoff:
+        logbuf += msg
+        print msg
+        sys.stdout.flush()
+
+def info_file(file):
+    info('## File: ' + file)
     fin = open(file, 'r')
     try:
         for line in fin.readlines():
-            log(line.rstrip())
+            info(line.rstrip())
     finally:
         fin.close()
 
 def debug(msg):
     log(msg, 'DBG')
+
+def info(msg):
+    log(msg, 'INFO')
 
 def warn(msg):
     log(msg, 'WARN')
@@ -479,11 +495,11 @@ def do_server(cfgs):
         do_server_rdiff(cfg, bdir)
 
         if os.path.isdir(rdiff_logdir):
-            log_file(os.path.join(rdiff_logdir, 'backup.log'))
+            info_file(os.path.join(rdiff_logdir, 'backup.log'))
             rdiff_logpost = os.listdir(rdiff_logdir)
             for lfn in rdiff_logpost:
                 if lfn.startswith('session_statistics.') and lfn.endswith('.data') and lfn not in rdiff_logpre:
-                    log_file(os.path.join(rdiff_logdir, lfn))
+                    info_file(os.path.join(rdiff_logdir, lfn))
         else:
             warn('Log dir does not exist.')
 
@@ -509,11 +525,14 @@ def usage():
     print '-m, --smtp=SMTP     SMTP server to use when sending mails (default: built-in SMTP)'
     print '-s, --server        launch in server mode (default)'
     print '-c, --client        launch in client mode'
-    print '-v, --version       show the version number and exit'
+    print '-q, --quiet         decreases the verbosity level'
+    print '-v, --verbose       increases the verbosity level'
+    print '-V, --version       show the version number and exit'
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'C:e:hm:scv', ['cfg=', 'email=', 'help', 'smtp=', 'server', 'client', 'version'])
+        opts, args = getopt.getopt(sys.argv[1:], 'C:e:hm:scqvV', 
+                                   ['cfg=', 'email=', 'help', 'smtp=', 'server', 'client', 'quiet', 'verbose', 'version'])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -521,6 +540,7 @@ def main():
     email = []
     smtp = ''
     cfgs = []
+    verbosity = 0
     for o, a in opts:
         if o in ('-C', '--cfg'):
             cfgs.append(a)
@@ -535,7 +555,11 @@ def main():
             mode = 'server'
         elif o in ('-c', '--client'):
             mode = 'client'
-        elif o in ('-v', '--version'):
+        elif o in ('-q', '--quiet'):
+            verbosity -= 1
+        elif o in ('-v', '--verbose'):
+            verbosity += 1
+        elif o in ('-V', '--version'):
             print 'LaBackup', VERSION
             return
 
@@ -543,12 +567,14 @@ def main():
         cfgs.append(config_dir)
 
     try:
-        global is_client
+        global is_client, verbosity_level
         if mode == 'server':
             is_client = False
+            verbosity_level = 1 + verbosity
             do_server(cfgs)
         else:
             is_client = True
+            verbosity_level = 3 + verbosity
             do_client()
     except Exception, ex:
         traceback.print_exc(file=sys.stdout)
