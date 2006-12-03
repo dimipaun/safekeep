@@ -8,6 +8,7 @@ import socket, smtplib
 config_dir = '/etc/labackup'
 config_ext = '.cfg'
 logbuf = []
+is_server = True
 
 VERSION = "0.0.1"
 
@@ -21,8 +22,11 @@ def send(msg):
 
 def log(msg, cls=None):
     global logbuf
-    if cls: msg = '%s: %s' % (cls, msg) 
-    logbuf +=  msg
+    if cls: 
+        if is_server: cls = cls.upper()
+        else: cls = cls.lower()
+        msg = '%s: %s' % (cls, msg) 
+    logbuf += msg
     print msg
     sys.stdout.flush()
 
@@ -372,11 +376,7 @@ def do_server_getanswer(cout):
         elif not line:
             raise Exception('client died unexpectedly')
         else:
-            if ':' in line:
-                (cls, msg) = line[:-1].split(':', 1)
-                log(msg, cls.lower())
-            else:
-                log(line[:-1], 'ukn')
+            log(line[:-1])
 
 def do_server_rdiff(cfg, bdir):
     args = ['rdiff-backup']
@@ -544,9 +544,12 @@ def main():
         cfgs.append(config_dir)
 
     try:
+        global is_server
         if mode == 'server':
+            is_server = True
             do_server(cfgs)
         else:
+            is_server = False
             do_client()
     except Exception, ex:
         traceback.print_exc(file=sys.stdout)
