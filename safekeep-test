@@ -46,7 +46,7 @@ def localTest(tmproot):
         </backup>
     """
     writefile(os.path.join(tmproot, 'test.cfg'), CONFIG % params)
-    for i in range(5):
+    for i in range(2):
         FILES = (
             'data/fileA.out', 
             'data/fileB.nobackup', 
