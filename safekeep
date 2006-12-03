@@ -55,7 +55,7 @@ def log_file(file):
     fin = open(file, 'r')
     try:
         for line in fin.readlines():
-            log(line)
+            log(line.rstrip())
     finally:
         fin.close()
 
