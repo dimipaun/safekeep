@@ -9,10 +9,21 @@ ssh_id_file = os.path.join(os.environ['HOME'], '.ssh/id_dsa')
 class TestFailure(Exception):
     pass
 
-def rcmd(cmd, user, host, error):
+def rcmd(cmd, user, host, desc, cmd2=None, user2=None, host2=None):
     ssh = 'ssh -i %s %s@%s %s' % (mkarg(ssh_id_file), user, host, cmd)
-    if os.system(ssh):
-        raise TestFailure('Failed to %s on host %s', error, host)
+    if cmd2:
+        ssh2 = 'ssh -i %s %s@%s %s' % (mkarg(ssh_id_file), user2, host2, cmd2)
+        pout = os.popen(ssh, 'r')
+        pin = os.popen(ssh2, 'w')
+        for line in pout:
+            pin.write(line)
+        if pout.close():
+            raise TestFailure('Failed to %s on host %s', desc, host)
+        if pin.close():
+            raise TestFailure('Failed to %s on host %s', desc, host2)
+    else:
+        if os.system(ssh):
+            raise TestFailure('Failed to %s on host %s', desc, host)
 
 def writefile(file, content, perm=None, mode='w', user=None, host=None):
     """
