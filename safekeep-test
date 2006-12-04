@@ -154,7 +154,14 @@ def remoteTest(id_file, client, server):
         pass #FIXME: install the new keys on the client
 
     while True:
-        # augment files on client
+        FILES = (
+            '/var/log/LaBackup-test1.log', 
+            '/var/log/LaBackup-test2.nobackup',
+            '/etc/a-simple-file', 
+            '/etc/another-file.nobackup', 
+        )
+        for file in FILES:
+            augmentfile(file, user, host)
         # compute MD5 sums on client
         # scp MD5 sums to server
         # run LaBackup on server
