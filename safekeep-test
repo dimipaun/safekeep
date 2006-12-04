@@ -9,27 +9,46 @@ ssh_id_file = os.path.join(os.environ['HOME'], '.ssh/id_dsa')
 class TestFailure(Exception):
     pass
 
-def writefile(file, content, perm=None, mode='w'):
+def rcmd(cmd, user, host, error):
+    ssh = 'ssh -i %s %s@%s %s' % (mkarg(ssh_id_file), user, host, cmd)
+    if os.system(ssh):
+        raise TestFailure('Failed to %s on host %s', error, host)
+
+def writefile(file, content, perm=None, mode='w', user=None, host=None):
     """
     Creates a file with the given name, content, and mode.
     The file may be passed in by name, as an open file object, 
     or as  file descriptor. If passed as a file object or file descriptor,
     it will be closed after the content will be written to it.
     """
-    fout = open(file, mode)
-    try:
-        fout.write(content)
-    finally:
-        fout.close()
+    if host:
+        if mode.startswith('a'):
+            redir = '>>'
+        else:
+            redir = '>'
+        ssh = 'ssh -i %s %s@%s cat %s %s' % (mkarg(ssh_id_file), user, host, redir, mkarg(file))
+        pipe = os.popen(ssh, 'w')
+        pipe.write(content)
+        if pipe.close():
+            raise TestFailure('Failed to create %s@%s:%s' % (user, host, file))
+        if perm != None:
+            cmd = 'chmod %s %s' % (perm, file)
+            rcmd(cmd, user, host, 'set file permissions for ' + file)
+    else:
+        fout = open(file, mode)
+        try:
+            fout.write(content)
+        finally:
+            fout.close()
 
-    if perm != None and isinstance(file, types.StringTypes): 
-        os.chmod(file, perm)
+        if perm != None and isinstance(file, types.StringTypes): 
+            os.chmod(file, perm)
 
-def augmentfile(file):
+def augmentfile(file, user=None, host=None):
     content = ""
     for i in range(random.randint(5, 20)):
         content = '%sSome random nr: %s\n' % (content, random.random())
-    writefile(file, content, mode='a')
+    writefile(file, content, mode='a', user=user, host=host)
 
 def localTest(tmproot):
     params = {'tmproot': tmproot}
@@ -78,11 +97,6 @@ def localTest(tmproot):
             raise TestFailure("The MD5 sums differ")
         shutil.rmtree(os.path.join(tmproot, 'restore'))
         time.sleep(1) 
-
-def rcmd(cmd, user, host, error):
-    ssh = 'ssh -i %s %s@%s %s' % (mkarg(ssh_id_file), user, host, cmd)
-    if os.system(ssh):
-        raise TestFailure('Failed to %s on host %s', error, host)
 
 def takeOver(host, role):
     cmd = 'ssh -o PasswordAuthentication=no root@%s ls /root/LaBackupTestBox' % (host)
