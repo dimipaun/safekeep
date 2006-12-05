@@ -145,15 +145,17 @@ def takeOver(host, role):
 def remoteTest(id_file, client, server):
     newKeys = False
     if takeOver(client, 'server'):
+        key1 = '/home/backup-op/.ssh/id-labackup-test-key1'
+        key2 = '/home/backup-op/.ssh/id-labackup-test-key2'
         cmd = 'useradd backup-op'
         rcmd(cmd, 'root', server, 'create backup-op user')
         cmd = 'cd ~backup-op; umask 077; test -d .ssh || mkdir .ssh; ' + \
               'cp /root/.ssh/authorized_keys .ssh/authorized_keys; ' + \
               'chown -R backup-op.backup-op .ssh'
         rcmd(cmd, 'root', server, 'install key for backup-op user')
-        cmd = 'ssh-keygen -q -b 1024 -t dsa -N '' -C server -f id-labackup-test-key1'
+        cmd = 'ssh-keygen -q -b 1024 -t dsa -N '' -C server -f %s' % key1
         rcmd(cmd, 'backup-op', server, 'create key1 on server')
-        cmd = 'ssh-keygen -q -b 1024 -t dsa -N '' -C server -f id-labackup-test-key2'
+        cmd = 'ssh-keygen -q -b 1024 -t dsa -N '' -C server -f %s' % key2
         rcmd(cmd, 'backup-op', server, 'create key2 on server')
         newKeys = True
         #FIXME create .cfg file
@@ -161,8 +163,12 @@ def remoteTest(id_file, client, server):
     if takeOver(client, 'client'):
         pass # no setup should be required for the client
 
-    if newKeys: 
-        pass #FIXME: install the new keys on the client
+    if newKeys:
+        cmd = 'umask 077; test -d .ssh || mkdir .ssh'
+        rcmd(cmd, 'root', client)
+        cmd1 = 'LaBackup --keys --clientid=client'
+        cmd2 = 'cat >> /root/.ssh/authorized_keys'
+        rcmd(cmd1, 'backup-op', server, cmd2, 'root', client)
 
     while True:
         FILES = (
