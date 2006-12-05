@@ -431,7 +431,7 @@ def do_server_rdiff(cfg, bdir):
     if ret:
         raise Exception('rdiff-backup returned %d' % ret)
 
-def do_server_data_cleanup(cfgs):
+def do_server_data_cleanup(cfg):
     args = ['rdiff-backup', '--remove-older-than', cfg['retention'], cfg['dir']]
     ret = spawn(args)
     if ret:
