@@ -249,7 +249,6 @@ def main():
     try:
         try:
             if mode == 'remote':
-                
                 remoteTest(client, server)
             else:
                 localTest(tmproot)
