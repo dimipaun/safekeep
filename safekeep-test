@@ -181,7 +181,7 @@ def remoteTest(client, server):
         cmd2 = 'cat >> /root/.ssh/authorized_keys'
         rcmd(cmd1, 'backup-op', server, cmd2, 'root', client)
 
-    while True:
+    for i in range(2):
         FILES = (
             '/etc/a-simple-file', 
             '/etc/another-file.nobackup', 
