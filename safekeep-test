@@ -69,7 +69,7 @@ def localTest(tmproot):
     os.mkdir(os.path.join(tmproot, 'client', 'misc'))
     os.mkdir(os.path.join(tmproot, 'server'))
     CONFIG = """
-       <backup id="labackup test for %(tmproot)s">
+       <backup id="%(tmproot)s">
           <repo path="%(tmproot)s/server" />
           <data>
              <exclude glob="**/*.nobackup" />
