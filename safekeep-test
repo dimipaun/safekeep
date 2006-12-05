@@ -72,7 +72,7 @@ def localTest(tmproot):
        <backup id="labackup test for %(tmproot)s">
           <repo path="%(tmproot)s/server" />
           <data>
-             <exclude glob="*.nobackup" />
+             <exclude glob="**/*.nobackup" />
              <include path="%(tmproot)s/client" />
           </data>
         </backup>
