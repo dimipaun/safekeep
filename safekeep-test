@@ -142,7 +142,7 @@ def takeOver(host, role):
     rcmd(cmd, 'root', host, 'create marker')
     return True
 
-def remoteTest(id_file, client, server):
+def remoteTest(client, server):
     newKeys = False
     if takeOver(client, 'server'):
         key1 = '/home/backup-op/.ssh/id-labackup-test-key1'
