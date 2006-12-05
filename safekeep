@@ -473,7 +473,6 @@ def do_server_data_cleanup(cfg):
 
 def do_server(cfgs):
     debug("Do server main loop")
-    # First compute the set of configuration files
     for cfg in cfgs:
         if cfg['retention']:
             do_server_data_cleanup(cfg)
@@ -526,15 +525,35 @@ def do_server(cfgs):
 
     debug('Server backup done')
 
+def do_keys(cfgs, id):
+    debug("Do server main loop")
+    host = os.environ['HOSTNAME']
+    for cfg in cfgs:
+        if cfg['id'] != id: continue
+        cmds = ['LaBackup --client', 'rdiff-backup --server --restrict-read-only /']
+        keyfiles = [cfg.get('key1'), cfg.get('key2')]
+        for (cmd, keyfile) in zip(cmds, keyfiles):
+            if keyfile:
+                keyin = open(keyfile, 'r')
+                key = keyin.read()
+                keyin.close()
+            else:
+                key = 'NOT AVAILABLE'
+            print '"command=%s",from=%s,no-port-forwarding,no-X11-forwarding,no-pty %s' % (cmd, host, key)
+        break
+    else:
+        error('No client with id \'%s\'' % id)
+
 ######################################################################
 # Main routine
 ######################################################################
 
 def usage():
-    print 'usage: %s [options]' % (sys.argv[0])
-    print 'mode selection:'
+    print 'usage: %s <mode> [options]' % (sys.argv[0])
+    print 'mode selection (pick one):'
     print '-s, --server        launch in server mode (default)'
     print '-c, --client        launch in client mode'
+    print '-k, --keys          manage SSH keys'
     print '-h, --help          show this help message and exit'
     print '-V, --version       show the version number and exit'
     print
@@ -542,13 +561,14 @@ def usage():
     print '-C, --cfg=FILE|DIR  use the given configuration file/directory'
     print '-e, --email=EMAIL   send results by email (can appear multiple times)'
     print '-m, --smtp=SMTP     SMTP server to use when sending mails (default: built-in SMTP)'
+    print '--clientid=ID       manage the keys of client identified by ID'
     print '-q, --quiet         decreases the verbosity level'
     print '-v, --verbose       increases the verbosity level'
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'C:e:hm:scqvV', 
-                                   ['cfg=', 'email=', 'help', 'smtp=', 'server', 'client', 'quiet', 'verbose', 'version'])
+        opts, args = getopt.getopt(sys.argv[1:], 'C:e:hkm:scqvV', 
+                                   ['cfg=', 'email=', 'help', 'smtp=', 'server', 'client', 'keys', 'clientid=', 'quiet', 'verbose', 'version'])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -557,6 +577,7 @@ def main():
     smtp = ''
     cfglocs = []
     verbosity = 0
+    clientid = None
     for o, a in opts:
         if o in ('-C', '--cfg'):
             cfglocs.append(a)
@@ -571,6 +592,10 @@ def main():
             mode = 'server'
         elif o in ('-c', '--client'):
             mode = 'client'
+        elif o in ('-k', '--keys'):
+            mode = 'keys'
+        elif o in ('--clientid', ):
+            clientid = a
         elif o in ('-q', '--quiet'):
             verbosity -= 1
         elif o in ('-v', '--verbose'):
@@ -593,6 +618,10 @@ def main():
             is_client = True
             verbosity_level = 3 + verbosity
             do_client()
+        elif mode == 'keys':
+            is_client = False
+            verbosity_level = 1 + verbosity
+            do_keys(cfgs, clientid)
         else:
             assert False, 'Unkown mode: ' + mode
     except Exception, ex:
