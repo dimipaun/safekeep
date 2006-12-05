@@ -525,17 +525,18 @@ def do_server(cfgs):
 
 def usage():
     print 'usage: %s [options]' % (sys.argv[0])
+    print 'mode selection:'
+    print '-s, --server        launch in server mode (default)'
+    print '-c, --client        launch in client mode'
+    print '-h, --help          show this help message and exit'
+    print '-V, --version       show the version number and exit'
     print
     print 'options:'
     print '-C, --cfg=FILE|DIR  use the given configuration file/directory'
     print '-e, --email=EMAIL   send results by email (can appear multiple times)'
-    print '-h, --help          show this help message and exit'
     print '-m, --smtp=SMTP     SMTP server to use when sending mails (default: built-in SMTP)'
-    print '-s, --server        launch in server mode (default)'
-    print '-c, --client        launch in client mode'
     print '-q, --quiet         decreases the verbosity level'
     print '-v, --verbose       increases the verbosity level'
-    print '-V, --version       show the version number and exit'
 
 def main():
     try:
@@ -580,10 +581,12 @@ def main():
             is_client = False
             verbosity_level = 1 + verbosity
             do_server(cfgs)
-        else:
+        elif mode == 'client':
             is_client = True
             verbosity_level = 3 + verbosity
             do_client()
+        else:
+            assert False, 'Unkown mode: ' + mode
     except Exception, ex:
         traceback.print_exc(file=sys.stdout)
         error('ERROR: %s' % ex)
