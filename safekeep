@@ -567,14 +567,15 @@ def usage():
     print '-C, --cfg=FILE|DIR  use the given configuration file/directory'
     print '-e, --email=EMAIL   send results by email (can appear multiple times)'
     print '-m, --smtp=SMTP     SMTP server to use when sending mails (default: built-in SMTP)'
-    print '--clientid=ID       manage the keys of client identified by ID'
+    print '--clientid=ID       manage the keys of client identified by ID (keys mode only)'
+    print '--print             display the authorization keys (keys mode only)'
     print '-q, --quiet         decreases the verbosity level'
     print '-v, --verbose       increases the verbosity level'
 
 def main():
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'C:e:hkm:scqvV', 
-                                   ['cfg=', 'email=', 'help', 'smtp=', 'server', 'client', 'keys', 'clientid=', 'quiet', 'verbose', 'version'])
+                                   ['cfg=', 'email=', 'help', 'smtp=', 'server', 'client', 'keys', 'clientid=', 'print', 'quiet', 'verbose', 'version'])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -584,6 +585,7 @@ def main():
     cfglocs = []
     verbosity = 0
     clientid = None
+    display = None
     for o, a in opts:
         if o in ('-C', '--cfg'):
             cfglocs.append(a)
@@ -602,6 +604,8 @@ def main():
             mode = 'keys'
         elif o in ('--clientid', ):
             clientid = a
+        elif o in ('--print', ):
+            display = True
         elif o in ('-q', '--quiet'):
             verbosity -= 1
         elif o in ('-v', '--verbose'):
@@ -627,7 +631,7 @@ def main():
         elif mode == 'keys':
             is_client = False
             verbosity_level = 1 + verbosity
-            do_keys(cfgs, clientid, True)
+            do_keys(cfgs, clientid, display)
         else:
             assert False, 'Unkown mode: ' + mode
     except Exception, ex:

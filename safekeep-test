@@ -166,7 +166,7 @@ def remoteTest(id_file, client, server):
     if newKeys:
         cmd = 'umask 077; test -d .ssh || mkdir .ssh'
         rcmd(cmd, 'root', client)
-        cmd1 = 'LaBackup --keys --clientid=client'
+        cmd1 = 'LaBackup --keys --clientid=client --print'
         cmd2 = 'cat >> /root/.ssh/authorized_keys'
         rcmd(cmd1, 'backup-op', server, cmd2, 'root', client)
 
