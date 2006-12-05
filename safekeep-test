@@ -214,7 +214,7 @@ def main():
         elif o in ('-r', '--remote'):
             mode = 'remote'
         elif o in ('-n', '--nocleanup'):
-            nocleanu = True
+            nocleanup = True
         elif o in ('-h', '--help'):
             usage()
             sys.exit()
