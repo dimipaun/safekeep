@@ -180,6 +180,40 @@ def parse_config(backup_el, filename):
              'dir' : dir, 'retention' : retention, 'dumps' : dumps, 'snaps' : snaps, 
              'cludes' : cludes}
 
+def parse_locs(cfglocs):
+    cfgfiles = []
+    for cfg in cfglocs:
+        if os.path.isdir(cfg):
+            for ent in os.listdir(cfg):
+                if not ent.endswith(config_ext):
+                    continue
+                filepath = os.path.join(cfg, ent)
+                if not os.path.isfile(filepath):
+                    continue
+                cfgfiles.append(filepath)
+        elif os.path.isfile(cfg):
+            cfgfiles.append(cfg)
+        else:
+            print >> sys.stderr, 'Inaccessible configuration, ignoring:', cfg
+
+    cfgs = []
+    for filepath in cfgfiles:
+        filename = os.path.splitext(os.path.basename(filepath))[0]
+
+        cfg_file = open(filepath)
+        cfg_str = cfg_file.read().strip()
+        cfg_file.close()
+
+        dom = xml.dom.minidom.parseString(cfg_str)
+        try:
+            cfg = parse_config(dom.documentElement, filename)
+        finally:
+            dom.unlink()
+        cfg['text'] = cfg_str
+        cfgs.append(cfg)
+
+    return cfgs
+
 ######################################################################
 # DB and SNAPSHOT support
 #   setup methods can raise exception to signal errors
@@ -440,34 +474,7 @@ def do_server_data_cleanup(cfg):
 def do_server(cfgs):
     debug("Do server main loop")
     # First compute the set of configuration files
-    cfgfiles = []
     for cfg in cfgs:
-        if os.path.isdir(cfg):
-            for ent in os.listdir(cfg):
-                if not ent.endswith(config_ext):
-                    continue
-                filepath = os.path.join(cfg, ent)
-                if not os.path.isfile(filepath):
-                    continue
-                cfgfiles.append(filepath)
-        elif os.path.isfile(cfg):
-            cfgfiles.append(cfg)
-        else:
-            print >> sys.stderr, 'Inaccessible configuration, ignoring:', cfg
-
-    for filepath in cfgfiles:
-        filename = os.path.splitext(os.path.basename(filepath))[0]
-
-        cfg_file = open(filepath)
-        cfg_str = cfg_file.read().strip()
-        cfg_file.close()
-
-        dom = xml.dom.minidom.parseString(cfg_str)
-        try:
-            cfg = parse_config(dom.documentElement, filename)
-        finally:
-            dom.unlink()
-
         if cfg['retention']:
             do_server_data_cleanup(cfg)
 
@@ -485,8 +492,8 @@ def do_server(cfgs):
         debug('Run [' + cmd + ']')
         (cin, cout) = os.popen4(cmd)
 
-        cin.write('CONFIG: %d\n' % (len(cfg_str.splitlines())))
-        cin.write(cfg_str + '\n')
+        cin.write('CONFIG: %d\n' % (len(cfg['text'].splitlines())))
+        cin.write(cfg['text'] + '\n')
         cin.flush()
         do_server_getanswer(cout)
 
@@ -548,11 +555,11 @@ def main():
     mode = 'server'
     email = []
     smtp = ''
-    cfgs = []
+    cfglocs = []
     verbosity = 0
     for o, a in opts:
         if o in ('-C', '--cfg'):
-            cfgs.append(a)
+            cfglocs.append(a)
         elif o in ('-e', '--email'):
             email.append(a)
         elif o in ('-h', '--help'):
@@ -572,9 +579,10 @@ def main():
             print 'LaBackup', VERSION
             return
 
-    if len(cfgs) == 0:
-        cfgs.append(config_dir)
+    if len(cfglocs) == 0:
+        cfglocs.append(config_dir)
 
+    cfgs = parse_locs(cfglocs)
     try:
         global is_client, verbosity_level
         if mode == 'server':
