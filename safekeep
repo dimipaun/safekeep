@@ -525,7 +525,7 @@ def do_server(cfgs):
 
     debug('Server backup done')
 
-def do_keys(cfgs, id):
+def do_keys(cfgs, id, display):
     debug("Do server main loop")
     host = os.environ['HOSTNAME']
     for cfg in cfgs:
@@ -539,7 +539,13 @@ def do_keys(cfgs, id):
                 keyin.close()
             else:
                 key = 'NOT AVAILABLE'
-            print '"command=%s",from=%s,no-port-forwarding,no-X11-forwarding,no-pty %s' % (cmd, host, key)
+            line = '"command=%s",from=%s,no-port-forwarding,no-X11-forwarding,no-pty %s' % (cmd, host, key)
+            if display:
+                print line
+            else:
+                # FIXME: append the line to the .ssh/authorized_keys on the client
+                # echo "$line" | ssh $1 "umask 077; test -d .ssh || mkdir .ssh ; cat >> .ssh/authorized_keys" || exit 1
+                pass
         break
     else:
         error('No client with id \'%s\'' % id)
@@ -621,7 +627,7 @@ def main():
         elif mode == 'keys':
             is_client = False
             verbosity_level = 1 + verbosity
-            do_keys(cfgs, clientid)
+            do_keys(cfgs, clientid, True)
         else:
             assert False, 'Unkown mode: ' + mode
     except Exception, ex:
