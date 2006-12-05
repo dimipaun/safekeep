@@ -158,7 +158,18 @@ def remoteTest(id_file, client, server):
         cmd = 'ssh-keygen -q -b 1024 -t dsa -N '' -C server -f %s' % key2
         rcmd(cmd, 'backup-op', server, 'create key2 on server')
         newKeys = True
-        #FIXME create .cfg file
+        cfg = """
+        <backup id="test-client">
+          <host name="%s" user="root" key="%s" key2="%s" />
+          <repo path="/home/backup-op/client/data" retention="10m"/>
+          <data>
+             <exclude glob="**/*.nobackup" />
+             <include path="/etc" />
+             <include path="/var" />
+          </data>
+        </backup>
+        """ % (client, key1, key2)
+        writefile('/etc/labackup/test-client.cfg', cfg, '664', 'root', server)
  
     if takeOver(client, 'client'):
         pass # no setup should be required for the client
@@ -166,16 +177,16 @@ def remoteTest(id_file, client, server):
     if newKeys:
         cmd = 'umask 077; test -d .ssh || mkdir .ssh'
         rcmd(cmd, 'root', client)
-        cmd1 = 'LaBackup --keys --clientid=client --print'
+        cmd1 = 'LaBackup --keys --clientid=test-client --print'
         cmd2 = 'cat >> /root/.ssh/authorized_keys'
         rcmd(cmd1, 'backup-op', server, cmd2, 'root', client)
 
     while True:
         FILES = (
-            '/var/log/LaBackup-test1.log', 
-            '/var/log/LaBackup-test2.nobackup',
             '/etc/a-simple-file', 
             '/etc/another-file.nobackup', 
+            '/var/log/LaBackup-test1.log', 
+            '/var/log/LaBackup-test2.nobackup',
         )
         for file in FILES:
             augmentfile(file, user, host)
