@@ -226,7 +226,7 @@ def remoteTest(client, server):
         # check iff appropriate DB dumps deleted
         time.sleep(1) 
 
-def guess_ssh_file_keys():
+def guess_ssh_id_file_keys():
     if os.environ.get('SSH_AUTH_SOCK'):
         out = os.popen('ssh-add -L', 'r')
         ids = out.read()
@@ -256,6 +256,7 @@ def usage():
     print '-h,--help             Print this help message and exit'
 
 def main():
+    global ssh_id_file_keys
     try:
         opts, args = getopt.getopt(sys.argv[1:], 
                                    'lrni:c:s:', 
