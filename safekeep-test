@@ -17,24 +17,31 @@ def mkssh(cmd='ssh'):
         args.append(mkarg(ssh_id_file))
     return ' '.join(args)
 
-def rcmd(cmd, user, host, desc, cmd2=None, user2=None, host2=None):
+def rpipe(cmd, user, host, desc, cmd2, user2, host2):
     ssh = '%s %s %s@%s %s' % (mkssh(), user, host, cmd)
-    if cmd2:
-        ssh2 = '%s %s %s@%s %s' % (mkssh(), user2, host2, cmd2)
-        print ssh
-        print ssh2
-        pout = os.popen(ssh, 'r')
-        pin = os.popen(ssh2, 'w')
-        for line in pout:
-            pin.write(line)
-        if pout.close():
-            raise TestFailure('Failed to %s on host %s', (desc, host))
-        if pin.close():
-            raise TestFailure('Failed to %s on host %s', (desc, host2))
-    else:
-        print ssh
-        if os.system(ssh):
-            raise TestFailure('Failed to %s on host %s', (desc, host))
+    print ssh
+    ssh2 = '%s %s %s@%s %s' % (mkssh(), user2, host2, cmd2)
+    print ssh2
+    pout = os.popen(ssh, 'r')
+    pin = os.popen(ssh2, 'w')
+    for line in pout:
+        pin.write(line)
+    st1 = pout.close()
+    st2 = pin.close()
+    if desc and st1:
+        raise TestFailure('Failed to %s on host %s', (desc, host))
+    if desc and st2:
+        raise TestFailure('Failed to %s on host %s', (desc, host2))
+    if st1: return st1
+    return st2
+
+def rcmd(cmd, user, host, desc = None):
+    ssh = '%s %s %s@%s %s' % (mkssh(), user, host, cmd)
+    print ssh
+    st = os.system(ssh)
+    if desc and st:
+        raise TestFailure('Failed to %s on host %s', (desc, host))
+    return st
 
 def writefile(file, content, perm=None, mode='w', user=None, host=None):
     """
@@ -191,7 +198,7 @@ def remoteTest(client, server):
         rcmd(cmd, 'root', client)
         cmd1 = 'LaBackup --keys --clientid=test-client --print'
         cmd2 = 'cat >> /root/.ssh/authorized_keys'
-        rcmd(cmd1, 'backup-op', server, cmd2, 'root', client)
+        rpipe(cmd1, 'backup-op', server, 'deploy keys to client', cmd2, 'root', client)
 
     for i in range(2):
         FILES = (
@@ -204,7 +211,7 @@ def remoteTest(client, server):
             augmentfile(file, user, host)
         cmd1 = "cd /; (find /etc -type f; find /var -type f) | grep -v '\.nobackup$' | sort | xargs md5sum"
         cmd2 = "cat > /home/backup-op/md5sum.client"
-        rcmd(cmd1, 'root', client, 'do MD5 sums on client', cmd2, 'backup-op', server)
+        rpipe(cmd1, 'root', client, 'do MD5 sums on client', cmd2, 'backup-op', server)
         cmd = 'LaBackup'
         rcmd(cmd, 'backup-op', server, 'backup data')
         cmd = 'cd /home/backup-op/client/data; find -type f | sort | xargs md5sum > /home/backup-op/md5sum.server'
