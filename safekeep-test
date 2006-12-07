@@ -227,7 +227,7 @@ def remoteTest(client, server):
         time.sleep(1) 
 
 def guess_ssh_file_keys():
-    if os.environ['SSH_AUTH_SOCK']:
+    if os.environ.get('SSH_AUTH_SOCK'):
         out = os.popen('ssh-add -L', 'r')
         ids = out.read()
         if out.close() or not ids:
@@ -264,8 +264,8 @@ def main():
         usage()
         sys.exit(2)
 
-    client = os.environ['LABACKUP_TEST_CLIENT']
-    server = os.environ['LABACKUP_TEST_SERVER']
+    client = os.environ.get('LABACKUP_TEST_CLIENT')
+    server = os.environ.get('LABACKUP_TEST_SERVER')
     nocleanup = False
     mode = 'local'
     for o, a in opts:
