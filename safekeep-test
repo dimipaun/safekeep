@@ -167,7 +167,7 @@ def createKey(user, host, keyname):
     return key
 
 def remoteTest(client, server):
-    takeOver(server, 'server'):
+    takeOver(server, 'server')
     cmd = 'useradd backup-op || true'
     rcmd(cmd, 'root', server, 'create backup-op user')
     cmd = 'umask 077; test -d .ssh || mkdir .ssh; ' + \
