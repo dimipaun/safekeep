@@ -264,8 +264,8 @@ def main():
         usage()
         sys.exit(2)
 
-    client = None
-    server = None
+    client = os.environ['LABACKUP_TEST_CLIENT']
+    server = os.environ['LABACKUP_TEST_SERVER']
     nocleanup = False
     mode = 'local'
     for o, a in opts:
