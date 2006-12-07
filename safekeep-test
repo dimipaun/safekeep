@@ -214,16 +214,19 @@ def usage():
     print 'usage: %s [options]' % (sys.argv[0])
     print
     print 'options:'
-    print '-l,--local          Run the local version of the test (default)'
-    print '-r,--remote         Run the client/server version of the test'
-    print '-n,--nocleanup      Do not erase the temporary root for the test'
-    print '-c,--client=ADDR    The client address (remote test only)'
-    print '-s,--server=ADDR    The server address (remote test only)'
-    print '-h,--help      Print this help message and exit'
+    print '-l,--local            Run the local version of the test (default)'
+    print '-r,--remote           Run the client/server version of the test'
+    print '-n,--nocleanup        Do not erase the temporary root for the test'
+    print '-i,--identity IDFILE  SSH identity file to use (remote test only)'
+    print '-c,--client=ADDR      The client address (remote test only)'
+    print '-s,--server=ADDR      The server address (remote test only)'
+    print '-h,--help             Print this help message and exit'
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'lrnc:s:', ['local', 'remote', 'nocleanup', 'client=', 'server='])
+        opts, args = getopt.getopt(sys.argv[1:], 
+                                   'lrni:c:s:', 
+                                   ['local', 'remote', 'nocleanup', 'identity', 'client=', 'server='])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -239,6 +242,8 @@ def main():
             mode = 'remote'
         elif o in ('-n', '--nocleanup'):
             nocleanup = True
+        elif o in ('-i', '--identity'):
+            ssh_id_file = a
         elif o in ('-c', '--client'):
             client = a
         elif o in ('-s', '--server'):
