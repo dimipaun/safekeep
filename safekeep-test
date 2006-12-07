@@ -13,17 +13,20 @@ def rcmd(cmd, user, host, desc, cmd2=None, user2=None, host2=None):
     ssh = 'ssh -i %s %s@%s %s' % (mkarg(ssh_id_file), user, host, cmd)
     if cmd2:
         ssh2 = 'ssh -i %s %s@%s %s' % (mkarg(ssh_id_file), user2, host2, cmd2)
+        print ssh
+        print ssh2
         pout = os.popen(ssh, 'r')
         pin = os.popen(ssh2, 'w')
         for line in pout:
             pin.write(line)
         if pout.close():
-            raise TestFailure('Failed to %s on host %s', desc, host)
+            raise TestFailure('Failed to %s on host %s', (desc, host))
         if pin.close():
-            raise TestFailure('Failed to %s on host %s', desc, host2)
+            raise TestFailure('Failed to %s on host %s', (desc, host2))
     else:
+        print ssh
         if os.system(ssh):
-            raise TestFailure('Failed to %s on host %s', desc, host)
+            raise TestFailure('Failed to %s on host %s', (desc, host))
 
 def writefile(file, content, perm=None, mode='w', user=None, host=None):
     """
@@ -120,7 +123,7 @@ def takeOver(host, role):
     print '         the box may be lost! Please make SURE this is'
     print '         the box you REALLY intend to use for the test.'
     print 'To cancel the test, type Ctrl-C'
-    cmd = 'ssh-copy-id %s root@%s' % (ssh_id_file, host)
+    cmd = 'ssh-copy-id -i %s root@%s' % (ssh_id_file, host)
     if os.system(cmd):
         raise TestFailure('Can not copy SSH ID %s to box %s.' % (ssh_id_file, host))
     cmd = 'rpm --import http://lattica.com/keys/RPM-GPG-KEY-lattica-devel'
@@ -133,8 +136,8 @@ def takeOver(host, role):
         enabled=1
         gpgcheck=1
     """
-    lattica_repo = '\n'.join([line.strip() for line in lattica_repo.splitlines])
-    cmd = 'echo %s > /etc/yum.repos.d/lattica.repo' % (mkarg(lattica_repo))
+    lattica_repo = '\n'.join([line.strip() for line in lattica_repo.splitlines()])
+    cmd = 'echo "%s" \\> /etc/yum.repos.d/lattica.repo' % (mkarg(lattica_repo).strip())
     rcmd(cmd, 'root', host, 'install Lattica Repo')
     cmd = 'yum install -y LaBackup'
     rcmd(cmd, 'root', host, 'install LaBackup')
@@ -144,7 +147,7 @@ def takeOver(host, role):
 
 def remoteTest(client, server):
     newKeys = False
-    if takeOver(client, 'server'):
+    if takeOver(server, 'server'):
         key1 = '/home/backup-op/.ssh/id-labackup-test-key1'
         key2 = '/home/backup-op/.ssh/id-labackup-test-key2'
         cmd = 'useradd backup-op'
