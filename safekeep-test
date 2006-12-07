@@ -288,6 +288,9 @@ def main():
             usage()
             sys.exit()
 
+    if not client: client = 'labackup-test-client'
+    if not server: server = 'labackup-test-server'
+
     exitcode = 0
     tmproot = tempfile.mkdtemp()
     try:
