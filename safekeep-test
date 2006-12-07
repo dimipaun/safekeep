@@ -131,6 +131,7 @@ def takeOver(host, role):
     print '         the box may be lost! Please make SURE this is'
     print '         the box you REALLY intend to use for the test.'
     print 'To cancel the test, type Ctrl-C'
+    #eval "$GET_ID" | ssh $1 "umask 077; test -d .ssh || mkdir .ssh ; cat >> .ssh/authorized_keys" || exit 1
     cmd = '%s %s root@%s' % (mkssh('ssh-copy-id'), host)
     if os.system(cmd):
         raise TestFailure('Can not copy SSH ID to box %s.' % host)
