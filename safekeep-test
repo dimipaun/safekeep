@@ -18,9 +18,9 @@ def mkssh(cmd='ssh'):
     return ' '.join(args)
 
 def rpipe(cmd, user, host, desc, cmd2, user2, host2):
-    ssh = '%s %s %s@%s %s' % (mkssh(), user, host, cmd)
+    ssh = '%s %s@%s %s' % (mkssh(), user, host, cmd)
     print ssh
-    ssh2 = '%s %s %s@%s %s' % (mkssh(), user2, host2, cmd2)
+    ssh2 = '%s %s@%s %s' % (mkssh(), user2, host2, cmd2)
     print ssh2
     pout = os.popen(ssh, 'r')
     pin = os.popen(ssh2, 'w')
@@ -36,7 +36,7 @@ def rpipe(cmd, user, host, desc, cmd2, user2, host2):
     return st2
 
 def rcmd(cmd, user, host, desc = None):
-    ssh = '%s %s %s@%s %s' % (mkssh(), user, host, cmd)
+    ssh = '%s %s@%s %s' % (mkssh(), user, host, cmd)
     print ssh
     st = os.system(ssh)
     if desc and st:
@@ -55,7 +55,7 @@ def writefile(file, content, perm=None, mode='w', user=None, host=None):
             redir = '>>'
         else:
             redir = '>'
-        ssh = '%s %s %s@%s cat %s %s' % (mkssh(), user, host, redir, mkarg(file))
+        ssh = '%s %s@%s "cat %s %s"' % (mkssh(), user, host, redir, mkarg(file))
         pipe = os.popen(ssh, 'w')
         pipe.write(content)
         if pipe.close():
@@ -139,7 +139,7 @@ def takeOver(host, role):
     print '         the box you REALLY intend to use for the test.'
     print 'To cancel the test, type Ctrl-C'
     #eval "$GET_ID" | ssh $1 "umask 077; test -d .ssh || mkdir .ssh ; cat >> .ssh/authorized_keys" || exit 1
-    cmd = '%s %s root@%s' % (mkssh('ssh-copy-id'), host)
+    cmd = '%s root@%s' % (mkssh('ssh-copy-id'), host)
     if os.system(cmd):
         raise TestFailure('Can not copy SSH ID to box %s.' % host)
     cmd = 'rpm --import http://lattica.com/keys/RPM-GPG-KEY-lattica-devel'
