@@ -18,9 +18,9 @@ def mkssh(cmd='ssh'):
     return ' '.join(args)
 
 def rpipe(cmd, user, host, desc, cmd2, user2, host2):
-    ssh = '%s %s@%s %s' % (mkssh(), user, host, cmd)
+    ssh = '%s %s@%s %s' % (mkssh(), user, host, mkarg(cmd))
     print ssh
-    ssh2 = '%s %s@%s %s' % (mkssh(), user2, host2, cmd2)
+    ssh2 = '%s %s@%s %s' % (mkssh(), user2, host2, mkarg(cmd2))
     print ssh2
     pout = os.popen(ssh, 'r')
     pin = os.popen(ssh2, 'w')
@@ -36,12 +36,13 @@ def rpipe(cmd, user, host, desc, cmd2, user2, host2):
     return st2
 
 def rcmd(cmd, user, host, desc = None):
-    ssh = '%s %s@%s %s' % (mkssh(), user, host, cmd)
+    ssh = '%s %s@%s %s' % (mkssh(), user, host, mkarg(cmd))
     print ssh
     st = os.system(ssh)
     if desc and st:
         raise TestFailure('Failed to %s on host %s', (desc, host))
     return st
+
 
 def writefile(file, content, perm=None, mode='w', user=None, host=None):
     """
@@ -153,7 +154,7 @@ def takeOver(host, role):
         gpgcheck=1
     """
     lattica_repo = '\n'.join([line.strip() for line in lattica_repo.splitlines()])
-    cmd = 'echo "%s" \\> /etc/yum.repos.d/lattica.repo' % (mkarg(lattica_repo).strip())
+    cmd = 'echo "%s" > /etc/yum.repos.d/lattica.repo' % (mkarg(lattica_repo).strip())
     rcmd(cmd, 'root', host, 'install Lattica Repo')
     cmd = 'yum install -y LaBackup'
     rcmd(cmd, 'root', host, 'install LaBackup')
