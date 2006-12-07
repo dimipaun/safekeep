@@ -4,15 +4,23 @@ import getopt, os, os.path, shutil, sys
 import commands, random, time, tempfile, traceback
 from commands import mkarg
 
-ssh_id_file = os.path.join(os.environ['HOME'], '.ssh/id_dsa')
+ssh_id_file_keys = None
 
 class TestFailure(Exception):
     pass
 
+def mkssh(cmd='ssh'):
+    args = [cmd]
+    ssh_id_file = ssh_id_file_keys[0]
+    if ssh_id_file:
+        args.append('-i')
+        args.append(mkarg(ssh_id_file))
+    return ' '.join(args)
+
 def rcmd(cmd, user, host, desc, cmd2=None, user2=None, host2=None):
-    ssh = 'ssh -i %s %s@%s %s' % (mkarg(ssh_id_file), user, host, cmd)
+    ssh = '%s %s %s@%s %s' % (mkssh(), user, host, cmd)
     if cmd2:
-        ssh2 = 'ssh -i %s %s@%s %s' % (mkarg(ssh_id_file), user2, host2, cmd2)
+        ssh2 = '%s %s %s@%s %s' % (mkssh(), user2, host2, cmd2)
         print ssh
         print ssh2
         pout = os.popen(ssh, 'r')
@@ -40,7 +48,7 @@ def writefile(file, content, perm=None, mode='w', user=None, host=None):
             redir = '>>'
         else:
             redir = '>'
-        ssh = 'ssh -i %s %s@%s cat %s %s' % (mkarg(ssh_id_file), user, host, redir, mkarg(file))
+        ssh = '%s %s %s@%s cat %s %s' % (mkssh(), user, host, redir, mkarg(file))
         pipe = os.popen(ssh, 'w')
         pipe.write(content)
         if pipe.close():
@@ -123,9 +131,9 @@ def takeOver(host, role):
     print '         the box may be lost! Please make SURE this is'
     print '         the box you REALLY intend to use for the test.'
     print 'To cancel the test, type Ctrl-C'
-    cmd = 'ssh-copy-id -i %s root@%s' % (ssh_id_file, host)
+    cmd = '%s %s root@%s' % (mkssh('ssh-copy-id'), host)
     if os.system(cmd):
-        raise TestFailure('Can not copy SSH ID %s to box %s.' % (ssh_id_file, host))
+        raise TestFailure('Can not copy SSH ID to box %s.' % host)
     cmd = 'rpm --import http://lattica.com/keys/RPM-GPG-KEY-lattica-devel'
     rcmd(cmd, 'root', host, 'install Lattica Devel Key')
     lattica_repo = """
@@ -210,6 +218,23 @@ def remoteTest(client, server):
         # check iff appropriate DB dumps deleted
         time.sleep(1) 
 
+def guess_ssh_file_keys():
+    if os.environ['SSH_AUTH_SOCK']:
+        out = os.popen('ssh-add -L', 'r')
+        ids = out.read()
+        if out.close() or not ids:
+            print >> sys.stderr, 'Failed to get keys from ssh agent'
+        else:
+            return (None, ids)
+    for filename in ('identity', 'id_dsa', 'id_rsa'):
+        file = os.path.join(os.environ['HOME'], '.ssh', filename)
+        if os.path.isfile(file): 
+            fin = open(file)
+            id = file.read()
+            fin.close()
+            return (file, id)
+    return None
+
 def usage():
     print 'usage: %s [options]' % (sys.argv[0])
     print
@@ -243,7 +268,10 @@ def main():
         elif o in ('-n', '--nocleanup'):
             nocleanup = True
         elif o in ('-i', '--identity'):
-            ssh_id_file = a
+            fin = open(a)
+            id = file.read()
+            fin.close()
+            ssh_id_file_keys = (a, id)
         elif o in ('-c', '--client'):
             client = a
         elif o in ('-s', '--server'):
@@ -257,6 +285,9 @@ def main():
     try:
         try:
             if mode == 'remote':
+                if not ssh_id_file_keys:
+                    ssh_id_file_keys = guess_ssh_id_file_keys()
+                assert ssh_id_file_keys, "Can not determine the SSH keys"
                 remoteTest(client, server)
             else:
                 localTest(tmproot)
