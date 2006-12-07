@@ -129,20 +129,21 @@ def localTest(tmproot):
         time.sleep(1) 
 
 def takeOver(host, role):
-    cmd = 'ssh -o PasswordAuthentication=no root@%s ls /root/LaBackupTestBox' % (host)
-    if not os.system(cmd): return False
-    print 'The box %s does not appear to have been initialized' % (host)
-    print 'for functioning as %s in a LaBackup remote test.' % (role)
-    print 'If you want to use it in such a role, please enter the root'
-    print 'password for the box so that the test can take over it.'
-    print 'WARNING: the test is potentially dangereous, all data on'
-    print '         the box may be lost! Please make SURE this is'
-    print '         the box you REALLY intend to use for the test.'
-    print 'To cancel the test, type Ctrl-C'
-    #eval "$GET_ID" | ssh $1 "umask 077; test -d .ssh || mkdir .ssh ; cat >> .ssh/authorized_keys" || exit 1
-    cmd = '%s root@%s' % (mkssh('ssh-copy-id'), host)
-    if os.system(cmd):
-        raise TestFailure('Can not copy SSH ID to box %s.' % host)
+    cmd = 'ssh -o PasswordAuthentication=no root@%s true' % (host)
+    if os.system(cmd): 
+        print 'The box %s does not appear to have been initialized' % (host)
+        print 'for functioning as %s in a LaBackup remote test.' % (role)
+        print 'If you want to use it in such a role, please enter the root'
+        print 'password for the box so that the test can take over it.'
+        print 'WARNING: the test is potentially dangereous, all data on'
+        print '         the box may be lost! Please make SURE this is'
+        print '         the box you REALLY intend to use for the test.'
+        print 'To cancel the test, type Ctrl-C'
+        #eval "$GET_ID" | ssh $1 "umask 077; test -d .ssh || mkdir .ssh ; cat >> .ssh/authorized_keys" || exit 1
+        cmd = '%s root@%s' % (mkssh('ssh-copy-id'), host)
+        if os.system(cmd):
+            raise TestFailure('Can not copy SSH ID to box %s.' % host)
+
     cmd = 'rpm --import http://lattica.com/keys/RPM-GPG-KEY-lattica-devel'
     rcmd(cmd, 'root', host, 'install Lattica Devel Key')
     lattica_repo = """
@@ -158,27 +159,25 @@ def takeOver(host, role):
     rcmd(cmd, 'root', host, 'install Lattica Repo')
     cmd = 'yum install -y LaBackup'
     rcmd(cmd, 'root', host, 'install LaBackup')
-    cmd = 'touch /root/LaBackupTestBox'
-    rcmd(cmd, 'root', host, 'create marker')
-    return True
+
+def createKey(user, host, keyname):
+    key = '/home/%s/.ssh/%s' % (user, keyname)
+    cmd = 'test -f "%s" || ssh-keygen -q -b 1024 -t dsa -N '' -C server -f "%s"' % (key, key)
+    rcmd(cmd, user, host, 'create %s on server' % keyname)
+    return key
 
 def remoteTest(client, server):
-    newKeys = False
-    if takeOver(server, 'server'):
-        key1 = '/home/backup-op/.ssh/id-labackup-test-key1'
-        key2 = '/home/backup-op/.ssh/id-labackup-test-key2'
-        cmd = 'useradd backup-op'
-        rcmd(cmd, 'root', server, 'create backup-op user')
-        cmd = 'cd ~backup-op; umask 077; test -d .ssh || mkdir .ssh; ' + \
-              'cp /root/.ssh/authorized_keys .ssh/authorized_keys; ' + \
-              'chown -R backup-op.backup-op .ssh'
-        rcmd(cmd, 'root', server, 'install key for backup-op user')
-        cmd = 'ssh-keygen -q -b 1024 -t dsa -N '' -C server -f %s' % key1
-        rcmd(cmd, 'backup-op', server, 'create key1 on server')
-        cmd = 'ssh-keygen -q -b 1024 -t dsa -N '' -C server -f %s' % key2
-        rcmd(cmd, 'backup-op', server, 'create key2 on server')
-        newKeys = True
-        cfg = """
+    takeOver(server, 'server'):
+    cmd = 'useradd backup-op || true'
+    rcmd(cmd, 'root', server, 'create backup-op user')
+    cmd = 'umask 077; test -d .ssh || mkdir .ssh; ' + \
+          'cp /root/.ssh/authorized_keys .ssh/authorized_keys; ' + \
+          'chown -R backup-op.backup-op .ssh'
+    rcmd(cmd, 'root', server, 'install key for backup-op user')
+    key1 = createKey('backup-op', server, 'id-labackup-test-key1')
+    key2 = createKey('backup-op', server, 'id-labackup-test-key2')
+
+    cfg = """
         <backup id="test-client">
           <host name="%s" user="root" key="%s" key2="%s" />
           <repo path="/home/backup-op/client/data" retention="10m"/>
@@ -189,17 +188,18 @@ def remoteTest(client, server):
           </data>
         </backup>
         """ % (client, key1, key2)
-        writefile('/etc/labackup/test-client.cfg', cfg, '664', 'root', server)
- 
-    if takeOver(client, 'client'):
-        pass # no setup should be required for the client
 
-    if newKeys:
-        cmd = 'umask 077; test -d .ssh || mkdir .ssh'
-        rcmd(cmd, 'root', client)
-        cmd1 = 'LaBackup --keys --clientid=test-client --print'
-        cmd2 = 'cat >> /root/.ssh/authorized_keys'
-        rpipe(cmd1, 'backup-op', server, 'deploy keys to client', cmd2, 'root', client)
+    writefile('/etc/labackup/test-client.cfg', cfg, '664', 'root', server)
+ 
+    takeOver(client, 'client')
+
+    cmd = 'umask 077; test -d .ssh || mkdir .ssh'
+    rcmd(cmd, 'root', client)
+
+    #FIXME: this keeps adding the keys to the client, needs fixing
+    cmd1 = 'LaBackup --keys --clientid=test-client --print'
+    cmd2 = 'cat >> /root/.ssh/authorized_keys'
+    rpipe(cmd1, 'backup-op', server, 'deploy keys to client', cmd2, 'root', client)
 
     for i in range(2):
         FILES = (
