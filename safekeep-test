@@ -29,9 +29,9 @@ def rpipe(cmd, user, host, desc, cmd2, user2, host2):
     st1 = pout.close()
     st2 = pin.close()
     if desc and st1:
-        raise TestFailure('Failed to %s on host %s', (desc, host))
+        raise TestFailure('Failed to %s on host %s' % (desc, host))
     if desc and st2:
-        raise TestFailure('Failed to %s on host %s', (desc, host2))
+        raise TestFailure('Failed to %s on host %s' % (desc, host2))
     if st1: return st1
     return st2
 
@@ -40,7 +40,7 @@ def rcmd(cmd, user, host, desc=None):
     print ssh
     st = os.system(ssh)
     if desc and st:
-        raise TestFailure('Failed to %s on host %s', (desc, host))
+        raise TestFailure('Failed to %s on host %s' % (desc, host))
     return st
 
 def rcmdout(cmd, user, host, desc=None):
