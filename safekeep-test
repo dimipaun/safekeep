@@ -45,19 +45,19 @@ def rcmd(cmd, user, host, desc=None):
 def rcmdout(cmd, user, host, desc=None):
     ssh = '%s %s@%s %s' % (mkssh(), user, host, mkarg(cmd))
     print ssh
-    out = os.popen(cmd, 'r')
+    out = os.popen(ssh, 'r')
     try:
         return out.read()
     finally:
         st = out.close()
         if desc and st:
-            raise TestFailure('Failed to %s on host %s', (desc, host))
+            raise TestFailure('Failed to %s on host %s' % (desc, host))
         if st:
             return None
 
 def readfile(file, user=None, host=None):
     if host:
-        cmd = 'cat "%s"' % file
+        cmd = 'cat %s' % file
         return rcmdout(cmd, user, host, 'read file %s' % file)
     else:
         fin = open(file)
@@ -162,10 +162,20 @@ def takeOver(host, role):
         print '         the box may be lost! Please make SURE this is'
         print '         the box you REALLY intend to use for the test.'
         print 'To cancel the test, type Ctrl-C'
-        #eval "$GET_ID" | ssh $1 "umask 077; test -d .ssh || mkdir .ssh ; cat >> .ssh/authorized_keys" || exit 1
-        cmd = '%s root@%s' % (mkssh('ssh-copy-id'), host)
-        if os.system(cmd):
-            raise TestFailure('Can not copy SSH ID to box %s.' % host)
+    exitingkeys = readfile('/root/.ssh/authorized_keys', 'root', host)
+    toaddkeys = ''
+    if exitingkeys:
+        ekl = exitingkeys.splitlines()
+        pkl = ssh_id_file_keys[1].splitlines()
+        nkl = []
+        for nk in pkl:
+            if nk not in ekl: nkl.append(nk)
+        toaddkeys = '\n'.join(nkl)
+    else:
+        toaddkeys = exitingkeys
+    cmd = 'umask 077; test -d .ssh || mkdir .ssh'
+    rcmd(cmd, 'root', host)
+    writefile('/root/.ssh/authorized_keys', toaddkeys, '600', 'a', 'root', host)
 
     cmd = 'rpm --import http://lattica.com/keys/RPM-GPG-KEY-lattica-devel'
     rcmd(cmd, 'root', host, 'install Lattica Devel Key')
