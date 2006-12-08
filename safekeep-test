@@ -162,7 +162,7 @@ def takeOver(host, role):
 
 def createKey(user, host, keyname):
     key = '/home/%s/.ssh/%s' % (user, keyname)
-    cmd = 'test -f "%s" || ssh-keygen -q -b 1024 -t dsa -N '' -C server -f "%s"' % (key, key)
+    cmd = 'test -f %s || ssh-keygen -q -b 1024 -t dsa -N \'\' -C server -f %s' % (key, key)
     rcmd(cmd, user, host, 'create %s on server' % keyname)
     return key
 
@@ -170,7 +170,7 @@ def remoteTest(client, server):
     takeOver(server, 'server')
     cmd = 'useradd backup-op || true'
     rcmd(cmd, 'root', server, 'create backup-op user')
-    cmd = 'umask 077; test -d .ssh || mkdir .ssh; ' + \
+    cmd = 'cd ~backup-op; umask 077; test -d .ssh || mkdir .ssh; ' + \
           'cp /root/.ssh/authorized_keys .ssh/authorized_keys; ' + \
           'chown -R backup-op.backup-op .ssh'
     rcmd(cmd, 'root', server, 'install key for backup-op user')
