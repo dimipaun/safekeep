@@ -43,18 +43,23 @@ def rcmd(cmd, user, host, desc=None):
         raise TestFailure('Failed to %s on host %s', (desc, host))
     return st
 
+def rcmdout(cmd, user, host, desc=None):
+    ssh = '%s %s@%s %s' % (mkssh(), user, host, mkarg(cmd))
+    print ssh
+    out = os.popen(cmd, 'r')
+    try:
+        return out.read()
+    finally:
+        st = out.close()
+        if desc and st:
+            raise TestFailure('Failed to %s on host %s', (desc, host))
+        if st:
+            return None
 
 def readfile(file, user=None, host=None):
     if host:
         cmd = 'cat "%s"' % file
-        ssh = '%s %s@%s %s' % (mkssh(), user, host, mkarg(cmd))
-        print ssh
-        pout = os.popen(ssh, 'r')
-        try:
-            return pout.read()
-        finally:
-            st = pout.close()
-            assert st == 0, "Failed to read %s@%s:%s" % (user, host, file)
+        return rcmdout(cmd, user, host, 'read file %s' % file)
     else:
         fin = open(file)
         try:
