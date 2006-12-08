@@ -19,9 +19,8 @@ def mkssh(cmd='ssh'):
 
 def rpipe(cmd, user, host, desc, cmd2, user2, host2):
     ssh = '%s %s@%s %s' % (mkssh(), user, host, mkarg(cmd))
-    print ssh
     ssh2 = '%s %s@%s %s' % (mkssh(), user2, host2, mkarg(cmd2))
-    print ssh2
+    print ssh, '|', ssh2
     pout = os.popen(ssh, 'r')
     pin = os.popen(ssh2, 'w')
     for line in pout:
