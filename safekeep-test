@@ -35,7 +35,7 @@ def rpipe(cmd, user, host, desc, cmd2, user2, host2):
     if st1: return st1
     return st2
 
-def rcmd(cmd, user, host, desc = None):
+def rcmd(cmd, user, host, desc=None):
     ssh = '%s %s@%s %s' % (mkssh(), user, host, mkarg(cmd))
     print ssh
     st = os.system(ssh)
@@ -43,6 +43,24 @@ def rcmd(cmd, user, host, desc = None):
         raise TestFailure('Failed to %s on host %s', (desc, host))
     return st
 
+
+def readfile(file, user=None, host=None):
+    if host:
+        cmd = 'cat "%s"' % file
+        ssh = '%s %s@%s %s' % (mkssh(), user, host, mkarg(cmd))
+        print ssh
+        pout = os.popen(ssh, 'r')
+        try:
+            return pout.read()
+        finally:
+            st = pout.close()
+            assert st == 0, "Failed to read %s@%s:%s" % (user, host, file)
+    else:
+        fin = open(file)
+        try:
+            return fin.read()
+        finally:
+            fin.close()
 
 def writefile(file, content, perm=None, mode='w', user=None, host=None):
     """
@@ -238,10 +256,7 @@ def guess_ssh_id_file_keys():
     for filename in ('identity', 'id_dsa', 'id_rsa'):
         file = os.path.join(os.environ['HOME'], '.ssh', filename)
         if os.path.isfile(file): 
-            fin = open(file)
-            id = file.read()
-            fin.close()
-            return (file, id)
+            return (file, readfile(file))
     return None
 
 def usage():
@@ -278,10 +293,7 @@ def main():
         elif o in ('-n', '--nocleanup'):
             nocleanup = True
         elif o in ('-i', '--identity'):
-            fin = open(a)
-            id = file.read()
-            fin.close()
-            ssh_id_file_keys = (a, id)
+            ssh_id_file_keys = (a, readfile(a))
         elif o in ('-c', '--client'):
             client = a
         elif o in ('-s', '--server'):
