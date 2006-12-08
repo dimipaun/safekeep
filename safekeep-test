@@ -75,6 +75,7 @@ def writefile(file, content, perm=None, mode='w', user=None, host=None):
         else:
             redir = '>'
         ssh = '%s %s@%s "cat %s %s"' % (mkssh(), user, host, redir, mkarg(file))
+        print ssh
         pipe = os.popen(ssh, 'w')
         pipe.write(content)
         if pipe.close():
@@ -207,7 +208,7 @@ def remoteTest(client, server):
         </backup>
         """ % (client, key1, key2)
 
-    writefile('/etc/labackup/test-client.cfg', cfg, '664', 'root', server)
+    writefile('/etc/labackup/test-client.cfg', cfg, '664', 'w', 'root', server)
  
     takeOver(client, 'client')
 
