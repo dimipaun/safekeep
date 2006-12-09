@@ -544,7 +544,7 @@ def do_keys(cfgs, id, display):
                 keyin.close()
             else:
                 key = 'NOT AVAILABLE'
-            line = '"command=%s",from=%s,no-port-forwarding,no-X11-forwarding,no-pty %s' % (cmd, host, key)
+            line = 'command="%s",no-port-forwarding,no-X11-forwarding,no-pty %s' % (cmd, key)
             lines.append(line)
        
         output = '\n'.join(line) 
