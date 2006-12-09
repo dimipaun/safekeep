@@ -142,6 +142,10 @@ def parse_config(backup_el, filename):
         key2 = host_el[0].getAttribute('key2')
     else:
         host = user = key = key2 = None
+    if host and key is None:
+        key = os.path.join(os.environ['HOME'], '.ssh', 'labackup_server_ctrl_key')
+    if host and key2 is None:
+        key2 = os.path.join(os.environ['HOME'], '.ssh', 'labackup_server_data_key')
 
     repo_el = backup_el.getElementsByTagName('repo')
     dir = None
