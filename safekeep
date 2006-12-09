@@ -554,7 +554,8 @@ def do_keys(cfgs, ids, display):
                     error('Public key exists %s, but private key is missing. Skipping client' % publickey)
                     break
                 info('Key do not exist, generating it now: ' + privatekeyfile)
-                cmd = 'ssh-keygen -q -b 1024 -t dsa -N "" -C server -f %s' % (privatekeyfile)
+                cmd = 'ssh-keygen -q -b 1024 -t dsa -N "" -C "LaBackup auto generated key at %s@%s" -f %s' % \
+                      (os.environ['USER'], os.environ['HOSTNAME'], privatekeyfile)
                 debug(cmd)
                 if os.system(cmd):
                     error('Failed to generate key %s, skipping client %s' % (privatekeyfile, cfg['id']))
