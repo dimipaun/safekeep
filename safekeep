@@ -535,6 +535,7 @@ def do_keys(cfgs, ids, display):
     matches = []
     for cfg in cfgs:
         if ids and cfg['id'] not in ids: continue
+        info('Handling keys for client: ' + cfg['id']) 
         matches.append(cfg['id'])
         if not cfg['host']:
             error('Client %d is local, it needs no keys' % cfg['id'])
@@ -557,9 +558,11 @@ def do_keys(cfgs, ids, display):
             print output
         else:
             cmd = 'ssh %s@%s "test -f .ssh/authorized_keys && cat .ssh/authorized_keys"' % (cfg['user'], cfg['host'])
+            debug(cmd)
             out = os.popen(cmd, 'r')
             authtext = out.read()
-            out.close()
+            if out.close():
+                warn('Failed to read the authorized_keys file for client: ' + cfg['id'])
             auth_keys = parse_authorized_keys(authtext)
             this_keys = parse_authorized_keys(output)
             new_keys = []
@@ -570,6 +573,7 @@ def do_keys(cfgs, ids, display):
                     new_keys.append(this_key)
             if new_keys:
                 cmd = 'ssh %s@%s "umask 077; test -d .ssh || mkdir .ssh; cat >> .ssh/authorized_keys"' % (cfg['user'], cfg['host'])
+                debug(cmd)
                 pipe = os.popen(cmd, 'w')
                 pipe.write('\n'.join(new_keys))
                 if pipe.close():
