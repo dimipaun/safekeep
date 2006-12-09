@@ -39,8 +39,11 @@ def log(msg, cls=None):
     if cutoff is None: cutoff = 3
     if is_client or verbosity_level >= cutoff:
         logbuf += msg
-        print msg
-        sys.stdout.flush()
+        if is_client:
+            print msg
+            sys.stdout.flush()
+        else:
+            print >> sys.stderr, msg
 
 def info_file(file):
     info('## File: ' + file)
