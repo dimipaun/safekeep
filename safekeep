@@ -145,11 +145,11 @@ def parse_config(backup_el, filename):
         key_data = host_el[0].getAttribute('key-data')
     else:
         host = user = key_ctrl = key_data = None
-    if host and user is None:
+    if host and not user:
         user = 'root'
-    if host and key_ctrl is None:
+    if host and not key_ctrl:
         key_ctrl = os.path.join(os.environ['HOME'], '.ssh', 'labackup_server_ctrl_key')
-    if host and key_data is None:
+    if host and not key_data:
         key_data = os.path.join(os.environ['HOME'], '.ssh', 'labackup_server_data_key')
 
     repo_el = backup_el.getElementsByTagName('repo')
@@ -185,7 +185,7 @@ def parse_config(backup_el, filename):
         cludes.append(parse_clude(child_el))
     cludes.append({ 'type' : 'exclude', 'path' : '', 'glob' : '', 'regexp' : '.*' })
 
-    return { 'id': id, 'host' : host, 'user' : user, 'key-ctrl' : key_ctrl, 'key-data' : key_data,
+    return { 'id': id, 'host' : host, 'user' : user, 'key_ctrl' : key_ctrl, 'key_data' : key_data,
              'dir' : dir, 'retention' : retention, 'dumps' : dumps, 'snaps' : snaps, 
              'cludes' : cludes}
 
@@ -537,6 +537,7 @@ def do_server(cfgs):
 def do_keys(cfgs, ids, display):
     matches = []
     for cfg in cfgs:
+        print cfg
         if ids and cfg['id'] not in ids: continue
         info('Handling keys for client: ' + cfg['id']) 
         matches.append(cfg['id'])
@@ -544,16 +545,27 @@ def do_keys(cfgs, ids, display):
             error('Client %d is local, it needs no keys' % cfg['id'])
             break 
         cmds = ['LaBackup --client', 'rdiff-backup --server --restrict-read-only /']
-        keyfiles = [cfg.get('key-ctrl'), cfg.get('key-data')]
+        privatekeyfiles = [cfg.get('key_ctrl'), cfg.get('key_data')]
         lines = []
-        for (cmd, keyfile) in zip(cmds, keyfiles):
-            if keyfile:
-                keyin = open(keyfile, 'r')
-                key = keyin.read()
-                keyin.close()
-            else:
-                key = 'NOT AVAILABLE'
-            line = 'command="%s",no-port-forwarding,no-X11-forwarding,no-pty %s' % (cmd, key)
+        for (cmd, privatekeyfile) in zip(cmds, privatekeyfiles):
+            publickeyfile = privatekeyfile + '.pub'
+            if not os.path.isfile(privatekeyfile):
+                if os.path.isfile(publickeyfile):
+                    error('Public key exists %s, but private key is missing. Skipping client' % publickey)
+                    break
+                info('Key do not exist, generating it now: ' + privatekeyfile)
+                cmd = 'ssh-keygen -q -b 1024 -t dsa -N "" -C server -f %s' % (privatekeyfile)
+                debug(cmd)
+                if os.system(cmd):
+                    error('Failed to generate key %s, skipping client %s' % (privatekeyfile, cfg['id']))
+                    break
+            if not os.path.isfile(publickeyfile):
+                error('Private key exists %s, but public key is missing. Skipping client' % privatekey)
+                break
+            fin = open(publickeyfile, 'r')
+            publickey = fin.read()
+            fin.close()
+            line = 'command="%s",no-port-forwarding,no-X11-forwarding,no-pty %s' % (cmd, publickey.strip())
             lines.append(line)
        
         output = '\n'.join(lines) 
