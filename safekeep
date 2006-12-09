@@ -138,14 +138,14 @@ def parse_config(backup_el, filename):
     if host_el:
         host = host_el[0].getAttribute('name')
         user = host_el[0].getAttribute('user')
-        key = host_el[0].getAttribute('key')
-        key2 = host_el[0].getAttribute('key2')
+        key_ctrl = host_el[0].getAttribute('key-ctrl')
+        key_data = host_el[0].getAttribute('key-data')
     else:
-        host = user = key = key2 = None
-    if host and key is None:
-        key = os.path.join(os.environ['HOME'], '.ssh', 'labackup_server_ctrl_key')
-    if host and key2 is None:
-        key2 = os.path.join(os.environ['HOME'], '.ssh', 'labackup_server_data_key')
+        host = user = key_ctrl = key_data = None
+    if host and key_ctrl is None:
+        key_ctrl = os.path.join(os.environ['HOME'], '.ssh', 'labackup_server_ctrl_key')
+    if host and key_data is None:
+        key_data = os.path.join(os.environ['HOME'], '.ssh', 'labackup_server_data_key')
 
     repo_el = backup_el.getElementsByTagName('repo')
     dir = None
@@ -180,7 +180,7 @@ def parse_config(backup_el, filename):
         cludes.append(parse_clude(child_el))
     cludes.append({ 'type' : 'exclude', 'path' : '', 'glob' : '', 'regexp' : '.*' })
 
-    return { 'id': id, 'host' : host, 'user' : user, 'key' : key, 'key2' : key2,
+    return { 'id': id, 'host' : host, 'user' : user, 'key-ctrl' : key_ctrl, 'key-data' : key_data,
              'dir' : dir, 'retention' : retention, 'dumps' : dumps, 'snaps' : snaps, 
              'cludes' : cludes}
 
@@ -444,8 +444,8 @@ def do_server_rdiff(cfg, bdir):
 
     if cfg['host']:
         schema = 'ssh -C'
-        if cfg['key2']:
-            schema += ' -i ' + cfg['key2']
+        if cfg['key-data']:
+            schema += ' -i ' + cfg['key-data']
         schema += ' %s rdiff-backup --server'
         args.extend(['--remote-schema', schema])
 
@@ -485,8 +485,8 @@ def do_server(cfgs):
 
         if cfg['host']:
             cmd = 'ssh -T'
-            if cfg['key']:
-                cmd += ' -i ' + cfg['key']
+            if cfg['key-ctrl']:
+                cmd += ' -i ' + cfg['key-ctrl']
             if cfg['user']:
                 cmd += ' -l ' + cfg['user']
             cmd += ' ' + cfg['host']
@@ -535,7 +535,7 @@ def do_keys(cfgs, id, display):
     for cfg in cfgs:
         if cfg['id'] != id: continue
         cmds = ['LaBackup --client', 'rdiff-backup --server --restrict-read-only /']
-        keyfiles = [cfg.get('key1'), cfg.get('key2')]
+        keyfiles = [cfg.get('key-ctrl'), cfg.get('key-data')]
         for (cmd, keyfile) in zip(cmds, keyfiles):
             if keyfile:
                 keyin = open(keyfile, 'r')

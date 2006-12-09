@@ -212,7 +212,7 @@ def remoteTest(client, server):
 
     cfg = """
         <backup id="test-client">
-          <host name="%s" user="root" key="%s" key2="%s" />
+          <host name="%s" user="root" key-ctrl="%s" key-data="%s" />
           <repo path="/home/backup-op/client/data" retention="10m"/>
           <data>
              <exclude glob="**/*.nobackup" />
