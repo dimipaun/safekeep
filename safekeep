@@ -142,6 +142,8 @@ def parse_config(backup_el, filename):
         key_data = host_el[0].getAttribute('key-data')
     else:
         host = user = key_ctrl = key_data = None
+    if host and user is None:
+        user = 'root'
     if host and key_ctrl is None:
         key_ctrl = os.path.join(os.environ['HOME'], '.ssh', 'labackup_server_ctrl_key')
     if host and key_data is None:
@@ -534,6 +536,9 @@ def do_keys(cfgs, id, display):
     host = os.environ['HOSTNAME']
     for cfg in cfgs:
         if cfg['id'] != id: continue
+        if not cfg['host']:
+            error('Client %d is local, it needs no keys' % cfg['id'])
+            break 
         cmds = ['LaBackup --client', 'rdiff-backup --server --restrict-read-only /']
         keyfiles = [cfg.get('key-ctrl'), cfg.get('key-data')]
         lines = []
@@ -551,10 +556,24 @@ def do_keys(cfgs, id, display):
         if display:
             print output
         else:
-            # FIXME: append the line to the .ssh/authorized_keys on the client
-            # echo "$line" | ssh $1 "umask 077; test -d .ssh || mkdir .ssh ; cat >> .ssh/authorized_keys" || exit 1
-            pass
-        break
+            cmd = 'ssh %s@%s "test -f .ssh/authorized_keys && cat .ssh/authorized_keys"' % (cfg['user'], cfg['host'])
+            out = os.popen(cmd, 'r')
+            authtext = out.read()
+            out.close()
+            auth_keys = parse_authorized_keys(authtext)
+            this_keys = parse_authorized_keys(output)
+            new_keys = []
+            for this_key in this_keys:
+                for auth_key in auth_keys:
+                    if this_key[2] == auth_key[2]: break
+                else:
+                    new_keys.append(this_key)
+            if new_keys:
+                cmd = 'ssh %s@%s "umask 077; test -d .ssh || mkdir .ssh; cat >> .ssh/authorized_keys"' % (cfg['user'], cfg['host'])
+                pipe = os.popen(cmd, 'w')
+                pipe.write('\n'.join(new_keys))
+                if pipe.close():
+                    error('Failed to deliver the keys to the client')
     else:
         error('No client with id \'%s\'' % id)
 
@@ -577,13 +596,15 @@ def usage():
     print '-m, --smtp=SMTP     SMTP server to use when sending mails (default: built-in SMTP)'
     print '--clientid=ID       manage the keys of client identified by ID (keys mode only)'
     print '--print             display the authorization keys (keys mode only)'
+    print '--deploy            deploy the authorization keys (keys mode only, default)'
     print '-q, --quiet         decreases the verbosity level'
     print '-v, --verbose       increases the verbosity level'
 
 def main():
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'C:e:hkm:scqvV', 
-                                   ['cfg=', 'email=', 'help', 'smtp=', 'server', 'client', 'keys', 'clientid=', 'print', 'quiet', 'verbose', 'version'])
+                                   ['cfg=', 'email=', 'help', 'smtp=', 'server', 'client', 'keys', 
+                                    'clientid=', 'print', 'deploy', 'quiet', 'verbose', 'version'])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -614,6 +635,8 @@ def main():
             clientid = a
         elif o in ('--print', ):
             display = True
+        elif o in ('--deploy', ):
+            display = False
         elif o in ('-q', '--quiet'):
             verbosity -= 1
         elif o in ('-v', '--verbose'):
