@@ -536,6 +536,7 @@ def do_keys(cfgs, id, display):
         if cfg['id'] != id: continue
         cmds = ['LaBackup --client', 'rdiff-backup --server --restrict-read-only /']
         keyfiles = [cfg.get('key-ctrl'), cfg.get('key-data')]
+        lines = []
         for (cmd, keyfile) in zip(cmds, keyfiles):
             if keyfile:
                 keyin = open(keyfile, 'r')
@@ -544,12 +545,15 @@ def do_keys(cfgs, id, display):
             else:
                 key = 'NOT AVAILABLE'
             line = '"command=%s",from=%s,no-port-forwarding,no-X11-forwarding,no-pty %s' % (cmd, host, key)
-            if display:
-                print line
-            else:
-                # FIXME: append the line to the .ssh/authorized_keys on the client
-                # echo "$line" | ssh $1 "umask 077; test -d .ssh || mkdir .ssh ; cat >> .ssh/authorized_keys" || exit 1
-                pass
+            lines.append(line)
+       
+        output = '\n'.join(line) 
+        if display:
+            print output
+        else:
+            # FIXME: append the line to the .ssh/authorized_keys on the client
+            # echo "$line" | ssh $1 "umask 077; test -d .ssh || mkdir .ssh ; cat >> .ssh/authorized_keys" || exit 1
+            pass
         break
     else:
         error('No client with id \'%s\'' % id)
