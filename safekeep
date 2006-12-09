@@ -531,11 +531,9 @@ def do_server(cfgs):
 
     debug('Server backup done')
 
-def do_keys(cfgs, id, display):
-    debug("Do server main loop")
-    host = os.environ['HOSTNAME']
+def do_keys(cfgs, ids, display):
     for cfg in cfgs:
-        if cfg['id'] != id: continue
+        if ids and cfg['id'] not in ids: continue
         if not cfg['host']:
             error('Client %d is local, it needs no keys' % cfg['id'])
             break 
@@ -583,6 +581,7 @@ def do_keys(cfgs, id, display):
 
 def usage():
     print 'usage: %s <mode> [options]' % (sys.argv[0])
+    print '       %s [-k|--keys] [--print|--deploy] [clientid1 [clientid2] ...]' % (sys.argv[0])
     print 'mode selection (pick one):'
     print '-s, --server        launch in server mode (default)'
     print '-c, --client        launch in client mode'
@@ -631,8 +630,6 @@ def main():
             mode = 'client'
         elif o in ('-k', '--keys'):
             mode = 'keys'
-        elif o in ('--clientid', ):
-            clientid = a
         elif o in ('--print', ):
             display = True
         elif o in ('--deploy', ):
@@ -662,7 +659,7 @@ def main():
         elif mode == 'keys':
             is_client = False
             verbosity_level = 1 + verbosity
-            do_keys(cfgs, clientid, display)
+            do_keys(cfgs, args, display)
         else:
             assert False, 'Unkown mode: ' + mode
     except Exception, ex:
