@@ -532,8 +532,10 @@ def do_server(cfgs):
     debug('Server backup done')
 
 def do_keys(cfgs, ids, display):
+    matches = []
     for cfg in cfgs:
         if ids and cfg['id'] not in ids: continue
+        matches.append(cfg['id'])
         if not cfg['host']:
             error('Client %d is local, it needs no keys' % cfg['id'])
             break 
@@ -550,7 +552,7 @@ def do_keys(cfgs, ids, display):
             line = 'command="%s",no-port-forwarding,no-X11-forwarding,no-pty %s' % (cmd, key)
             lines.append(line)
        
-        output = '\n'.join(line) 
+        output = '\n'.join(lines) 
         if display:
             print output
         else:
@@ -572,8 +574,10 @@ def do_keys(cfgs, ids, display):
                 pipe.write('\n'.join(new_keys))
                 if pipe.close():
                     error('Failed to deliver the keys to the client')
-    else:
-        error('No client with id \'%s\'' % id)
+
+    for id in ids:
+        if id not in matches:
+            error('No client with id \'%s\'' % id)
 
 ######################################################################
 # Main routine
