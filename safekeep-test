@@ -193,9 +193,9 @@ def takeOver(host, role):
     cmd = 'yum install -y LaBackup'
     #rcmd(cmd, 'root', host, 'install LaBackup')
 
-def createKey(user, host, keyname):
+def createKey(user, host, keyname, comment):
     key = '/home/%s/.ssh/%s' % (user, keyname)
-    cmd = 'test -f %s || ssh-keygen -q -b 1024 -t dsa -N \'\' -C server -f %s' % (key, key)
+    cmd = 'test -f %s || ssh-keygen -q -b 1024 -t dsa -N \'\' -C \'%s\' -f %s' % (key, comment, key)
     rcmd(cmd, user, host, 'create %s on server' % keyname)
     return key
 
@@ -207,8 +207,8 @@ def remoteTest(client, server):
           'cp /root/.ssh/authorized_keys .ssh/authorized_keys; ' + \
           'chown -R backup-op.backup-op .ssh'
     rcmd(cmd, 'root', server, 'install key for backup-op user')
-    key1 = createKey('backup-op', server, 'id-labackup-test-key1')
-    key2 = createKey('backup-op', server, 'id-labackup-test-key2')
+    key_ctrl = createKey('backup-op', server, 'id-labackup-ctrl-key', 'LaBackup server control key')
+    key_data = createKey('backup-op', server, 'id-labackup-data-key', 'LaBackup server data key')
 
     cfg = """
         <backup id="test-client">
@@ -220,7 +220,7 @@ def remoteTest(client, server):
              <include path="/var" />
           </data>
         </backup>
-        """ % (client, key1, key2)
+        """ % (client, key_ctrl, key_data)
 
     writefile('/etc/labackup/test-client.cfg', cfg, '664', 'w', 'root', server)
  
