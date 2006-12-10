@@ -566,7 +566,7 @@ def do_keys(cfgs, ids, display):
             fin = open(publickeyfile, 'r')
             publickey = fin.read()
             fin.close()
-            line = 'command="%s",no-port-forwarding,no-X11-forwarding,no-pty %s' % (cmd, publickey.strip())
+            line = 'command="%s",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty %s' % (cmd, publickey.strip())
             lines.append(line)
        
         output = '\n'.join(lines) 
@@ -598,6 +598,59 @@ def do_keys(cfgs, ids, display):
     for id in ids:
         if id not in matches:
             error('No client with id \'%s\'' % id)
+
+# parses authozied_keys, see sshd(8) man page for details
+def parse_authorized_keys(keystext):
+    keys = []
+    for line in keystext.splitlines():
+        line = line.strip()
+        if not line or line[0] == '#': continue
+        if line[0] in '0123456789':
+            warn('SSH Protocol 1 keys are ignored: %s' % line)
+            continue
+        opts =''
+        if line[0:7] not in ('ssh-dss', 'ssh-rsa'):
+            in_str = False
+            in_esc = False
+            for i, c in enumerate(line):
+                if in_str:
+                    if in_esc: in_esc = False
+                    elif c is '\'': in_esc = True
+                    elif c is '"': in_str = False
+                else:
+                    if c is ' ':
+                        rest = line[i:].strip()
+                        break
+                    elif c is '"': in_str = True
+                opts += c
+            else:
+                info('Invalid key line, ignoring: %s' % line)
+                continue
+        else:
+            rest = line
+
+        if rest[0] in '0123456789':
+            warn('SSH Protocol 1 keys are ignored: %s' % line)
+            continue
+
+        parts = rest.split(None, 2)
+        if len(parts) < 2:
+            error('Invalid key line, skipping: %s' % line)
+            continue
+
+        type = parts[0]
+        if type not in ('ssh-dss', 'ssh-rsa'):
+            error('Invalid key type "%s", skipping: %s' % (type, line))
+            continue
+
+        base46enc = parts[1]
+
+        if len(parts) is 2:
+            comment = None
+        else:
+            comment = parts[2]
+
+        keys.append((opts, type, base46enc, comment))
 
 ######################################################################
 # Main routine
