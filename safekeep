@@ -591,7 +591,7 @@ def do_keys(cfgs, ids, display):
                 cmd = 'ssh %s@%s "umask 077; test -d .ssh || mkdir .ssh; cat >> .ssh/authorized_keys"' % (cfg['user'], cfg['host'])
                 debug(cmd)
                 pipe = os.popen(cmd, 'w')
-                pipe.write('\n'.join(new_keys))
+                pipe.write('\n'.join([' '.join(key) for key in new_keys]))
                 if pipe.close():
                     error('Failed to deliver the keys to the client')
 
