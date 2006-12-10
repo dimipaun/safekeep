@@ -534,50 +534,61 @@ def do_server(cfgs):
 
     debug('Server backup done')
 
-def do_keys(cfgs, ids, display):
+def do_keys(cfgs, ids, action):
     matches = []
     for cfg in cfgs:
-        if ids and cfg['id'] not in ids: continue
-        info('Handling keys for client: ' + cfg['id']) 
-        matches.append(cfg['id'])
+        id = cfg['id']
+        if ids and id not in ids: continue
+        info('Handling keys for client: %s' % id) 
+        matches.append(id)
         if not cfg['host']:
-            error('Client %d is local, it needs no keys' % cfg['id'])
-            break 
+            info('%s: Client is local, it needs no keys' % id)
+            continue 
         cmds = ['LaBackup --client', 'rdiff-backup --server --restrict-read-only /']
         privatekeyfiles = [cfg.get('key_ctrl'), cfg.get('key_data')]
         lines = []
+        keys_ok = False
         for (cmd, privatekeyfile) in zip(cmds, privatekeyfiles):
             publickeyfile = privatekeyfile + '.pub'
             if not os.path.isfile(privatekeyfile):
                 if os.path.isfile(publickeyfile):
-                    error('Public key exists %s, but private key is missing. Skipping client' % publickey)
+                    error('%s: Public key exists %s, but private key is missing. Skipping client.' % (id, publickey))
                     break
-                info('Key do not exist, generating it now: ' + privatekeyfile)
-                cmd = 'ssh-keygen -q -b 1024 -t dsa -N "" -C "LaBackup auto generated key at %s@%s" -f %s' % \
-                      (os.environ['USER'], os.environ['HOSTNAME'], privatekeyfile)
-                debug(cmd)
-                if os.system(cmd):
-                    error('Failed to generate key %s, skipping client %s' % (privatekeyfile, cfg['id']))
+                if action is 'status':
+                    print '%s: Key do not exist: %. Will be generated.' % (id, privatekeyfile)
                     break
+                elif action is 'deploy':
+                    info('%s: Key do not exist, generating it now: %s' % (id, privatekeyfile))
+                    cmd = 'ssh-keygen -q -b 1024 -t dsa -N "" -C "LaBackup auto generated key at %s@%s" -f %s' % \
+                          (os.environ['USER'], os.environ['HOSTNAME'], privatekeyfile)
+                    debug(cmd)
+                    if os.system(cmd):
+                        error('%s: Failed to generate key %s. Skipping client.' % (id, privatekeyfile))
+                        break
             if not os.path.isfile(publickeyfile):
-                error('Private key exists %s, but public key is missing. Skipping client' % privatekey)
+                error('%s: Private key exists %s, but public key is missing. Skipping client.' % (id, privatekey))
                 break
             fin = open(publickeyfile, 'r')
             publickey = fin.read()
             fin.close()
             line = 'command="%s",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty %s' % (cmd, publickey.strip())
             lines.append(line)
-       
-        output = '\n'.join(lines) 
-        if display:
-            print output
         else:
+            keys_ok = True
+
+        if not keys_ok:
+            continue
+
+        output = '\n'.join(lines) 
+        if action is 'print':
+            print output
+        elif action in ('status', 'deploy'):
             cmd = 'ssh %s@%s "if test -f .ssh/authorized_keys; then cat .ssh/authorized_keys; fi"' % (cfg['user'], cfg['host'])
             debug(cmd)
             out = os.popen(cmd, 'r')
             authtext = out.read()
             if out.close():
-                warn('Failed to read the authorized_keys file for client: ' + cfg['id'])
+                warn('%s: Failed to read the authorized_keys file.' % id)
             auth_keys = parse_authorized_keys(authtext)
             this_keys = parse_authorized_keys(output)
             new_keys = []
@@ -586,13 +597,22 @@ def do_keys(cfgs, ids, display):
                     if this_key[2] == auth_key[2]: break
                 else:
                     new_keys.append(this_key)
-            if new_keys:
+            if not new_keys:
+                if action is 'status':
+                    print '%s: Client is up to date.' % id
+                continue
+
+            if action is 'deploy':
                 cmd = 'ssh %s@%s "umask 077; test -d .ssh || mkdir .ssh; cat >> .ssh/authorized_keys"' % (cfg['user'], cfg['host'])
                 debug(cmd)
                 pipe = os.popen(cmd, 'w')
                 pipe.write('\n'.join([key[4] for key in new_keys]))
                 if pipe.close():
                     error('Failed to deliver the keys to the client')
+            elif action is 'status':
+                print '%s: Keys will be deployed on the client.' % id
+        else:
+            assert False, 'Unknown action: %s' % action
 
     for id in ids:
         if id not in matches:
@@ -659,7 +679,7 @@ def parse_authorized_keys(keystext):
 
 def usage():
     print 'usage: %s <mode> [options]' % (sys.argv[0])
-    print '       %s [-k|--keys] [--print|--deploy] [clientid1 [clientid2] ...]' % (sys.argv[0])
+    print '       %s [-k|--keys] [--status|--print|--deploy] [clientid1 [clientid2] ...]' % (sys.argv[0])
     print 'mode selection (pick one):'
     print '-s, --server        launch in server mode (default)'
     print '-c, --client        launch in client mode'
@@ -672,8 +692,9 @@ def usage():
     print '-e, --email=EMAIL   send results by email (can appear multiple times)'
     print '-m, --smtp=SMTP     SMTP server to use when sending mails (default: built-in SMTP)'
     print '--clientid=ID       manage the keys of client identified by ID (keys mode only)'
+    print '--status            display the key status for the clients (keys mode only, default)'
     print '--print             display the authorization keys (keys mode only)'
-    print '--deploy            deploy the authorization keys (keys mode only, default)'
+    print '--deploy            deploy the authorization keys (keys mode only)'
     print '-q, --quiet         decreases the verbosity level'
     print '-v, --verbose       increases the verbosity level'
 
@@ -691,7 +712,7 @@ def main():
     cfglocs = []
     verbosity = 0
     clientid = None
-    display = None
+    action = None
     for o, a in opts:
         if o in ('-C', '--cfg'):
             cfglocs.append(a)
@@ -708,10 +729,12 @@ def main():
             mode = 'client'
         elif o in ('-k', '--keys'):
             mode = 'keys'
+        elif o in ('--status', ):
+            action = 'status'
         elif o in ('--print', ):
-            display = True
+            action = 'print'
         elif o in ('--deploy', ):
-            display = False
+            action = 'deploy'
         elif o in ('-q', '--quiet'):
             verbosity -= 1
         elif o in ('-v', '--verbose'):
@@ -737,7 +760,8 @@ def main():
         elif mode == 'keys':
             is_client = False
             verbosity_level = 1 + verbosity
-            do_keys(cfgs, args, display)
+            if not action: action = 'status'
+            do_keys(cfgs, args, action)
         else:
             assert False, 'Unkown mode: ' + mode
     except Exception, ex:
