@@ -652,6 +652,8 @@ def parse_authorized_keys(keystext):
 
         keys.append((opts, type, base46enc, comment))
 
+    return keys
+
 ######################################################################
 # Main routine
 ######################################################################
