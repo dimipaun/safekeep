@@ -573,7 +573,7 @@ def do_keys(cfgs, ids, display):
         if display:
             print output
         else:
-            cmd = 'ssh %s@%s "test -f .ssh/authorized_keys && cat .ssh/authorized_keys"' % (cfg['user'], cfg['host'])
+            cmd = 'ssh %s@%s "if test -f .ssh/authorized_keys; then cat .ssh/authorized_keys; fi"' % (cfg['user'], cfg['host'])
             debug(cmd)
             out = os.popen(cmd, 'r')
             authtext = out.read()
