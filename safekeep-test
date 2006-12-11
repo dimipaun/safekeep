@@ -306,12 +306,12 @@ def remoteTest(tmproot, client, server):
         )
         for file in FILES:
             augmentfile(file, 'root', client)
-        cmd1 = "cd /; (find /etc -type f; find /var -type f) | grep -v '\.nobackup$' | sort | xargs md5sum"
+        cmd1 = "cd /; (find /etc -type f; find /var -type f) | grep -v '\.nobackup$' | sort | sed s/.// | xargs md5sum"
         cmd2 = "cat > /home/backup-op/md5sum.client"
         rpipe(cmd1, 'root', client, 'do MD5 sums on client', cmd2, 'backup-op', server)
         cmd = 'LaBackup'
         rcmd(cmd, 'backup-op', server, 'backup data')
-        cmd = 'cd /home/backup-op/client/data; find -type f | sort | xargs md5sum > /home/backup-op/md5sum.server'
+        cmd = 'cd /home/backup-op/client/data; find -type f | sort | sed s/..// | xargs md5sum > /home/backup-op/md5sum.server'
         rcmd(cmd, 'backup-op', server, 'do MD5 sums on server')
         cmd = 'diff -q /home/backup-op/md5sum.client /home/backup-op/md5sum.server'
         rcmd(cmd, 'backup-op', server, 'compare MD5 sums')
