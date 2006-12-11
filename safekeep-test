@@ -185,7 +185,7 @@ def takeOver(host, role):
     cmd = 'echo "%s" > /etc/yum.repos.d/lattica.repo' % (mkarg(lattica_repo).strip())
     rcmd(cmd, 'root', host, 'install Lattica Repo')
     cmd = 'yum install -y LaBackup'
-    #rcmd(cmd, 'root', host, 'install LaBackup')
+    rcmd(cmd, 'root', host, 'install LaBackup')
 
 def createKey(user, host, keyname, comment):
     key = '/home/%s/.ssh/%s' % (user, keyname)
