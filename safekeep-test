@@ -301,7 +301,7 @@ def remoteTest(tmproot, client, server):
             '/var/log/LaBackup-test2.nobackup',
         )
         for file in FILES:
-            augmentfile(file, user, host)
+            augmentfile(file, 'root', client)
         cmd1 = "cd /; (find /etc -type f; find /var -type f) | grep -v '\.nobackup$' | sort | xargs md5sum"
         cmd2 = "cat > /home/backup-op/md5sum.client"
         rpipe(cmd1, 'root', client, 'do MD5 sums on client', cmd2, 'backup-op', server)
