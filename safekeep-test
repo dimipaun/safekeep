@@ -222,8 +222,6 @@ def remoteTest(client, server):
     takeOver(client, 'client')
 
     cmd = 'umask 077; test -d .ssh || mkdir .ssh'
-    # sometimes get rid of .ssh to test more code paths
-    if random.choice((True, False)): cmd = 'rm -rf .ssh; ' + cmd
     rcmd(cmd, 'root', client)
     key_id_enc = readfile('.ssh/id_dsa.pub', 'backup-op', server)
     writefile('.ssh/authorized_keys', key_id_enc, None, 'a', 'root', client)
