@@ -483,7 +483,8 @@ def do_server_data_cleanup(cfg):
 def do_server(cfgs):
     debug("Do server main loop")
     for cfg in cfgs:
-        if cfg['retention']:
+        rdiff_logdir = os.path.join(cfg['dir'], 'rdiff-backup-data')
+        if cfg['retention'] and os.path.isdir(rdiff_logdir):
             do_server_data_cleanup(cfg)
 
         debug('Do server backup [' + cfg['id'] + ']')
@@ -509,7 +510,6 @@ def do_server(cfgs):
         cin.flush()
         bdir = do_server_getanswer(cout)
 
-        rdiff_logdir = os.path.join(cfg['dir'], 'rdiff-backup-data')
         if os.path.isdir(rdiff_logdir):
             rdiff_logpre = os.listdir(rdiff_logdir)
         else:
