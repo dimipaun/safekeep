@@ -47,7 +47,7 @@ def rcmdin(cmd, content, user, host, desc=None):
     print ssh
     pipe = os.popen(ssh, 'w')
     pipe.write(content)
-    st = pipe.close():
+    st = pipe.close()
     if st and desc:
         raise TestFailure('Failed to %s for %s@%s' % (desc, user, host))
     return st
