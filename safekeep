@@ -449,8 +449,8 @@ def do_server_rdiff(cfg, bdir):
 
     if cfg['host']:
         schema = 'ssh -C'
-        if cfg['key-data']:
-            schema += ' -i ' + cfg['key-data']
+        if cfg['key_data']:
+            schema += ' -i ' + cfg['key_data']
         schema += ' %s rdiff-backup --server'
         args.extend(['--remote-schema', schema])
 
@@ -491,8 +491,8 @@ def do_server(cfgs):
 
         if cfg['host']:
             cmd = 'ssh -T'
-            if cfg['key-ctrl']:
-                cmd += ' -i ' + cfg['key-ctrl']
+            if cfg['key_ctrl']:
+                cmd += ' -i ' + cfg['key_ctrl']
             if cfg['user']:
                 cmd += ' -l ' + cfg['user']
             cmd += ' ' + cfg['host']
