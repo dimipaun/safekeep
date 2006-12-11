@@ -85,15 +85,10 @@ def writefile(file, content, perm=None, mode='w', user=None, host=None):
     """
     if host:
         if mode.startswith('a'):
-            redir = '>>'
+            cmd = 'cat >> %s' % mkarg(file)
         else:
-            redir = '>'
-        ssh = '%s %s@%s "cat %s %s"' % (mkssh(), user, host, redir, mkarg(file))
-        print ssh
-        pipe = os.popen(ssh, 'w')
-        pipe.write(content)
-        if pipe.close():
-            raise TestFailure('Failed to create %s@%s:%s' % (user, host, file))
+            cmd = 'cat > %s' % mkarg(file)
+        rcmdin(cmd, content, user, host, 'write file %s' % file)
         if perm != None:
             cmd = 'chmod %s %s' % (perm, file)
             rcmd(cmd, user, host, 'set file permissions for ' + file)
