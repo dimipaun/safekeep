@@ -182,7 +182,7 @@ def takeOver(host, role):
         gpgcheck=1
     """
     lattica_repo = '\n'.join([line.strip() for line in lattica_repo.splitlines()])
-    cmd = 'echo "%s" > /etc/yum.repos.d/lattica.repo' % (mkarg(lattica_repo).strip())
+    cmd = 'echo %s > /etc/yum.repos.d/lattica.repo' % (mkarg(lattica_repo).strip())
     rcmd(cmd, 'root', host, 'install Lattica Repo')
     cmd = 'yum install -y LaBackup'
     rcmd(cmd, 'root', host, 'install LaBackup')
