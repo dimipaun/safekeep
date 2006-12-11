@@ -193,8 +193,69 @@ def createKey(user, host, keyname, comment):
     rcmd(cmd, user, host, 'create %s on server' % keyname)
     return key
 
-def remoteTest(client, server):
+def packageAndUpload(pkgroot, keyname, repodir, user, host):
+    rpmmacros = """
+%%packager          LaBackup Tester Package Builder
+%%_topdir           %s
+%%_debug_package    %%{nil}
+
+%%_signature         gpg
+""" % (pkgroot)
+    writefile(os.path.join(pkgroot, '.rpmmacros'), rpmmacros)
+
+    # and the directories needed by rpmbuild
+    for dir in ('BUILD', 'RPMS/noarch', 'SOURCES', 'SPECS', 'SRPMS'):
+        os.makedirs(os.path.join(pkgroot, dir))
+
+    cmd = 'make tar'
+    if os.system(cmd):
+        raise TestFailure('Failed to build the tar snapshot')
+    files = os.listdir('.')
+    mytar = None
+    for file in files:
+        if file.startswith('LaBackup-') and file.endswith('.tar.gz'):
+            if file > mytar:
+                mytar = file # last one wins
+    if not mytar:
+        raise TestFailure('Failed to determine the tar name')
+
+    cmd = 'HOME=%s rpmbuild -ta %s' % (pkgroot, mytar)
+    print cmd
+    if os.system(cmd):
+        raise TestFailure('Failed to build the .rpm')
+
+    cmd = 'rm %s' % (mytar)
+    print cmd
+    if os.system(cmd):
+        raise TestFailure('Failed to nuke the tar')
+
+    basename = mytar[0:-len('.tar.gz')]
+    binrpm = os.path.join(pkgroot, 'RPMS/noarch', basename + '-1.noarch.rpm')
+    if not os.path.isfile(binrpm):
+        raise TestFailure('Failed to find binary rpm: %s' % binrpm)
+   
+    cmd = 'rpm --define %s --addsign %s' % (mkarg('_gpg_name ' + keyname), mkarg(binrpm))
+    print cmd
+    if os.system(cmd):
+        raise TestFailure('Failed to sign rpms')
+
+    cmd = '%s %s %s@%s:%s' % (mkssh('scp'), mkarg(binrpm), user, host, repodir)
+    print cmd
+    if os.system(cmd):
+        raise TestFailure('Failed to copy %s to the repository' % binrpm) 
+    
+    cmd = 'createrepo %s' % mkarg(repodir)
+    rcmd(cmd, user, host, 'update repo metadata') 
+
+def remoteTest(tmproot, client, server):
+    # build, sign and upload the .rpm
+    repodir = '/var/www/repos/lattica/yum/fedora/5/devel/i386'
+    packageAndUpload(tmproot, 'Lattica, Inc. (Devel Key) <devel@lattica.com>', repodir, 'root', 'achilles')
+
     takeOver(server, 'server')
+    takeOver(client, 'client')
+
+    # setup the server
     cmd = 'useradd backup-op || true'
     rcmd(cmd, 'root', server, 'create backup-op user')
     cmd = 'cd ~backup-op; umask 077; test -d .ssh || mkdir .ssh; ' + \
@@ -219,8 +280,7 @@ def remoteTest(client, server):
 
     writefile('/etc/labackup/test-client.cfg', cfg, '664', 'w', 'root', server)
  
-    takeOver(client, 'client')
-
+    # setup the client
     cmd = 'umask 077; test -d .ssh || mkdir .ssh; if test -f .ssh/authorized_keys; then cat .ssh/authorized_keys; fi'
     clkeys_txt = rcmdout(cmd, 'root', client, 'fetch client keys')
     key_id_enc = readfile('.ssh/id_dsa.pub', 'backup-op', server)
@@ -230,6 +290,7 @@ def remoteTest(client, server):
     cmd = 'LaBackup --keys --deploy'
     rcmd(cmd, 'backup-op', server)
 
+    # run the test
     for i in range(2):
         FILES = (
             '/etc/a-simple-file', 
@@ -324,7 +385,7 @@ def main():
                 if not ssh_id_file_keys:
                     ssh_id_file_keys = guess_ssh_id_file_keys()
                 assert ssh_id_file_keys, "Can not determine the SSH keys"
-                remoteTest(client, server)
+                remoteTest(tmproot, client, server)
             else:
                 localTest(tmproot)
         except TestFailure, tf:
