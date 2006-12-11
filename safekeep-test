@@ -281,7 +281,9 @@ def remoteTest(tmproot, client, server):
         """ % (client, key_ctrl, key_data)
 
     writefile('/etc/labackup/test-client.cfg', cfg, '664', 'w', 'root', server)
- 
+    cmd = 'mkdir -p client/data'
+    rcmd(cmd, 'backup-op', server, 'create data repo') 
+
     # setup the client
     cmd = 'umask 077; test -d .ssh || mkdir .ssh; if test -f .ssh/authorized_keys; then cat .ssh/authorized_keys; fi'
     clkeys_txt = rcmdout(cmd, 'root', client, 'fetch client keys')
@@ -290,10 +292,12 @@ def remoteTest(tmproot, client, server):
         writefile('.ssh/authorized_keys', key_id_enc, None, 'a', 'root', client)
 
     cmd = 'LaBackup --keys --deploy'
-    rcmd(cmd, 'backup-op', server)
+    rcmd(cmd, 'backup-op', server, 'deploy keys to client')
 
     # run the test
     for i in range(2):
+        cmd = 'rm -f md5sum.*'
+        rcmd(cmd, 'backup-op', server, 'cleanup MD5 sums')
         FILES = (
             '/etc/a-simple-file', 
             '/etc/another-file.nobackup', 
