@@ -167,20 +167,9 @@ def takeOver(host, role):
         print '         the box may be lost! Please make SURE this is'
         print '         the box you REALLY intend to use for the test.'
         print 'To cancel the test, type Ctrl-C'
-    exitingkeys = readfile('/root/.ssh/authorized_keys', 'root', host)
-    toaddkeys = ''
-    if exitingkeys:
-        ekl = exitingkeys.splitlines()
-        pkl = ssh_id_file_keys[1].splitlines()
-        nkl = []
-        for nk in pkl:
-            if nk not in ekl: nkl.append(nk)
-        toaddkeys = '\n'.join(nkl)
-    else:
-        toaddkeys = exitingkeys
-    cmd = 'umask 077; test -d .ssh || mkdir .ssh'
-    rcmd(cmd, 'root', host)
-    writefile('/root/.ssh/authorized_keys', toaddkeys, '600', 'a', 'root', host)
+        # add the key blindly to make sure we have it, and we are asked the passwd only once
+        cmd = 'umask 077; test -d .ssh || mkdir .ssh; cat >> .ssh/authorized_keys'
+        rcmdin(cmd, ssh_id_file_keys[1], 'root', host)
 
     cmd = 'rpm --import http://lattica.com/keys/RPM-GPG-KEY-lattica-devel'
     rcmd(cmd, 'root', host, 'install Lattica Devel Key')
