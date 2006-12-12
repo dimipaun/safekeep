@@ -22,7 +22,7 @@ help:
 	@echo "    rpm         Buidls snapshot binary and source RPMs"
 	@echo "    tar         Builds snapshot source distribution"
 	@echo "    test        Invokes a quick local test for LaBackup"
-	@echo "    testfull    Invokes a comprehensive remote test for LaBackup"
+	@echo "    fulltest    Invokes a comprehensive remote test for LaBackup"
 	@echo "    clean       Cleans up the source tree"
 
 info:
@@ -88,7 +88,7 @@ rpm-snapshot: tar-snapshot
 	rpmbuild -ta $(snapshotname).tar.gz
 
 test: test-local
-testfull: test-remote
+fulltest: test-remote
 
 test-local:
 	LaBackupTest --local
