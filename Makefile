@@ -56,14 +56,14 @@ tar: tar-snapshot
 tar-release:
 	cvs -Q -d '$(cvsroot)' export -d $(releasename) -r '$(tagname)' '$(cvsmodule)'
 	cat $(releasename)/LaBackup.spec.in | sed 's/^%define version.*/%define version $(version)/' > $(releasename)/LaBackup.spec
-	cat $(releasename)/debian/changelog.in | sed 's/^labackup.*/labackup ($(version)-1) unstable; urgency=low/' > $(releasename)/debian/changelog
+	cat $(releasename)/debian/changelog.in | sed 's/^LaBackup.*/LaBackup ($(version)-1) unstable; urgency=low/' > $(releasename)/debian/changelog
 	tar cz -f $(releasename).tar.gz $(releasename)
 	rm -rf $(releasename)
 
 tar-snapshot:
 	cvs -Q -d '$(cvsroot)' export -d $(snapshotname) -D '$(timestamp)' '$(cvsmodule)'
 	cat $(snapshotname)/LaBackup.spec.in | sed 's/^%define version.*/%define version $(version)+$(version_ts)/' > $(snapshotname)/LaBackup.spec
-	cat $(snapshotname)/debian/changelog.in | sed 's/^labackup.*/labackup ($(version)+$(version_ts)-1) unstable; urgency=low/' > $(snapshotname)/debian/changelog
+	cat $(snapshotname)/debian/changelog.in | sed 's/^LaBackup.*/LaBackup ($(version)+$(version_ts)-1) unstable; urgency=low/' > $(snapshotname)/debian/changelog
 	tar cz -f $(snapshotname).tar.gz $(snapshotname)
 	rm -rf $(snapshotname)
 

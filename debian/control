@@ -1,11 +1,11 @@
-Source: labackup
+Source: LaBackup
 Section: Applications/System
 Priority: optional
 Maintainer: Lattica, Inc.
 Build-Depends: debhelper (>= 4.0.0)
 Standards-Version: 3.6.2
 
-Package: labackup
+Package: LaBackup
 Architecture: all
 Depends: ${python:Depends}, rdiff-backup
 Description: Lattica's backup script

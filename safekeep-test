@@ -265,8 +265,8 @@ def remoteTest(tmproot, client, server):
           'chown -R backup-op.backup-op .ssh'
     rcmd(cmd, 'root', server, 'install key for backup-op user')
     key_id   = createKey('backup-op', server, 'id_dsa', 'LaBackup server ID')
-    key_ctrl = createKey('backup-op', server, 'id-labackup-ctrl-key', 'LaBackup server control key')
-    key_data = createKey('backup-op', server, 'id-labackup-data-key', 'LaBackup server data key')
+    key_ctrl = createKey('backup-op', server, 'id-LaBackup-ctrl-key', 'LaBackup server control key')
+    key_data = createKey('backup-op', server, 'id-LaBackup-data-key', 'LaBackup server data key')
 
     cfg = """
         <backup id="test-client">
@@ -281,7 +281,7 @@ def remoteTest(tmproot, client, server):
         </backup>
         """ % (client, key_ctrl, key_data)
 
-    writefile('/etc/labackup/test-client.cfg', cfg, '664', 'w', 'root', server)
+    writefile('/etc/LaBackup.d/test-client.cfg', cfg, '664', 'w', 'root', server)
     cmd = 'rm -rf client; mkdir -p client/data'
     rcmd(cmd, 'backup-op', server, 'create data repo') 
 
@@ -381,8 +381,8 @@ def main():
             usage()
             sys.exit()
 
-    if not client: client = 'labackup-test-client'
-    if not server: server = 'labackup-test-server'
+    if not client: client = 'LaBackup-test-client'
+    if not server: server = 'LaBackup-test-server'
 
     exitcode = 0
     tmproot = tempfile.mkdtemp()

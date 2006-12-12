@@ -12,9 +12,9 @@ install:
 	dh_clean -k
 	dh_installdirs
 
-	mkdir -p $(CURDIR)/debian/labackup/usr/bin
-	mkdir -p $(CURDIR)/debian/labackup/etc/labackup
-	install -m 755 LaBackup lbc-copy-id $(CURDIR)/debian/labackup/usr/bin
+	mkdir -p $(CURDIR)/debian/LaBackup/usr/bin
+	mkdir -p $(CURDIR)/debian/LaBackup/etc/LaBackup
+	install -m 755 LaBackup lbc-copy-id $(CURDIR)/debian/LaBackup/usr/bin
 
 binary-indep: install
 	dh_testdir
