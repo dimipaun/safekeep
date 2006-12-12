@@ -274,14 +274,15 @@ def remoteTest(tmproot, client, server):
           <repo path="/home/backup-op/client/data" retention="10m"/>
           <data>
              <exclude glob="**/*.nobackup" />
+             <exclude path="/etc/cups/certs" />
              <include path="/etc" />
-             <include path="/var" />
+             <include path="/srv" />
           </data>
         </backup>
         """ % (client, key_ctrl, key_data)
 
     writefile('/etc/labackup/test-client.cfg', cfg, '664', 'w', 'root', server)
-    cmd = 'mkdir -p client/data'
+    cmd = 'rm -rf client; mkdir -p client/data'
     rcmd(cmd, 'backup-op', server, 'create data repo') 
 
     # setup the client
@@ -301,17 +302,17 @@ def remoteTest(tmproot, client, server):
         FILES = (
             '/etc/a-simple-file', 
             '/etc/another-file.nobackup', 
-            '/var/log/LaBackup-test1.log', 
-            '/var/log/LaBackup-test2.nobackup',
+            '/srv/LaBackup-test1.log', 
+            '/srv/LaBackup-test2.nobackup',
         )
         for file in FILES:
             augmentfile(file, 'root', client)
-        cmd1 = "cd /; (find /etc -type f; find /var -type f) | grep -v '\.nobackup$' | sort | sed s/.// | xargs md5sum"
+        cmd1 = "cd /; (find /etc -type f; find /srv -type f) | grep -v '\.nobackup$' | grep -v '^/etc/cups/certs/' | sort | sed s/.// | xargs md5sum"
         cmd2 = "cat > /home/backup-op/md5sum.client"
         rpipe(cmd1, 'root', client, 'do MD5 sums on client', cmd2, 'backup-op', server)
         cmd = 'LaBackup'
         rcmd(cmd, 'backup-op', server, 'backup data')
-        cmd = 'cd /home/backup-op/client/data; find -type f | sort | sed s/..// | xargs md5sum > /home/backup-op/md5sum.server'
+        cmd = 'cd /home/backup-op/client/data; find -type f | grep -v rdiff-backup-data/ | sort | sed s/..// | xargs md5sum > /home/backup-op/md5sum.server'
         rcmd(cmd, 'backup-op', server, 'do MD5 sums on server')
         cmd = 'diff -q /home/backup-op/md5sum.client /home/backup-op/md5sum.server'
         rcmd(cmd, 'backup-op', server, 'compare MD5 sums')
