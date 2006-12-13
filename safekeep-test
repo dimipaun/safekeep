@@ -19,11 +19,13 @@ def mkssh(cmd='ssh'):
     return ' '.join(args)
 
 def rpipe(cmd, user, host, desc, cmd2, user2, host2):
-    ssh = '%s %s@%s %s' % (mkssh(), user, host, mkarg(cmd))
-    ssh2 = '%s %s@%s %s' % (mkssh(), user2, host2, mkarg(cmd2))
-    print ssh, '|', ssh2
-    pout = os.popen(ssh, 'r')
-    pin = os.popen(ssh2, 'w')
+    if host:
+        cmd = '%s %s@%s %s' % (mkssh(), user, host, mkarg(cmd))
+    if host2:
+        cmd2 = '%s %s@%s %s' % (mkssh(), user2, host2, mkarg(cmd2))
+    print cmd, '|', cmd2
+    pout = os.popen(cmd, 'r')
+    pin = os.popen(cmd2, 'w')
     for line in pout:
         pin.write(line)
     st1 = pout.close()
@@ -36,17 +38,19 @@ def rpipe(cmd, user, host, desc, cmd2, user2, host2):
     return st2
 
 def rcmd(cmd, user, host, desc=None):
-    ssh = '%s %s@%s %s' % (mkssh(), user, host, mkarg(cmd))
-    print ssh
-    st = os.system(ssh)
+    if host:
+        cmd = '%s %s@%s %s' % (mkssh(), user, host, mkarg(cmd))
+    print cmd
+    st = os.system(cmd)
     if desc and st:
         raise TestFailure('Failed to %s on host %s' % (desc, host))
     return st
 
 def rcmdin(cmd, content, user, host, desc=None):
-    ssh = '%s %s@%s %s' % (mkssh(), user, host, mkarg(cmd))
-    print ssh
-    pipe = os.popen(ssh, 'w')
+    if host:
+        cmd = '%s %s@%s %s' % (mkssh(), user, host, mkarg(cmd))
+    print cmd
+    pipe = os.popen(cmd, 'w')
     pipe.write(content)
     st = pipe.close()
     if st and desc:
@@ -54,9 +58,10 @@ def rcmdin(cmd, content, user, host, desc=None):
     return st
 
 def rcmdout(cmd, user, host, desc=None):
-    ssh = '%s %s@%s %s' % (mkssh(), user, host, mkarg(cmd))
-    print ssh
-    out = os.popen(ssh, 'r')
+    if host:
+        cmd = '%s %s@%s %s' % (mkssh(), user, host, mkarg(cmd))
+    print cmd
+    out = os.popen(cmd, 'r')
     try:
         return out.read()
     finally:
@@ -254,8 +259,8 @@ def remoteTest(tmproot, client, server):
     repodir = '/var/www/repos/lattica/yum/fedora/5/devel/i386'
     packageAndUpload(tmproot, 'Lattica, Inc. (Devel Key) <devel@lattica.com>', repodir, 'root', 'achilles')
 
-    takeOver(server, 'server')
     takeOver(client, 'client')
+    takeOver(server, 'server')
 
     # setup the server
     cmd = 'useradd backup-op || true'
