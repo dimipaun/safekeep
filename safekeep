@@ -483,6 +483,13 @@ def do_server_data_cleanup(cfg):
 def do_server(cfgs):
     debug("Do server main loop")
     for cfg in cfgs:
+        if cfg['key_ctrl'] and not os.path.isfile(cfg['key_ctrl']):
+            warn('Client %s missing ctrl key %s, skipping' % (cfg['id'], cfg['key_ctrl']))
+            continue
+        if cfg['key_data'] and not os.path.isfile(cfg['key_data']):
+            warn('Client %s missing data key %s, skipping' % (cfg['id'], cfg['key_data']))
+            continue
+
         rdiff_logdir = os.path.join(cfg['dir'], 'rdiff-backup-data')
         if cfg['retention'] and os.path.isdir(rdiff_logdir):
             do_server_data_cleanup(cfg)
