@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import getopt, os, os.path, shutil, sys
+import getopt, os, os.path, shutil, socket, sys
 import commands, random, time, tempfile, traceback
 from commands import mkarg
 
@@ -263,6 +263,11 @@ def remoteTest(tmproot, client, server):
     takeOver(server, 'server')
 
     # setup the server
+    client_addr = socket.gethostbyname(client)
+    if client_addr != client:
+        cmd = 'if ! grep -iq %s /etc/hosts; then echo "%s   %s" >> /etc/hosts; fi' % (client, client_addr, client)
+        rcmd(cmd, 'root', server, 'install the client name in /etc/hosts')
+
     cmd = 'useradd backup-op || true'
     rcmd(cmd, 'root', server, 'create backup-op user')
     cmd = 'cd ~backup-op; umask 077; test -d .ssh || mkdir .ssh; ' + \
@@ -272,6 +277,7 @@ def remoteTest(tmproot, client, server):
     key_id   = createKey('backup-op', server, 'id_dsa', 'LaBackup server ID')
     key_ctrl = createKey('backup-op', server, 'id-LaBackup-ctrl-key', 'LaBackup server control key')
     key_data = createKey('backup-op', server, 'id-LaBackup-data-key', 'LaBackup server data key')
+
     known_hosts = os.path.join(os.environ['HOME'], '.ssh', 'known_hosts')
     cmd = 'if test -f %s; then grep -i %s %s; fi' % (known_hosts, client, known_hosts)
     fingerprint = rcmdout(cmd, None, None, 'read the client fingerprint')
