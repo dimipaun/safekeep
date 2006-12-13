@@ -1,0 +1,24 @@
+
+Full Test
+~~~~~~~~~
+To run the full test simply invoke the target:
+  $ make fulltest
+
+However, to be able to run it successfully, you will need to
+prepare a few things in advance:
+  1. You need two boxes to act as a client and a server in the test.
+     It is highly recommended that you use some virtual images that
+     can suffer corruption, as the test will take control of them
+     and perform all necessary steps to accomplish the task.
+
+  2. Make sure you have the following names resolve to the IPs of 
+     the above mentioned boxes:
+                LaBackup-test-client
+                LaBackup-test-server
+     The easiest way to achive that is to have them in your /etc/hosts
+     files like this:
+192.168.4.128   LaBackup-test-client
+192.168.4.129   LaBackup-test-server
+	
+  3. At the moment, it is assumed that the VMs will run a RPM based
+     distro, preferably Fedora Core 5.
