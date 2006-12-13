@@ -297,6 +297,12 @@ def remoteTest(tmproot, client, server):
     if key_id_enc not in clkeys_txt.splitlines():
         writefile('.ssh/authorized_keys', key_id_enc, None, 'a', 'root', client)
 
+    known_hosts = os.path.join(os.environ['HOME'], '.ssh', 'known_hosts')
+    cmd = 'if test -f %s; then grep -i %s %s; fi' % (known_hosts, client, known_hosts)
+    fingerprint = rcmdout(cmd, None, None, 'read the client fingerprint')
+    if fingerprint:
+        cmd = 'if grep -qi LaBackup .ssh/known_hosts; then cat > /dev/null; else cat >> .ssh/known_hosts; fi'
+        rcmdin(cmd, fingerprint, 'backup-op', server, 'deploy client fingerprint on server')
     cmd = 'LaBackup --keys --deploy'
     rcmd(cmd, 'backup-op', server, 'deploy keys to client')
 
