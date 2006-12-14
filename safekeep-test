@@ -344,7 +344,7 @@ def remoteTest(tmproot, client, server):
 
     # run the test
     for i in range(2):
-        cmd = 'rm -f md5sum.*'
+        cmd = 'rm -f md5sum.client md5sum.server'
         rcmd(cmd, 'backup-op', server, 'cleanup MD5 sums')
         FILES = (
             '/etc/a-simple-file', 
