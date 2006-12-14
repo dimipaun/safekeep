@@ -308,7 +308,8 @@ def remoteTest(tmproot, client, server):
     cmd = 'if test -f %s; then grep -i %s %s; fi' % (known_hosts, client, known_hosts)
     fingerprint = rcmdout(cmd, None, None, 'read the client fingerprint')
     if fingerprint:
-        cmd = 'if grep -qi LaBackup .ssh/known_hosts; then cat > /dev/null; else cat >> .ssh/known_hosts; fi'
+        cmd = '(if test -f .ssh/known_hosts; then grep -iv %s %s .ssh/known_hosts; fi; cat) > .ssh/known_hosts.new; ' + \
+              'mv -f .ssh/known_hosts.new .ssh/known_hosts'
         rcmdin(cmd, fingerprint, 'backup-op', server, 'deploy client fingerprint on server')
 
     snap_cfg = ''
