@@ -363,7 +363,7 @@ def do_client_setup(cfg):
     do_client_dbdump(cfg)
 
     if len(cfg['snaps']) > 0:
-        bdir = tempfile.mkdtemp("", "lbc")
+        bdir = tempfile.mkdtemp("-rbind", "LaBackup-")
         ret = spawn(['mount', '--rbind', '/', bdir])
         if ret:
             warn('mount --rbind failed with %d, snapshotting will be disabled' % ret)
