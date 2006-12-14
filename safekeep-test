@@ -191,7 +191,7 @@ def takeOver(host, role):
     elif distro in ('Fedora', 'Fedora Core'):
         distro = 'fedora'
     else:
-        raise TestFailure('Unknown distro %s in release %s' % (distro, release)
+        raise TestFailure('Unknown distro %s in release %s' % (distro, release))
 
     lattica_repo = """
         [lattica-development]
