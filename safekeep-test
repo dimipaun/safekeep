@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import getopt, os, os.path, shutil, socket, sys
+import getopt, os, os.path, re, shutil, socket, sys
 import commands, random, time, tempfile, traceback
 from commands import mkarg
 
@@ -300,7 +300,7 @@ def remoteTest(tmproot, client, server):
     cmd = 'if ! rpm -q postgresql-server; then p=postgresql-server; fi; ' + \
           'if ! rpm -q mysql-server; then p="$p mysql-server"; fi; ' + \
           'if [ "x$p" != "x" ]; then yum install -y $p; fi; ' + \
-          'if service postgresql status | grep -v running; then service postgres start; fi; ' + \
+          'if service postgresql status | grep -v running; then service postgresql start; fi; ' + \
           'if service mysqld status | grep -v running; then service mysqld start; fi; '
     rcmd(cmd, 'root', server, 'ensure RDBMSes are installed and running')
    
