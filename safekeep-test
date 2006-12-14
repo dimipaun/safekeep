@@ -6,6 +6,7 @@ from commands import mkarg
 
 ssh_id_file_keys = None
 sign_packages = 0
+perform_snaphots = False
 
 class TestFailure(Exception):
     pass
@@ -292,10 +293,14 @@ def remoteTest(tmproot, client, server):
         cmd = 'if grep -qi LaBackup .ssh/known_hosts; then cat > /dev/null; else cat >> .ssh/known_hosts; fi'
         rcmdin(cmd, fingerprint, 'backup-op', server, 'deploy client fingerprint on server')
 
+    snap_cfg = ''
+    if perform_snaphots:
+        snap_cfg = '<snapshot device="/dev/mapper/VolGroup00-LogVol00" size="50M"/>'
     cfg = """
         <backup id="test-client">
           <host name="%s" user="root" key-ctrl="%s" key-data="%s" />
           <repo path="/home/backup-op/client/data" retention="10m"/>
+          %s
           <data>
              <exclude glob="**/*.nobackup" />
              <exclude path="/etc/cups/certs" />
@@ -303,7 +308,7 @@ def remoteTest(tmproot, client, server):
              <include path="/srv" />
           </data>
         </backup>
-        """ % (client, key_ctrl, key_data)
+        """ % (client, key_ctrl, key_data, snap_cfg)
 
     writefile('/etc/LaBackup.d/test-client.cfg', cfg, '664', 'w', 'root', server)
     cmd = 'rm -rf client; mkdir -p client/data'
@@ -343,7 +348,9 @@ def remoteTest(tmproot, client, server):
         
         # TODO: list available backups
         # TODO: compare against retention policy, fail if different
-        # TODO: check no snaps on client
+        if perform_snaphots:
+            cmd = 'if lvscan | grep _snap_; then false; fi'
+            rcmd(cmd, 'root', client, 'test that no snapshots are left behind')
         # TODO: check --rbind mounts on client
         # TODO: check iff appropriate DB dumps deleted
         time.sleep(1) 
