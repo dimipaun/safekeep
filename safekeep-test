@@ -6,7 +6,7 @@ from commands import mkarg
 
 ssh_id_file_keys = None
 sign_packages = 0
-perform_snaphots = False
+perform_snapshots = False
 
 class TestFailure(Exception):
     pass
@@ -313,7 +313,7 @@ def remoteTest(tmproot, client, server):
         rcmdin(cmd, fingerprint, 'backup-op', server, 'deploy client fingerprint on server')
 
     snap_cfg = ''
-    if perform_snaphots:
+    if perform_snapshots:
         snap_cfg = '<snapshot device="/dev/mapper/VolGroup00-LogVol00" size="50M"/>'
     cfg = """
         <backup id="test-client">
