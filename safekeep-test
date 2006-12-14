@@ -341,11 +341,11 @@ def remoteTest(tmproot, client, server):
         cmd = 'diff -q /home/backup-op/md5sum.client /home/backup-op/md5sum.server'
         rcmd(cmd, 'backup-op', server, 'compare MD5 sums')
         
-        # list available backups
-        # compare against retention policy, fail if different
-        # check no snaps on client
-        # check --rbind mounts on client
-        # check iff appropriate DB dumps deleted
+        # TODO: list available backups
+        # TODO: compare against retention policy, fail if different
+        # TODO: check no snaps on client
+        # TODO: check --rbind mounts on client
+        # TODO: check iff appropriate DB dumps deleted
         time.sleep(1) 
 
 def guess_ssh_id_file_keys():
