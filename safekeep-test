@@ -351,7 +351,8 @@ def remoteTest(tmproot, client, server):
         if perform_snaphots:
             cmd = 'if lvscan | grep _snap_; then false; fi'
             rcmd(cmd, 'root', client, 'test that no snapshots are left behind')
-        # TODO: check --rbind mounts on client
+        cmd = 'if grep 'LaBackup-.*-rbind' /proc/mounts; then false; fi'
+        rcmd(cmd, 'root', client, 'test that no --rbind mounts are left behind')
         # TODO: check iff appropriate DB dumps deleted
         time.sleep(1) 
 
