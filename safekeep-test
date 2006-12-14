@@ -180,14 +180,27 @@ def takeOver(host, role):
 
     cmd = 'rpm --import http://lattica.com/keys/RPM-GPG-KEY-lattica-devel'
     rcmd(cmd, 'root', host, 'install Lattica Devel Key')
+    cmd = 'cat /etc/redhat-release'
+    release = rcmdout(cmd, 'root', host, 'fetch the release')
+    res = re.match('\s*(.*) release (.*) \(.*\)\s*', release)
+    if not res:
+        raise TestFailure('Unknown release format for: %s' % release)
+    distro = res.group(1)
+    if distro in ('CentOS', ):
+        distro = 'centos'
+    elif distro in ('Fedora', 'Fedora Core'):
+        distro = 'fedora'
+    else:
+        raise TestFailure('Unknown distro %s in release %s' % (distro, release)
+
     lattica_repo = """
         [lattica-development]
         name=Lattica - Development Tree  for Fedora Core $releasever $basearch
-        baseurl=http://lattica.com/repos/lattica/yum/fedora/$releasever/devel/$basearch
+        baseurl=http://lattica.com/repos/lattica/yum/%s/$releasever/devel/$basearch
         gpgkey=http://lattica.com/keys/RPM-GPG-KEY-lattica-devel
         enabled=1
         gpgcheck=%s
-    """ % (sign_packages)
+    """ % (distro, sign_packages)
     lattica_repo = '\n'.join([line.strip() for line in lattica_repo.splitlines()])
     cmd = 'echo %s > /etc/yum.repos.d/lattica-development.repo' % (mkarg(lattica_repo).strip())
     rcmd(cmd, 'root', host, 'install Lattica Repo')
