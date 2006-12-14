@@ -213,7 +213,7 @@ def createKey(user, host, keyname, comment):
     rcmd(cmd, user, host, 'create %s on server' % keyname)
     return key
 
-def packageAndUpload(pkgroot, keyname, repodir, user, host):
+def packageAndUpload(pkgroot, keyname, repodirs, user, host):
     rpmmacros = """
 %%packager          LaBackup Tester Package Builder
 %%_topdir           %s
@@ -260,18 +260,23 @@ def packageAndUpload(pkgroot, keyname, repodir, user, host):
         if os.system(cmd):
             raise TestFailure('Failed to sign rpms')
 
-    cmd = '%s %s %s@%s:%s' % (mkssh('scp'), mkarg(binrpm), user, host, repodir)
-    print cmd
-    if os.system(cmd):
-        raise TestFailure('Failed to copy %s to the repository' % binrpm) 
+    for repodir in repodirs:
+        cmd = '%s %s %s@%s:%s' % (mkssh('scp'), mkarg(binrpm), user, host, repodir)
+        print cmd
+        if os.system(cmd):
+            raise TestFailure('Failed to copy %s to the repository' % binrpm) 
     
-    cmd = 'createrepo %s' % mkarg(repodir)
-    rcmd(cmd, user, host, 'update repo metadata') 
+        cmd = 'createrepo %s' % mkarg(repodir)
+        rcmd(cmd, user, host, 'update repo metadata') 
 
 def remoteTest(tmproot, client, server):
     # build, sign and upload the .rpm
-    repodir = '/var/www/repos/lattica/yum/fedora/5/devel/i386'
-    packageAndUpload(tmproot, 'Lattica, Inc. (Devel Key) <devel@lattica.com>', repodir, 'root', 'achilles')
+    repodirs = [
+        '/var/www/repos/lattica/yum/fedora/5/devel/i386',
+        '/var/www/repos/lattica/yum/fedora/6/devel/i386',
+        '/var/www/repos/lattica/yum/centos/4/devel/i386',
+    ]
+    packageAndUpload(tmproot, 'Lattica, Inc. (Devel Key) <devel@lattica.com>', repodirs, 'root', 'achilles')
 
     takeOver(client, 'client')
     takeOver(server, 'server')
