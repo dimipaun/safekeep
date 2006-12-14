@@ -279,11 +279,11 @@ def remoteTest(tmproot, client, server):
     key_ctrl = createKey('backup-op', server, 'LaBackup-server-ctrl-key', 'LaBackup server control key')
     key_data = createKey('backup-op', server, 'id-LaBackup-data-key', 'LaBackup server data key')
 
-    cmd = 'if ! rpm -q postgresql-server; then p=postgresql-server; fi; ' +
-          'if ! rpm -q mysql-server; then p="$p mysql-server"; fi; ' +
-          'if [ "x$p" != "x" ]; then yum install $p; fi' +
-          'if service postgresql status | grep -v running; then service postgres start; fi' +
-          'if service mysqld status | grep -v running; then service mysqld start; fi'
+    cmd = 'if ! rpm -q postgresql-server; then p=postgresql-server; fi; ' + \
+          'if ! rpm -q mysql-server; then p="$p mysql-server"; fi; ' + \
+          'if [ "x$p" != "x" ]; then yum install -y $p; fi; ' + \
+          'if service postgresql status | grep -v running; then service postgres start; fi; ' + \
+          'if service mysqld status | grep -v running; then service mysqld start; fi; '
     rcmd(cmd, 'root', server, 'ensure RDBMSes are installed and running')
    
     known_hosts = os.path.join(os.environ['HOME'], '.ssh', 'known_hosts')
@@ -350,7 +350,7 @@ def remoteTest(tmproot, client, server):
         # TODO: compare against retention policy, fail if different
         cmd = 'if lvscan | grep _snap_; then false; fi'
         rcmd(cmd, 'root', client, 'test that no snapshots are left behind')
-        cmd = 'if grep 'LaBackup-.*-rbind' /proc/mounts; then false; fi'
+        cmd = 'if grep "LaBackup-.*-rbind" /proc/mounts; then false; fi'
         rcmd(cmd, 'root', client, 'test that no --rbind mounts are left behind')
         # TODO: check iff appropriate DB dumps deleted
         time.sleep(1) 
