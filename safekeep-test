@@ -298,7 +298,7 @@ def remoteTest(tmproot, client, server):
         snap_cfg = '<snapshot device="/dev/mapper/VolGroup00-LogVol00" size="50M"/>'
     cfg = """
         <backup id="test-client">
-          <host name="%s" user="root" key-data="%s" />
+          <host name="%s" key-data="%s" />
           <repo path="/home/backup-op/client/data" retention="10m"/>
           %s
           <data>
