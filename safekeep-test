@@ -284,7 +284,7 @@ def remoteTest(tmproot, client, server):
     # setup the server
     client_addr = socket.gethostbyname(client)
     if client_addr != client:
-        cmd = 'if ! grep -iq %s /etc/hosts; then echo "%s   %s" >> /etc/hosts; fi' % (client, client_addr, client)
+        cmd = '(grep -iv %s /etc/hosts; echo "%s   %s") > /etc/hosts.new; mv -f /etc/hosts.new /etc/hosts' % (client, client_addr, client)
         rcmd(cmd, 'root', server, 'install the client name in /etc/hosts')
 
     cmd = 'useradd backup-op || true'
