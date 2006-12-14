@@ -276,7 +276,7 @@ def remoteTest(tmproot, client, server):
           'chown -R backup-op.backup-op .ssh'
     rcmd(cmd, 'root', server, 'install key for backup-op user')
     key_id   = createKey('backup-op', server, 'id_dsa', 'LaBackup server ID')
-    key_ctrl = createKey('backup-op', server, 'id-LaBackup-ctrl-key', 'LaBackup server control key')
+    key_ctrl = createKey('backup-op', server, 'LaBackup-server-ctrl-key', 'LaBackup server control key')
     key_data = createKey('backup-op', server, 'id-LaBackup-data-key', 'LaBackup server data key')
 
     cmd = 'if ! rpm -q postgresql-server; then p=postgresql-server; fi; ' +
@@ -298,7 +298,7 @@ def remoteTest(tmproot, client, server):
         snap_cfg = '<snapshot device="/dev/mapper/VolGroup00-LogVol00" size="50M"/>'
     cfg = """
         <backup id="test-client">
-          <host name="%s" user="root" key-ctrl="%s" key-data="%s" />
+          <host name="%s" user="root" key-data="%s" />
           <repo path="/home/backup-op/client/data" retention="10m"/>
           %s
           <data>
@@ -308,7 +308,7 @@ def remoteTest(tmproot, client, server):
              <include path="/srv" />
           </data>
         </backup>
-        """ % (client, key_ctrl, key_data, snap_cfg)
+        """ % (client, key_data, snap_cfg)
 
     writefile('/etc/LaBackup.d/test-client.cfg', cfg, '664', 'w', 'root', server)
     cmd = 'rm -rf client; mkdir -p client/data'
