@@ -448,10 +448,7 @@ def do_server_rdiff(cfg, bdir):
     args = ['rdiff-backup']
 
     if cfg['host']:
-        schema = 'ssh -C'
-        if cfg['key_data']:
-            schema += ' -i ' + cfg['key_data']
-        schema += ' %s rdiff-backup --server'
+        schema = 'ssh -C -i %s %%s rdiff-backup --server' % (cfg['key_data'])
         args.extend(['--remote-schema', schema])
 
     #args.extend([ '-v', '6'])
@@ -466,9 +463,7 @@ def do_server_rdiff(cfg, bdir):
 
     userhost = ''
     if cfg['host']:
-        if cfg['user']: 
-            userhost = cfg['user'] + '@'
-        userhost += cfg['host']
+        userhost = '%s@%s' % (cfg['user'], cfg['host'])
     args.extend([userhost + '::' + bdir, cfg['dir']])
     ret = spawn(args)
     if ret:
@@ -483,12 +478,13 @@ def do_server_data_cleanup(cfg):
 def do_server(cfgs):
     debug("Do server main loop")
     for cfg in cfgs:
-        if cfg['key_ctrl'] and not os.path.isfile(cfg['key_ctrl']):
-            warn('Client %s missing ctrl key %s, skipping' % (cfg['id'], cfg['key_ctrl']))
-            continue
-        if cfg['key_data'] and not os.path.isfile(cfg['key_data']):
-            warn('Client %s missing data key %s, skipping' % (cfg['id'], cfg['key_data']))
-            continue
+        if cfg['host']:
+            if not os.path.isfile(cfg['key_ctrl']):
+                warn('Client %(id)s missing ctrl key %(key_ctrl)s, skipping' % cfg)
+                continue
+            if not os.path.isfile(cfg['key_data']):
+                warn('Client %(id)s missing data key %(id)s, skipping' % cfg)
+                continue
 
         rdiff_logdir = os.path.join(cfg['dir'], 'rdiff-backup-data')
         if cfg['retention'] and os.path.isdir(rdiff_logdir):
@@ -497,12 +493,7 @@ def do_server(cfgs):
         debug('Do server backup [' + cfg['id'] + ']')
 
         if cfg['host']:
-            cmd = 'ssh -T'
-            if cfg['key_ctrl']:
-                cmd += ' -i ' + cfg['key_ctrl']
-            if cfg['user']:
-                cmd += ' -l ' + cfg['user']
-            cmd += ' ' + cfg['host']
+            cmd = 'ssh -T -i %(key_ctrl)s -l %(user)s %(host)s' % cfg
         else:
             cmd = 'LaBackup --client'
         debug('Run [' + cmd + ']')
