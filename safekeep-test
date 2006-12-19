@@ -327,6 +327,8 @@ def remoteTest(tmproot, client, server):
           <data>
              <exclude glob="**/*.nobackup" />
              <exclude path="/etc/cups/certs" />
+             <exclude path="/etc/lvm" />
+             <exclude path="/etc/mtab" />
              <include path="/etc" />
              <include path="/srv" />
           </data>
@@ -359,7 +361,10 @@ def remoteTest(tmproot, client, server):
         )
         for file in FILES:
             augmentfile(file, 'root', client)
-        cmd1 = "cd /; (find /etc -type f; find /srv -type f) | grep -v '\.nobackup$' | grep -v '^/etc/cups/certs/' | sort | sed s/.// | xargs md5sum"
+        cmd1 = "cd /; (find /etc -type f; find /srv -type f) | " + \
+               "grep -v '\.nobackup$' | grep -v '^/etc/cups/certs/' | " + \
+               "grep -v '^/etc/mtab' | grep -v '^/etc/lvm/' | " + \
+               "sort | sed s/.// | xargs md5sum"
         cmd2 = "cat > /home/backup-op/md5sum.client"
         rpipe(cmd1, 'root', client, 'do MD5 sums on client', cmd2, 'backup-op', server)
         cmd = 'LaBackup %s' % LaBackup_args
