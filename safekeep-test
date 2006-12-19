@@ -7,6 +7,7 @@ from commands import mkarg
 ssh_id_file_keys = None
 sign_packages = 0
 perform_snapshots = True
+LaBackup_args = ''
 test_reps=2
 
 class TestFailure(Exception):
@@ -117,7 +118,7 @@ def augmentfile(file, user=None, host=None):
     writefile(file, content, mode='a', user=user, host=host)
 
 def localTest(tmproot):
-    params = {'tmproot': tmproot}
+    params = {'tmproot': tmproot, 'args': LaBackup_args}
     os.mkdir(os.path.join(tmproot, 'client'))
     os.mkdir(os.path.join(tmproot, 'client', 'data'))
     os.mkdir(os.path.join(tmproot, 'client', 'home'))
@@ -148,7 +149,7 @@ def localTest(tmproot):
         cmd = "cd %(tmproot)s/client; find -type f -a \! -name '*.nobackup' | sort | xargs md5sum > %(tmproot)s/md5sums.client"
         if os.system(cmd % params):
             raise TestFailure("Can't compute the source MD5 sums")
-        cmd = "LaBackup --cfg '%(tmproot)s/test.cfg'"
+        cmd = "LaBackup %(args)s --cfg '%(tmproot)s/test.cfg'"
         if os.system(cmd % params):
             raise TestFailure("Can't backup files")
         os.mkdir(os.path.join(tmproot, 'restore'))
@@ -343,7 +344,7 @@ def remoteTest(tmproot, client, server):
     if key_id_enc not in clkeys_txt.splitlines():
         writefile('.ssh/authorized_keys', key_id_enc, None, 'a', 'root', client)
 
-    cmd = 'LaBackup --keys --deploy'
+    cmd = 'LaBackup %s --keys --deploy' % LaBackup_args
     rcmd(cmd, 'backup-op', server, 'deploy keys to client')
 
     # run the test
@@ -361,7 +362,7 @@ def remoteTest(tmproot, client, server):
         cmd1 = "cd /; (find /etc -type f; find /srv -type f) | grep -v '\.nobackup$' | grep -v '^/etc/cups/certs/' | sort | sed s/.// | xargs md5sum"
         cmd2 = "cat > /home/backup-op/md5sum.client"
         rpipe(cmd1, 'root', client, 'do MD5 sums on client', cmd2, 'backup-op', server)
-        cmd = 'LaBackup'
+        cmd = 'LaBackup %s' % LaBackup_args
         rcmd(cmd, 'backup-op', server, 'backup data')
         cmd = 'cd /home/backup-op/client/data; find -type f | grep -v rdiff-backup-data/ | sort | sed s/..// | xargs md5sum > /home/backup-op/md5sum.server'
         rcmd(cmd, 'backup-op', server, 'do MD5 sums on server')
@@ -402,6 +403,7 @@ def usage():
     print '-c,--client=ADDR      The client address (remote test only)'
     print '-s,--server=ADDR      The server address (remote test only)'
     print '--reps=N              The number of iterations for the test (default 2)'
+    print '--args=ARGS           Extra arguments to pass to LaBackup (default to none)'
     print '-h,--help             Print this help message and exit'
 
 def main():
@@ -409,7 +411,7 @@ def main():
     try:
         opts, args = getopt.getopt(sys.argv[1:], 
                                    'lrni:c:s:', 
-                                   ['local', 'remote', 'nocleanup', 'identity', 'reps=', 'client=', 'server='])
+                                   ['local', 'remote', 'nocleanup', 'identity', 'reps=', 'args=', 'client=', 'server='])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -434,6 +436,9 @@ def main():
         elif o in ('--reps', ):
             global test_reps
             test_reps = int(a)
+        elif o in ('--args', ):
+            global LaBackup_args
+            LaBackup_args = a
         elif o in ('-h', '--help'):
             usage()
             sys.exit()
