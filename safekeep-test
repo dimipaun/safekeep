@@ -7,6 +7,7 @@ from commands import mkarg
 ssh_id_file_keys = None
 sign_packages = 0
 perform_snapshots = True
+test_reps=2
 
 class TestFailure(Exception):
     pass
@@ -132,7 +133,7 @@ def localTest(tmproot):
         </backup>
     """
     writefile(os.path.join(tmproot, 'test.cfg'), CONFIG % params)
-    for i in range(2):
+    for i in xrange(test_reps):
         FILES = (
             'data/fileA.out', 
             'data/fileB.nobackup', 
@@ -346,7 +347,7 @@ def remoteTest(tmproot, client, server):
     rcmd(cmd, 'backup-op', server, 'deploy keys to client')
 
     # run the test
-    for i in range(2):
+    for i in range(test_reps):
         cmd = 'rm -f md5sum.client md5sum.server'
         rcmd(cmd, 'backup-op', server, 'cleanup MD5 sums')
         FILES = (
@@ -400,6 +401,7 @@ def usage():
     print '-i,--identity IDFILE  SSH identity file to use (remote test only)'
     print '-c,--client=ADDR      The client address (remote test only)'
     print '-s,--server=ADDR      The server address (remote test only)'
+    print '--reps=N              The number of iterations for the test (default 2)'
     print '-h,--help             Print this help message and exit'
 
 def main():
@@ -407,7 +409,7 @@ def main():
     try:
         opts, args = getopt.getopt(sys.argv[1:], 
                                    'lrni:c:s:', 
-                                   ['local', 'remote', 'nocleanup', 'identity', 'client=', 'server='])
+                                   ['local', 'remote', 'nocleanup', 'identity', 'reps=', 'client=', 'server='])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -429,6 +431,9 @@ def main():
             client = a
         elif o in ('-s', '--server'):
             server = a
+        elif o in ('--reps', ):
+            global test_reps
+            test_reps = int(a)
         elif o in ('-h', '--help'):
             usage()
             sys.exit()
