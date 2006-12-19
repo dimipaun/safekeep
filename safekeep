@@ -85,7 +85,7 @@ def is_temp_root(dir):
     return dir != '/'
 
 def reroot(root, path):
-    if root = '/': return path
+    if root == '/': return path
     if root.endswith('/'): root = root[:-1]
     if not path: return root
     if path.startswith('/'): return root + path
