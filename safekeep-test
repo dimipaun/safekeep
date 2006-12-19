@@ -6,7 +6,7 @@ from commands import mkarg
 
 ssh_id_file_keys = None
 sign_packages = 0
-perform_snapshots = False
+perform_snapshots = True
 
 class TestFailure(Exception):
     pass
@@ -318,8 +318,10 @@ def remoteTest(tmproot, client, server):
     cfg = """
         <backup id="test-client">
           <host name="%s" key-data="%s" />
-          <repo path="/home/backup-op/client/data" retention="10m"/>
-          %s
+          <repo path="/home/backup-op/client/data" retention="5h"/>
+          <setup>
+              %s
+          </setup>
           <data>
              <exclude glob="**/*.nobackup" />
              <exclude path="/etc/cups/certs" />
