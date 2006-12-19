@@ -84,6 +84,13 @@ def send_notification(email, smtp):
 def is_temp_root(dir):
     return dir != '/'
 
+def reroot(root, path):
+    if root = '/': return path
+    if root.endswith('/'): root = root[:-1]
+    if not path: return root
+    if path.startswith('/'): return root + path
+    return os.path.join(root, path)
+
 ######################################################################
 # Configuration file parser
 ######################################################################
@@ -455,9 +462,9 @@ def do_server_rdiff(cfg, bdir):
     for clude in cfg['cludes']:
         opt = '--' + clude['type']
         if clude['path']:
-            args.extend([opt, os.path.join(bdir, clude['path'])])
+            args.extend([opt, reroot(bdir, clude['path'])])
         if clude['glob']:
-            args.extend([opt, os.path.join(bdir, clude['glob'])])
+            args.extend([opt, reroot(bdir, clude['glob'])])
         if clude['regexp']:
             args.extend([opt + '-regexp', bdir + clude['regexp']])
 
