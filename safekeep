@@ -71,7 +71,7 @@ def spawn(args):
     (cout, cin) = popen2.popen4(args)
     cin.close()
     for line in cout:
-        info(line)
+        info(line.rstrip())
     cout.close()
 
 def send_notification(email, smtp):
