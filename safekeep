@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import getopt, os, os.path, sys, re
+import getopt, os, os.path, popen2, re, sys
 import commands, tempfile, traceback
 import xml.dom.minidom
 import socket, smtplib
@@ -68,7 +68,11 @@ def error(msg):
 
 def spawn(args):
     debug('Run [' + ' '.join(args) + ']')
-    return os.spawnvp(os.P_WAIT, args[0], args)
+    (cout, cin) = popen2.popen4(args)
+    cin.close()
+    for line in cout:
+        info(line)
+    cout.close()
 
 def send_notification(email, smtp):
     global logbuf
