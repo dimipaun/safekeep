@@ -269,8 +269,7 @@ def do_client_dbdump(cfg):
             args = [ 'su', '-c', cmd, '-', dump['user'] ]
         cmd = ' '.join([commands.mkarg(arg) for arg in args])
         cmd = '%s > %s' % (cmd, commands.mkarg(dump['file']))
-        debug('Run [' + cmd + ']')
-        ec = os.system(cmd)
+        ec = spawn(cmd)
         if ec:
             warn('Can not dump the database: ' + dump['db'])
 
