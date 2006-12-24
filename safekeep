@@ -355,7 +355,7 @@ def do_client_snap_teardown(cfg, bdir):
 def do_client_config(cmd):
     cfgStr = ''
 
-    cnt_str = cmd[cmd.index(':') + 1:].strip()
+    (cfg_cmd, cnt_str, dflt_id) = cmd.split(':', 2)
     for i in xrange(int(cnt_str)):
         line = sys.stdin.readline()
         if not line: raise ConfigException('Unexpected end of file')
@@ -363,7 +363,7 @@ def do_client_config(cmd):
 
     dom = xml.dom.minidom.parseString(cfgStr)
     try:
-        return parse_config(dom.documentElement, None)
+        return parse_config(dom.documentElement, dflt_id)
     finally:
         dom.unlink()
 
@@ -509,7 +509,7 @@ def do_server(cfgs):
         debug('Run [' + cmd + ']')
         (cin, cout) = os.popen4(cmd)
 
-        cin.write('CONFIG: %d\n' % (len(cfg['text'].splitlines())))
+        cin.write('CONFIG: %d: %s\n' % (len(cfg['text'].splitlines()), cfg['id']))
         cin.write(cfg['text'] + '\n')
         cin.flush()
         do_server_getanswer(cout)
