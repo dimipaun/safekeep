@@ -5,7 +5,7 @@ import commands, tempfile, traceback
 import xml.dom.minidom
 import socket, smtplib
 
-config_dir = '/etc/LaBackup.d'
+config_dir = '/etc/safekeep.d'
 config_ext = '.cfg'
 logbuf = []
 is_client = False
@@ -78,12 +78,12 @@ def spawn(args):
 def send_notification(email, smtp):
     global logbuf
     hostname = socket.gethostname()
-    msg = 'From: LaBackup@' + hostname + \
+    msg = 'From: SafeKeep@' + hostname + \
           '\r\nTo: ' + ', '.join(email) + \
-          '\r\nSubject: LaBackup results on ' + hostname + \
+          '\r\nSubject: SafeKeep results on ' + hostname + \
           '\r\n\r\n' + '\n'.join(logbuf)
     server = smtplib.SMTP(smtp)
-    server.sendmail('LaBackup@' + hostname, email, msg)
+    server.sendmail('SafeKeep@' + hostname, email, msg)
     server.quit()
 
 def is_temp_root(dir):
@@ -160,9 +160,9 @@ def parse_config(backup_el, filename):
     if host and not user:
         user = 'root'
     if host and not key_ctrl:
-        key_ctrl = os.path.join(os.environ['HOME'], '.ssh', 'LaBackup-server-ctrl-key')
+        key_ctrl = os.path.join(os.environ['HOME'], '.ssh', 'safekeep-server-ctrl-key')
     if host and not key_data:
-        key_data = os.path.join(os.environ['HOME'], '.ssh', 'LaBackup-server-data-key')
+        key_data = os.path.join(os.environ['HOME'], '.ssh', 'safekeep-server-data-key')
 
     repo_el = backup_el.getElementsByTagName('repo')
     dir = None
@@ -374,7 +374,7 @@ def do_client_setup(cfg):
     do_client_dbdump(cfg)
 
     if len(cfg['snaps']) > 0:
-        bdir = tempfile.mkdtemp("-rbind", "LaBackup-")
+        bdir = tempfile.mkdtemp("-rbind", "safekeep-")
         ret = spawn(['mount', '--rbind', '/', bdir])
         if ret:
             warn('mount --rbind failed with %d, snapshotting will be disabled' % ret)
@@ -519,7 +519,7 @@ def do_server(cfgs):
         if cfg['host']:
             cmd = 'ssh -T -i %(key_ctrl)s -l %(user)s %(host)s' % cfg
         else:
-            cmd = 'LaBackup --client'
+            cmd = 'safekeep --client'
         debug('Run [' + cmd + ']')
         (cin, cout) = os.popen4(cmd)
 
@@ -571,7 +571,7 @@ def do_keys(cfgs, ids, action):
         if not cfg['host']:
             info('%s: Client is local, it needs no keys' % id)
             continue 
-        cmds = ['LaBackup --client', 'rdiff-backup --server --restrict-read-only /']
+        cmds = ['safekeep --client', 'rdiff-backup --server --restrict-read-only /']
         privatekeyfiles = [cfg.get('key_ctrl'), cfg.get('key_data')]
         lines = []
         keys_ok = False
@@ -586,7 +586,7 @@ def do_keys(cfgs, ids, action):
                     break
                 elif action is 'deploy':
                     info('%s: Key do not exist, generating it now: %s' % (id, privatekeyfile))
-                    cmd = 'ssh-keygen -q -b 1024 -t dsa -N "" -C "LaBackup auto generated key at %s@%s" -f %s' % \
+                    cmd = 'ssh-keygen -q -b 1024 -t dsa -N "" -C "SafeKeep auto generated key at %s@%s" -f %s' % \
                           (os.environ['USER'], os.environ['HOSTNAME'], privatekeyfile)
                     debug(cmd)
                     if os.system(cmd):
@@ -767,7 +767,7 @@ def main():
         elif o in ('-v', '--verbose'):
             verbosity += 1
         elif o in ('-V', '--version'):
-            print 'LaBackup', VERSION
+            print 'safekeep', VERSION
             return
 
     if len(cfglocs) == 0:

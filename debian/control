@@ -1,13 +1,13 @@
-Source: LaBackup
+Source: safekeep
 Section: Applications/System
 Priority: optional
 Maintainer: Lattica, Inc.
 Build-Depends: debhelper (>= 4.0.0)
 Standards-Version: 3.6.2
 
-Package: LaBackup
+Package: safekeep
 Architecture: all
 Depends: ${python:Depends}, rdiff-backup
 Description: Lattica's backup script
-  LaBackup is a client/server backup script which enhances the
+  SafeKeep is a client/server backup script which enhances the
   power of rdiff-backup with simple configuration and use.

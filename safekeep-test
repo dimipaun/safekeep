@@ -7,7 +7,7 @@ from commands import mkarg
 ssh_id_file_keys = None
 sign_packages = 0
 perform_snapshots = True
-LaBackup_args = ''
+safekeep_args = ''
 test_reps=2
 
 class TestFailure(Exception):
@@ -118,7 +118,7 @@ def augmentfile(file, user=None, host=None):
     writefile(file, content, mode='a', user=user, host=host)
 
 def localTest(tmproot):
-    params = {'tmproot': tmproot, 'args': LaBackup_args}
+    params = {'tmproot': tmproot, 'args': safekeep_args}
     os.mkdir(os.path.join(tmproot, 'client'))
     os.mkdir(os.path.join(tmproot, 'client', 'data'))
     os.mkdir(os.path.join(tmproot, 'client', 'home'))
@@ -149,7 +149,7 @@ def localTest(tmproot):
         cmd = "cd %(tmproot)s/client; find -type f -a \! -name '*.nobackup' | sort | xargs md5sum > %(tmproot)s/md5sums.client"
         if os.system(cmd % params):
             raise TestFailure("Can't compute the source MD5 sums")
-        cmd = "LaBackup %(args)s --cfg '%(tmproot)s/test.cfg'"
+        cmd = "safekeep %(args)s --cfg '%(tmproot)s/test.cfg'"
         if os.system(cmd % params):
             raise TestFailure("Can't backup files")
         os.mkdir(os.path.join(tmproot, 'restore'))
@@ -169,7 +169,7 @@ def takeOver(host, role):
     cmd = 'ssh -o PasswordAuthentication=no root@%s true' % (host)
     if os.system(cmd): 
         print 'The box %s does not appear to have been initialized' % (host)
-        print 'for functioning as %s in a LaBackup remote test.' % (role)
+        print 'for functioning as %s in a SafeKeep remote test.' % (role)
         print 'If you want to use it in such a role, please enter the root'
         print 'password for the box so that the test can take over it.'
         print 'WARNING: the test is potentially dangereous, all data on'
@@ -206,8 +206,8 @@ def takeOver(host, role):
     lattica_repo = '\n'.join([line.strip() for line in lattica_repo.splitlines()])
     cmd = 'echo %s > /etc/yum.repos.d/lattica-development.repo' % (mkarg(lattica_repo).strip())
     rcmd(cmd, 'root', host, 'install Lattica Repo')
-    cmd = 'if rpm -q LaBackup; then rm -rf /var/cache/yum/lattica-development/; yum update -y LaBackup; else yum install -y LaBackup; fi'
-    rcmd(cmd, 'root', host, 'install LaBackup')
+    cmd = 'if rpm -q safekeep; then rm -rf /var/cache/yum/lattica-development/; yum update -y safekeep; else yum install -y safekeep; fi'
+    rcmd(cmd, 'root', host, 'install safekeep')
 
 def createKey(user, host, keyname, comment):
     key = '/home/%s/.ssh/%s' % (user, keyname)
@@ -217,7 +217,7 @@ def createKey(user, host, keyname, comment):
 
 def packageAndUpload(pkgroot, keyname, repodirs, user, host):
     rpmmacros = """
-%%packager          LaBackup Tester Package Builder
+%%packager          safekeep Tester Package Builder
 %%_topdir           %s
 %%_debug_package    %%{nil}
 
@@ -235,7 +235,7 @@ def packageAndUpload(pkgroot, keyname, repodirs, user, host):
     files = os.listdir('.')
     mytar = None
     for file in files:
-        if file.startswith('LaBackup-') and file.endswith('.tar.gz'):
+        if file.startswith('safekeep-') and file.endswith('.tar.gz'):
             if file > mytar:
                 mytar = file # last one wins
     if not mytar:
@@ -295,9 +295,9 @@ def remoteTest(tmproot, client, server):
           'cp /root/.ssh/authorized_keys .ssh/authorized_keys; ' + \
           'chown -R backup-op.backup-op .ssh'
     rcmd(cmd, 'root', server, 'install key for backup-op user')
-    key_id   = createKey('backup-op', server, 'id_dsa', 'LaBackup server ID')
-    key_ctrl = createKey('backup-op', server, 'LaBackup-server-ctrl-key', 'LaBackup server control key')
-    key_data = createKey('backup-op', server, 'id-LaBackup-data-key', 'LaBackup server data key')
+    key_id   = createKey('backup-op', server, 'id_dsa', 'SafeKeep server ID')
+    key_ctrl = createKey('backup-op', server, 'safekeep-server-ctrl-key', 'SafeKeep server control key')
+    key_data = createKey('backup-op', server, 'id-safekeep-data-key', 'SafeKeep server data key')
 
     cmd = 'if ! rpm -q postgresql-server; then p=postgresql-server; fi; ' + \
           'if ! rpm -q mysql-server; then p="$p mysql-server"; fi; ' + \
@@ -335,7 +335,7 @@ def remoteTest(tmproot, client, server):
         </backup>
         """ % (client, key_data, snap_cfg)
 
-    writefile('/etc/LaBackup.d/test-client.cfg', cfg, '664', 'w', 'root', server)
+    writefile('/etc/safekeep.d/test-client.cfg', cfg, '664', 'w', 'root', server)
     cmd = 'rm -rf client; mkdir -p client/data'
     rcmd(cmd, 'backup-op', server, 'create data repo') 
 
@@ -346,7 +346,7 @@ def remoteTest(tmproot, client, server):
     if key_id_enc not in clkeys_txt.splitlines():
         writefile('.ssh/authorized_keys', key_id_enc, None, 'a', 'root', client)
 
-    cmd = 'LaBackup %s --keys --deploy' % LaBackup_args
+    cmd = 'safekeep %s --keys --deploy' % safekeep_args
     rcmd(cmd, 'backup-op', server, 'deploy keys to client')
 
     # run the test
@@ -356,8 +356,8 @@ def remoteTest(tmproot, client, server):
         FILES = (
             '/etc/a-simple-file', 
             '/etc/another-file.nobackup', 
-            '/srv/LaBackup-test1.log', 
-            '/srv/LaBackup-test2.nobackup',
+            '/srv/safekeep-test1.log', 
+            '/srv/safekeep-test2.nobackup',
         )
         for file in FILES:
             augmentfile(file, 'root', client)
@@ -367,7 +367,7 @@ def remoteTest(tmproot, client, server):
                "sort | sed s/.// | xargs md5sum"
         cmd2 = "cat > /home/backup-op/md5sum.client"
         rpipe(cmd1, 'root', client, 'do MD5 sums on client', cmd2, 'backup-op', server)
-        cmd = 'LaBackup %s' % LaBackup_args
+        cmd = 'safekeep %s' % safekeep_args
         rcmd(cmd, 'backup-op', server, 'backup data')
         cmd = 'cd /home/backup-op/client/data; find -type f | grep -v rdiff-backup-data/ | sort | sed s/..// | xargs md5sum > /home/backup-op/md5sum.server'
         rcmd(cmd, 'backup-op', server, 'do MD5 sums on server')
@@ -378,7 +378,7 @@ def remoteTest(tmproot, client, server):
         # TODO: compare against retention policy, fail if different
         cmd = 'if lvscan | grep _snap_; then false; fi'
         rcmd(cmd, 'root', client, 'test that no snapshots are left behind')
-        cmd = 'if grep "LaBackup-.*-rbind" /proc/mounts; then false; fi'
+        cmd = 'if grep "safekeep-.*-rbind" /proc/mounts; then false; fi'
         rcmd(cmd, 'root', client, 'test that no --rbind mounts are left behind')
         # TODO: check iff appropriate DB dumps deleted
         time.sleep(1) 
@@ -408,7 +408,7 @@ def usage():
     print '-c,--client=ADDR      The client address (remote test only)'
     print '-s,--server=ADDR      The server address (remote test only)'
     print '--reps=N              The number of iterations for the test (default 2)'
-    print '--args=ARGS           Extra arguments to pass to LaBackup (default to none)'
+    print '--args=ARGS           Extra arguments to pass to SafeKeep (default to none)'
     print '-h,--help             Print this help message and exit'
 
 def main():
@@ -421,8 +421,8 @@ def main():
         usage()
         sys.exit(2)
 
-    client = os.environ.get('LABACKUP_TEST_CLIENT')
-    server = os.environ.get('LABACKUP_TEST_SERVER')
+    client = os.environ.get('SAFEKEEP_TEST_CLIENT')
+    server = os.environ.get('SAFEKEEP_TEST_SERVER')
     nocleanup = False
     mode = 'local'
     for o, a in opts:
@@ -442,14 +442,14 @@ def main():
             global test_reps
             test_reps = int(a)
         elif o in ('--args', ):
-            global LaBackup_args
-            LaBackup_args = a
+            global safekeep_args
+            safekeep_args = a
         elif o in ('-h', '--help'):
             usage()
             sys.exit()
 
-    if not client: client = 'LaBackup-test-client'
-    if not server: server = 'LaBackup-test-server'
+    if not client: client = 'safekeep-test-client'
+    if not server: server = 'safekeep-test-server'
 
     exitcode = 0
     tmproot = tempfile.mkdtemp()

@@ -13,12 +13,12 @@ prepare a few things in advance:
 
   2. Make sure you have the following names resolve to the IPs of 
      the above mentioned boxes:
-                LaBackup-test-client
-                LaBackup-test-server
+                safekeep-test-client
+                safekeep-test-server
      The easiest way to achive that is to have them in your /etc/hosts
      files like this:
-192.168.4.128   LaBackup-test-client
-192.168.4.129   LaBackup-test-server
+192.168.4.128   safekeep-test-client
+192.168.4.129   safekeep-test-server
 	
   3. At the moment, it is assumed that the VMs will run a RPM based
      distro, preferably Fedora Core 5.
