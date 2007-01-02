@@ -25,7 +25,7 @@ def send(msg):
 
 def log(msg, cls=None):
     global logbuf
-    if cls: 
+    if cls:
         if is_client: cls = cls.lower()
         msg = '%s: %s' % (cls, msg)
     else:
@@ -198,7 +198,7 @@ def parse_config(backup_el, filename):
     cludes.append({ 'type' : 'exclude', 'path' : '', 'glob' : '', 'regexp' : '.*' })
 
     return { 'id': id, 'host' : host, 'user' : user, 'key_ctrl' : key_ctrl, 'key_data' : key_data,
-             'dir' : dir, 'retention' : retention, 'dumps' : dumps, 'snaps' : snaps, 
+             'dir' : dir, 'retention' : retention, 'dumps' : dumps, 'snaps' : snaps,
              'cludes' : cludes}
 
 def parse_locs(cfglocs):
@@ -393,7 +393,7 @@ def do_client_setup(cfg):
 
 def do_client_cleanup(cfg, bdir):
     debug('Do cleanup of %s in %s' % (cfg['host'], bdir))
-    if is_temp_root(bdir): 
+    if is_temp_root(bdir):
         do_client_snap_teardown(cfg, bdir)
 
         ret = spawn(['umount', '-l', bdir])
@@ -541,7 +541,7 @@ def do_server(cfgs):
             rdiff_logpre = os.listdir(rdiff_logdir)
         else:
             rdiff_logpre = []
-    
+
         do_server_rdiff(cfg, bdir)
 
         if os.path.isdir(rdiff_logdir):
@@ -566,11 +566,11 @@ def do_keys(cfgs, ids, action):
     for cfg in cfgs:
         id = cfg['id']
         if ids and id not in ids: continue
-        info('Handling keys for client: %s' % id) 
+        info('Handling keys for client: %s' % id)
         matches.append(id)
         if not cfg['host']:
             info('%s: Client is local, it needs no keys' % id)
-            continue 
+            continue
         cmds = ['safekeep --client', 'rdiff-backup --server --restrict-read-only /']
         privatekeyfiles = [cfg.get('key_ctrl'), cfg.get('key_data')]
         lines = []
@@ -606,7 +606,7 @@ def do_keys(cfgs, ids, action):
         if not keys_ok:
             continue
 
-        output = '\n'.join(lines) 
+        output = '\n'.join(lines)
         if action is 'print':
             print output
         elif action in ('status', 'deploy'):
@@ -727,8 +727,8 @@ def usage():
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'C:e:hkm:scqvV', 
-                                   ['cfg=', 'email=', 'help', 'smtp=', 'server', 'client', 'keys', 
+        opts, args = getopt.getopt(sys.argv[1:], 'C:e:hkm:scqvV',
+                                   ['cfg=', 'email=', 'help', 'smtp=', 'server', 'client', 'keys',
                                     'clientid=', 'print', 'deploy', 'quiet', 'verbose', 'version'])
     except getopt.GetoptError:
         usage()
