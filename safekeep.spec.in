@@ -1,0 +1,45 @@
+%{!?python_sitelib: %define python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
+
+%define name    safekeep
+%define version TBD
+%define release 1
+
+Name:           %{name}
+Version:        %{version}
+Release:        %{release}%{?dist}
+Summary:        The SafeKeep backup system
+
+Group:          Applications/System
+License:        GPL
+URL:            http://safekeep.sourceforge.net
+Source0:        %{name}-%{version}.tar.gz
+BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+Prefix:         %{_prefix}
+
+BuildArch:      noarch
+
+Requires:	rdiff-backup
+Provides:	safekeep
+
+%description
+SafeKeep is a client/server backup script which enhances the
+power of rdiff-backup with simple configuration and use.
+
+%prep
+%setup -q
+
+%build
+
+%install
+install -m 755 safekeep "%{buildroot}%{_bindir}"
+
+%clean
+rm -rf "%{buildroot}"
+
+%files
+%defattr(-,root,root,-)
+%{_bindir}/safekeep
+%doc AUTHORS COPYING LICENSE README safekeep-test sample.cfg
+
+%changelog
+

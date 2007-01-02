@@ -15,10 +15,13 @@ install:
 	mkdir -p $(CURDIR)/debian/safekeep/usr/bin
 	mkdir -p $(CURDIR)/debian/safekeep/etc/safekeep.d
 
+	install -m 755 safekeep $(CURDIR)/debian/safekeep/usr/bin
+
 binary-indep: install
 	dh_testdir
 	dh_testroot
 	dh_installchangelogs
+	dh_installdocs
 	dh_compress
 	dh_fixperms
 	dh_pysupport

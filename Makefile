@@ -42,8 +42,6 @@ release: check-info commit-release tag-release rpm-release
 commit-release:
 	cvs ci -m "Release $(version) (tagged as $(tagname))"
 
-snapshot: rpm-snapshot
-
 tag-release:
 	cvs tag -c "$(tagname)"
 
@@ -53,41 +51,42 @@ check-info: info
 
 tar: tar-snapshot
 
-tar-release:
-	cvs -Q -d '$(cvsroot)' export -d $(releasename) -r '$(tagname)' '$(cvsmodule)'
-	cat $(releasename)/$(name).spec.in | sed 's/^%define version.*/%define version $(version)/' > $(releasename)/$(name).spec
-	cat $(releasename)/debian/changelog.in | sed 's/^safekeep.*/safekeep ($(version)-1) unstable; urgency=low/' > $(releasename)/debian/changelog
-	tar cz -f $(releasename).tar.gz $(releasename)
-	rm -rf $(releasename)
-
 tar-snapshot:
 	cvs -Q -d '$(cvsroot)' export -d $(snapshotname) -D '$(timestamp)' '$(cvsmodule)'
 	cat $(snapshotname)/$(name).spec.in | sed 's/^%define version.*/%define version $(version).$(version_ts)/' > $(snapshotname)/$(name).spec
-	cat $(snapshotname)/debian/changelog.in | sed 's/^safekeep.*/safekeep ($(version).$(version_ts)-1) unstable; urgency=low/' > $(snapshotname)/debian/changelog
+	cat $(snapshotname)/debian/changelog.in | sed 's/^safekeep.*/safekeep ($(version).$(version_ts)) unstable; urgency=low/' > $(snapshotname)/debian/changelog
 	tar cz -f $(snapshotname).tar.gz $(snapshotname)
 	rm -rf $(snapshotname)
 
-deb: deb-snapshot
+tar-release:
+	cvs -Q -d '$(cvsroot)' export -d $(releasename) -r '$(tagname)' '$(cvsmodule)'
+	cat $(releasename)/$(name).spec.in | sed 's/^%define version.*/%define version $(version)/' > $(releasename)/$(name).spec
+	cat $(releasename)/debian/changelog.in | sed 's/^safekeep.*/safekeep ($(version)) unstable; urgency=low/' > $(releasename)/debian/changelog
+	tar cz -f $(releasename).tar.gz $(releasename)
+	rm -rf $(releasename)
 
-deb-release: tar-release
-	tar xz -f $(releasename).tar.gz
-	cd $(releasename) && debuild --check-dirname-regex 'safekeep(-.*)?'
-	rm -rf $(releasename) $(releasename).tar.gz
+deb: deb-snapshot
 
 deb-snapshot: tar-snapshot
 	tar xz -f $(snapshotname).tar.gz
 	cd $(snapshotname) && debuild --check-dirname-regex 'safekeep(-.*)?'
 	rm -rf $(snapshotname) $(snapshotname).tar.gz
 
-rpm: rpm-snapshot
+deb-release: tar-release
+	tar xz -f $(releasename).tar.gz
+	cd $(releasename) && debuild --check-dirname-regex 'safekeep(-.*)?'
+	rm -rf $(releasename) $(releasename).tar.gz
 
-rpm-release: tar-release
-	rpmbuild -ta $(releasename).tar.gz
+rpm: rpm-snapshot
 
 rpm-snapshot: tar-snapshot
 	rpmbuild -ta $(snapshotname).tar.gz
 
+rpm-release: tar-release
+	rpmbuild -ta $(releasename).tar.gz
+
 test: test-local
+
 fulltest: test-remote
 
 test-local:
