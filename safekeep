@@ -728,8 +728,10 @@ def usage():
 def main():
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'C:e:hkm:scqvV',
-                                   ['cfg=', 'email=', 'help', 'smtp=', 'server', 'client', 'keys',
-                                    'clientid=', 'print', 'deploy', 'quiet', 'verbose', 'version'])
+                                   [ 'cfg=', 'client', 'clientid=', 'deploy',
+                                     'email=', 'help', 'keys', 'print',
+                                     'quiet', 'server', 'smtp=', 'status',
+                                     'verbose', 'version'])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
