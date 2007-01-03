@@ -33,7 +33,7 @@ The client/server protocol is versioned for forward/backward compatibility.
 The conversation starts with the server sending over it's protocol version,
 and the client replying with it's version:
   S: ALOHA: <server_protocol_version>, <server_software_version>
-  C: ALOHA: <client_protocol_version>, <client_software_version>
+  C: <client_protocol_version>, <client_software_version>
 
 For the time being the software version is ignored, being sent only for
 information purposes.
