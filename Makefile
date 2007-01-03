@@ -1,5 +1,6 @@
 name        := safekeep
 timestamp   := $(shell LANG=C date)
+timestamp_svn := $(shell date -u -d '$(timestamp)' '+%Y%m%dT%H%MZ')
 version_num := $(shell grep 'VERSION *=' safekeep | sed s'/[^"]*"\([^"].*\)".*/\1/')
 version_ts  := $(shell date -u -d '$(timestamp)' '+%Y%m%d%H%M')
 version     := $(version_num)
@@ -8,8 +9,7 @@ snapshotname:= $(name)-$(version).$(version_ts)
 tagname     := $(shell echo Release-$(releasename) | tr . _)
 dirname     := $(shell basename $(PWD))
 rpmroot     := $(shell grep '%_topdir' ~/.rpmmacros | sed 's/^[^ \t]*[ \t]*//')
-cvsroot     := $(shell cat CVS/Root)
-cvsmodule   := $(shell cat CVS/Repository)
+svnroot     := $(shell  LANG=C svn info |grep Root |cut -c 18-)
 
 all: help
 
@@ -32,18 +32,17 @@ info:
 	@echo "Timestamp      = $(timestamp)"
 	@echo "Tag            = $(tagname)"
 	@echo "RPM Root       = $(rpmroot)"
-	@echo "CVS Root       = $(cvsroot)"
-	@echo "CVS Module     = $(cvsmodule)"
+	@echo "SVN Root       = $(svnroot)"
 
 build:
 
 release: check-info commit-release tag-release rpm-release
 
 commit-release:
-	cvs ci -m "Release $(version) (tagged as $(tagname))"
+	svn ci -m "Release $(version) (tagged as $(tagname))"
 
 tag-release:
-	cvs tag -c "$(tagname)"
+	svn cp . $(svnroot)/safekeep/tags/$(tagname)
 
 check-info: info
 	@echo -n 'Is this information correct? (yes/No) '
@@ -52,14 +51,14 @@ check-info: info
 tar: tar-snapshot
 
 tar-snapshot:
-	cvs -Q -d '$(cvsroot)' export -d $(snapshotname) -D '$(timestamp)' '$(cvsmodule)'
+	svn export -r {'$(timestamp_svn)'} $(svnroot)/safekeep/trunk $(snapshotname)
 	cat $(snapshotname)/$(name).spec.in | sed 's/^%define version.*/%define version $(version).$(version_ts)/' > $(snapshotname)/$(name).spec
 	cat $(snapshotname)/debian/changelog.in | sed 's/^safekeep.*/safekeep ($(version).$(version_ts)) unstable; urgency=low/' > $(snapshotname)/debian/changelog
 	tar cz -f $(snapshotname).tar.gz $(snapshotname)
 	rm -rf $(snapshotname)
 
 tar-release:
-	cvs -Q -d '$(cvsroot)' export -d $(releasename) -r '$(tagname)' '$(cvsmodule)'
+	svn export $(svnroot)/safekeep/tags/$(tagname) $(snapshotname)
 	cat $(releasename)/$(name).spec.in | sed 's/^%define version.*/%define version $(version)/' > $(releasename)/$(name).spec
 	cat $(releasename)/debian/changelog.in | sed 's/^safekeep.*/safekeep ($(version)) unstable; urgency=low/' > $(releasename)/debian/changelog
 	tar cz -f $(releasename).tar.gz $(releasename)
