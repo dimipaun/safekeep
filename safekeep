@@ -579,21 +579,24 @@ def do_keys(cfgs, ids, action):
             publickeyfile = privatekeyfile + '.pub'
             if not os.path.isfile(privatekeyfile):
                 if os.path.isfile(publickeyfile):
-                    error('%s: Public key exists %s, but private key is missing. Skipping client.' % (id, publickey))
+                    error('%s: Public key exists %s, but private key is missing. Skipping client.' % (id, publickeyfile))
+                    break
+                if action is 'print':
+                    print '%s: Key do not exist: %s.' % (id, privatekeyfile)
                     break
                 if action is 'status':
-                    print '%s: Key do not exist: %. Will be generated.' % (id, privatekeyfile)
+                    print '%s: Key do not exist: %s. Will be generated.' % (id, privatekeyfile)
                     break
                 elif action is 'deploy':
                     info('%s: Key do not exist, generating it now: %s' % (id, privatekeyfile))
                     cmd = 'ssh-keygen -q -b 1024 -t dsa -N "" -C "SafeKeep auto generated key at %s@%s" -f %s' % \
-                          (os.environ['USER'], os.environ['HOSTNAME'], privatekeyfile)
+                          (os.getlogin(), os.uname()[1], privatekeyfile)
                     debug(cmd)
                     if os.system(cmd):
                         error('%s: Failed to generate key %s. Skipping client.' % (id, privatekeyfile))
                         break
             if not os.path.isfile(publickeyfile):
-                error('%s: Private key exists %s, but public key is missing. Skipping client.' % (id, privatekey))
+                error('%s: Private key exists %s, but public key is missing. Skipping client.' % (id, privatekeyfile))
                 break
             fin = open(publickeyfile, 'r')
             publickey = fin.read()
