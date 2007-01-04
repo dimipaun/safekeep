@@ -56,4 +56,3 @@ If the majors are the same, it may use the minor to invoke any optional
 features, or it will proceed as if they were the same. In that case, the
 other end must be able to handle the older protocol appropriately.
 
-
