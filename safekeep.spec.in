@@ -16,6 +16,7 @@ Prefix:         %{_prefix}
 
 BuildArch:      noarch
 
+BuildRequires:	xmlto, asciidoc > 6.0.3
 Requires:	rdiff-backup
 Provides:	safekeep
 
@@ -27,9 +28,11 @@ power of rdiff-backup with simple configuration and use.
 %setup -q
 
 %build
+make build
 
 %install
 install -m 755 safekeep "%{buildroot}%{_bindir}"
+install -m 755 doc/safekeep.1 "%{buildroot}%{_mandir}/man1/"
 
 %clean
 rm -rf "%{buildroot}"
@@ -37,6 +40,7 @@ rm -rf "%{buildroot}"
 %files
 %defattr(-,root,root,-)
 %{_bindir}/safekeep
+%{_mandir}/man1/safekeep.1*
 %doc AUTHORS COPYING LICENSE README safekeep-test sample.cfg
 
 %changelog

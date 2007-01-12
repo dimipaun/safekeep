@@ -721,7 +721,6 @@ def usage():
     print '-C, --cfg=FILE|DIR  use the given configuration file/directory'
     print '-e, --email=EMAIL   send results by email (can appear multiple times)'
     print '-m, --smtp=SMTP     SMTP server to use when sending mails (default: built-in SMTP)'
-    print '--clientid=ID       manage the keys of client identified by ID (keys mode only)'
     print '--status            display the key status for the clients (keys mode only, default)'
     print '--print             display the authorization keys (keys mode only)'
     print '--deploy            deploy the authorization keys (keys mode only)'

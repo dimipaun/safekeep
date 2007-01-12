@@ -35,6 +35,7 @@ info:
 	@echo "SVN Root       = $(svnroot)"
 
 build:
+	$(MAKE) -C doc build
 
 release: check-info commit-release tag-release rpm-release
 
@@ -95,5 +96,6 @@ test-remote:
 	safekeep-test --remote
 
 clean:
+	$(MAKE) -C doc clean
 	rm -rf `find -name "*.py[co]" -o -name "*~"```
 	rm -f $(name).spec debian/changelog

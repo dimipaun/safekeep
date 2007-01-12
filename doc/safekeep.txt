@@ -1,0 +1,171 @@
+safekeep(1)
+==========
+
+NAME
+----
+safekeep - Client/server backup script
+
+SYNOPSIS
+--------
+'safekeep' [-s] [-q] [-v] [-C file] [-e <email>] [-m <smtp>]
+
+'safekeep' -c
+
+'safekeep' -k [-q] [-v] [--status|--print|--deploy] <clientid>*
+
+'safekeep' -h | -V
+
+DESCRIPTION
+-----------
+SafeKeep is a client/server backup script which enhances the
+power of rdiff-backup with simple configuration and use.
+
+SafeKeep can work in server mode, client mode or SSH key management mode.
+
+In server mode, SafeKeep parses a set of configurations files which
+defines a set of backup clients. For each backup client, SafeKeep
+connects to the client host over SSH (using a public key authentification
+system previously set up using `safekeep -k --deploy`), and launches
+`safekeep --client` onto the client host. The client does the real backup
+and sends the data over SSH to the SafeKeep server which stores it in
+the specified location.
+
+In client mode, SafeKeep does a few setup steps, depending on the
+client configuration (database dump, LVM device snapshot), then backups
+the client data using `rdiff-backup`, and then cleanups the state
+(removes the database dumps, deactivates the LVM snapshots)
+
+Note that the client mode of SafeKeep should never be invoked manually,
+this mode is meant to be used only by the server mode of SafeKeep.
+
+The SSH key management mode is a helper mode for deploying or verifying
+the setup of the SSH authentification keys.
+
+Each mode accepts a few options as described below.
+
+OPTIONS
+-------
+-s, --server::
+	Selects the server mode (default)
+
+-c, --client::
+	Selects the client mode. This should never be invoked manually, the
+	clients are started automatically by the server on the client machines
+	using SSH.
+
+-k, --keys::
+	Selects the SSH key management mode
+
+-h, --help::
+	Selects the help mode, in which safekeep prints out the
+	online help and exits.
+
+-V, --version::
+	Selects the version mode, in which safekeep prints out the
+	version number and exits.
+
+-q, --quiet::
+	Decreases the verbosity level. Can be specified more than
+	once.
+
+-v, --verbose::
+	Increases the verbosity level. Can be specified more than
+	once.
+
+-C, --cfg=FILE|DIR::
+	Specifies the configuration file location.
+	This can be a single file (for a single client configuration)
+	or a directory containing several configuration files (one per
+	backup client)
+
+-e, --email=EMAIL::
+	In addition to writing the session logs
+	on the standard output, this parameter let the user specify
+	the mail address where the logs are to be send. Can be specified
+	more than once to send reports to multiple addresses.
+
+-m, --smtp=SMTP::
+	Specifies the SMTP server used for sending
+	mails when `-e` is used. Defaults to `localhost`.
+
+--status::
+	(key mode only) Display the key status for the clients.
+
+--print::
+	(key mode only) Display the authorization keys for the clients.
+
+--deploy::
+	(key mode only) Deploy the authorization keys on the clients.
+
+Configuration file
+------------------
+
+Each backup client is described by a configuration file in XML format of the
+following form:
+
+------------------------------------------------------------------------
+<!-- the client backup id -->
+<backup id="my.host.com primary backup">
+
+  <!-- the client backup host, the user under which the servers will connect,
+       the SSH keys used for launching "safekeep -c" and "rdiff-backup" -->
+  <host
+    name="localhost" user="guest"
+    key-ctrl="/home/dimi/.ssh/backup_id_dsa"
+    key-data="/home/dimi/.ssh/backup2_id_dsa"
+  />
+
+  <!-- location where the backuped data will be stored on the server
+       and for how long (s=sec, m=min, h=hours, D=days, W=weeks, M=months, or Y=years) -->
+  <repo
+    path="./tmp"
+    retention="10D"
+  />
+
+  <!-- settings for database dump and for volume snapshot -->
+  <setup>
+
+    <!-- database type ("postgres" or "mysql"), user with backup rights,
+         location of the dump file on the client host, and flag to remove
+	 or not the dump file after the backup is done -->
+    <dump
+      type="postgres"
+      db="dbname"
+      user="foobar"
+      file="/var/backup/dumps/mydata"
+      cleanup="true"
+    />
+
+    <!-- what volume is to be snapshoted (device location) and the size
+         of the snapshot (unallocated space must exist in the volume group) -->
+    <snapshot
+      device="/path/to/volume"
+      size="500M"
+    />
+
+  </setup>
+
+  <!-- data to be backuped -->
+  <data>
+    <!-- each type of tag can be present more than one time -->
+    <!-- if a database dump was created, it must be added in this section -->
+    <include path="/home"/>
+    <exclude path="/home/guest"/>
+
+    <include glob="**/important/"/>
+    <exclude glob="/home/*/tmp"/>
+
+    <include regexp=".*\.ogg"/>
+    <exclude regexp=".*\.mp3"/>
+  </data>
+</backup>
+------------------------------------------------------------------------
+
+See Also
+--------
+rdiff-backup(1)
+
+Author
+------
+Written by Dimi Paun <dimi@lattica.com> and Stelian Pop <stelian@lattica.com>.
+
