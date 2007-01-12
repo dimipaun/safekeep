@@ -16,9 +16,10 @@ install:
 
 	mkdir -p $(CURDIR)/debian/safekeep/usr/bin
 	mkdir -p $(CURDIR)/debian/safekeep/etc/safekeep.d
+	mkdir -p $(CURDIR)/debian/safekeep/usr/share/man/man1
 
 	install -m 755 safekeep $(CURDIR)/debian/safekeep/usr/bin
-	install -m 755 doc/safekeep.1 $(CURDIR)/debian/safekeep/usr/man/man1
+	install -m 755 doc/safekeep.1 $(CURDIR)/debian/safekeep/usr/share/man/man1
 
 binary-indep: install
 	dh_testdir
