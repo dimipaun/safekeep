@@ -31,6 +31,7 @@ power of rdiff-backup with simple configuration and use.
 make build
 
 %install
+install -d -m 755 "%{buildroot}%{_bindir}"
 install -m 755 safekeep "%{buildroot}%{_bindir}"
 install -m 755 doc/safekeep.1 "%{buildroot}%{_mandir}/man1/"
 
