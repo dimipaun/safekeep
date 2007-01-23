@@ -1,4 +1,10 @@
 
+Requirements
+~~~~~~~~~~~~
+  * rdiff-backup
+  * asciidoc
+  * xmlto
+
 Full Test
 ~~~~~~~~~
 To run the full test simply invoke the target:
