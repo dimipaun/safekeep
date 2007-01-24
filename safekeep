@@ -186,16 +186,28 @@ def parse_config(backup_el, filename):
             snaps.append(parse_snap(snap_el))
 
     data_el = backup_el.getElementsByTagName('data')
-
-    child_els = data_el[0].childNodes
-    cludes = []
-    for child_el in child_els:
-        if child_el.nodeType != child_el.ELEMENT_NODE:
-            continue
-        if child_el.tagName not in ('include', 'exclude'):
-            continue
-        cludes.append(parse_clude(child_el))
-    cludes.append({ 'type' : 'exclude', 'path' : '', 'glob' : '', 'regexp' : '.*' })
+    
+    if data_el:
+        child_els = data_el[0].childNodes
+        cludes = []
+        for child_el in child_els:
+            if child_el.nodeType != child_el.ELEMENT_NODE:
+                continue
+            if child_el.tagName not in ('include', 'exclude'):
+                continue
+            cludes.append(parse_clude(child_el))
+        cludes.append({ 'type' : 'exclude', 'path' : '', 'glob' : '', 'regexp' : '.*' })
+    else:
+        cludes = [
+            { 'type' : 'exclude', 'path' : '/dev/',   'glob' : None, 'regexp' : None },
+            { 'type' : 'exclude', 'path' : '/media/', 'glob' : None, 'regexp' : None },
+            { 'type' : 'exclude', 'path' : '/mnt/',   'glob' : None, 'regexp' : None },
+            { 'type' : 'exclude', 'path' : '/net/',   'glob' : None, 'regexp' : None },
+            { 'type' : 'exclude', 'path' : '/proc/',  'glob' : None, 'regexp' : None },
+            { 'type' : 'exclude', 'path' : '/sys/',   'glob' : None, 'regexp' : None },
+            { 'type' : 'exclude', 'path' : '/tmp/',   'glob' : None, 'regexp' : None },
+            { 'type' : 'include', 'path' : '/',       'glob' : None, 'regexp' : None },
+        ]
 
     return { 'id': id, 'host' : host, 'user' : user, 'key_ctrl' : key_ctrl, 'key_data' : key_data,
              'dir' : dir, 'retention' : retention, 'dumps' : dumps, 'snaps' : snaps,
