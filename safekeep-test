@@ -206,7 +206,7 @@ def takeOver(host, role):
     lattica_repo = '\n'.join([line.strip() for line in lattica_repo.splitlines()])
     cmd = 'echo %s > /etc/yum.repos.d/lattica-development.repo' % (mkarg(lattica_repo).strip())
     rcmd(cmd, 'root', host, 'install Lattica Repo')
-    cmd = 'if rpm -q safekeep; then rm -rf /var/cache/yum/lattica-development/; yum update -y safekeep; else yum install -y safekeep; fi'
+    cmd = 'rm -rf /var/cache/yum/lattica-development/; if rpm -q safekeep; then yum update -y safekeep; else yum install -y safekeep; fi'
     rcmd(cmd, 'root', host, 'install safekeep')
 
 def createKey(user, host, keyname, comment):
