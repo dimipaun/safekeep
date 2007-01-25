@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import getopt, os, os.path, popen2, re, sys
-import commands, tempfile, traceback
+import commands, tempfile, time, traceback
 import xml.dom.minidom
 import socket, smtplib
 
@@ -46,11 +46,16 @@ def log(msg, cls=None):
         else:
             print >> sys.stderr, msg
 
-def info_file(file):
+def info_file(file, marker=None):
     info('## File: ' + file)
     fin = open(file, 'r')
     try:
         for line in fin.readlines():
+            if marker:
+                if line.startswith(marker):
+                    marker = None
+                else:
+                    continue
             info(line.rstrip())
     finally:
         fin.close()
@@ -554,10 +559,16 @@ def do_server(cfgs):
         else:
             rdiff_logpre = []
 
+        backup_log = os.path.join(rdiff_logdir, 'backup.log')
+        if os.path.isfile(backup_log):
+            backup_marker = '=== Backup session on %s ===' % time.asctime()
+        else:
+            backup_marker = None
+
         do_server_rdiff(cfg, bdir)
 
         if os.path.isdir(rdiff_logdir):
-            info_file(os.path.join(rdiff_logdir, 'backup.log'))
+            info_file(backup_log, backup_marker)
             rdiff_logpost = os.listdir(rdiff_logdir)
             for lfn in rdiff_logpost:
                 if lfn.startswith('session_statistics.') and lfn.endswith('.data') and lfn not in rdiff_logpre:
