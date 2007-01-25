@@ -278,7 +278,7 @@ def remoteTest(tmproot, client, server):
         '/var/www/repos/lattica/yum/fedora/6/devel/i386',
         '/var/www/repos/lattica/yum/centos/4/devel/i386',
     ]
-    packageAndUpload(tmproot, 'Lattica, Inc. (Devel Key) <devel@lattica.com>', repodirs, 'root', 'achilles')
+    packageAndUpload(tmproot, 'Lattica, Inc. (Devel Key) <devel@lattica.com>', repodirs, 'root', 'ulysses')
 
     takeOver(client, 'client')
     takeOver(server, 'server')
