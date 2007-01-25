@@ -612,10 +612,10 @@ def do_keys(cfgs, ids, action):
                     break
                 elif action is 'deploy':
                     info('%s: Key do not exist, generating it now: %s' % (id, privatekeyfile))
-                    cmd = 'ssh-keygen -q -b 1024 -t dsa -N "" -C "SafeKeep auto generated key at %s@%s" -f %s' % \
+                    gencmd = 'ssh-keygen -q -b 1024 -t dsa -N "" -C "SafeKeep auto generated key at %s@%s" -f %s' % \
                           (os.getlogin(), os.uname()[1], privatekeyfile)
-                    debug(cmd)
-                    if os.system(cmd):
+                    debug(gencmd)
+                    if os.system(gencmd):
                         error('%s: Failed to generate key %s. Skipping client.' % (id, privatekeyfile))
                         break
             if not os.path.isfile(publickeyfile):
