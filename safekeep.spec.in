@@ -45,7 +45,7 @@ rm -rf "%{buildroot}"
 %dir %{_sysconfdir}/safekeep.d
 %{_bindir}/safekeep
 %{_mandir}/man1/safekeep.1*
-%doc AUTHORS COPYING LICENSE README safekeep-test sample.cfg
+%doc AUTHORS COPYING LICENSE README safekeep-test sample.conf
 
 %changelog
 
