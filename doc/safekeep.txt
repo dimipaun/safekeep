@@ -116,77 +116,70 @@ KEYS OPTIONS
 --deploy::
 	Deploy the authorization keys on the clients.
 
-
 CONFIGURATION
 -------------
 
-Each backup client is described by a configuration file in XML format of the
-following form:
-
+Normally the configuration files are placed in the `/etc/safekeep.d/` directory
+from where they will get picked up automatically by SafeKeep. Each backup
+client is described by a configuration file in XML format. The minimum 
+configuration file is:
 ------------------------------------------------------------------------
-<!-- the client backup id -->
-<backup id="my_workstation">
+<backup>
+  <host name="my_workstation" />
+</backup>
+------------------------------------------------------------------------
+This will simply backup all relevant files (excluding temporary files,
+caches, etc) from the client with the address `my_workstation`.
 
-  <!-- the client backup host, the user under which the servers will connect,
-       the SSH keys used for launching "safekeep --client" and "rdiff-backup" -->
-  <host
-    name="my_workstation.corp.com" user="root"
-    key-ctrl="/home/jdoe/.ssh/backup_id_dsa"
-    key-data="/home/jdoe/.ssh/backup2_id_dsa"
-  />
-
-  <!-- location where the backuped data will be stored on the server
-       and for how long (s=sec, m=min, h=hours, D=days, W=weeks, M=months, or Y=years) -->
-  <repo
-    path="./data"
-    retention="10D"
-  />
-
-  <!-- settings for database dump and for volume snapshot -->
+A more realistic example:
+------------------------------------------------------------------------
+<backup>
+  <host name="my_workstation" />
+  <repo retention="10D" />
   <setup>
-
-    <!-- database type ("postgres" or "mysql"), user with backup rights,
-         location of the dump file on the client host, and flag to remove
-	 or not the dump file after the backup is done -->
-    <dump
-      type="postgres"
-      db="dbname"
-      user="foobar"
-      file="/var/backup/dumps/mydata"
-      cleanup="true"
-    />
-
-    <!-- what volume is to be snapshoted (device location) and the size
-         of the snapshot (unallocated space must exist in the volume group) -->
-    <snapshot
-      device="/path/to/volume"
-      size="500M"
-    />
-
+      <dump type="postgres" user="postgres" file="/var/lib/pgsql/backups/all_dbs" />
+      <snapshot device="/dev/mapper/VolGroup00-LogVol00" size="500M" />
   </setup>
 
-  <!-- data to be backuped -->
   <data>
-    <!-- each type of tag can be present more than one time -->
-    <!-- if a database dump was created, it must be added in this section -->
-    <include path="/home"/>
-    <exclude path="/home/guest"/>
-
-    <include glob="**/important/"/>
-    <exclude glob="/home/*/tmp"/>
-
-    <include regexp=".*\.ogg"/>
+    <exclude regexp=".*\.ogg"/>
     <exclude regexp=".*\.mp3"/>
+
+    <include path="/etc"/>
+
+    <exclude glob="/home/*/tmp"/>
+    <include path="/home"/>
+
+    <include path="/root"/>
+
+    <include path="/srv"/>
+
+    <exclude path="/var/cache"/>
+    <exclude path="/var/lock"/>
+    <exclude path="/var/run"/>
+    <exclude path="/var/tmp"/>
+    <include path="/var"/>
   </data>
 </backup>
 ------------------------------------------------------------------------
+In this case, SafeKeep will dump all databases managed by PostgreSQL,
+snapshot the disk via LVM, and proceed to backup `/etc`, `/home`,
+`/root`, `/srv`, `/var`, while excluding some unneeded files and
+directories. Older data will be retained for 10 days.
 
-Normally the configuration files are placed in the `/etc/safekeep.d/` directory
-from where they will get picked up automatically by SafeKeep.
+For full reference documentation of the configuration format, see
+safekeep.conf(5).
+
+CLIENT IDS
+----------
+Normally the client IDs are generated automatically from the configuration
+filenames without the extension. E.g. if a configuration file is named
+`my_workstation.conf`, the client ID becomes `my_workstation`. For more
+information on this topic, see safekeep.conf(5).
 
 SEE ALSO
 --------
-rdiff-backup(1)
+rdiff-backup(1), safekeep.conf(5)
 
 AUTHOR
 ------
