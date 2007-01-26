@@ -152,11 +152,11 @@ def parse_clude(clude_el):
         raise ConfigException('Empty ' + clude_el.tagName)
     return { 'type' : clude_el.tagName, 'path' : path, 'glob' : glob, 'regexp' : regexp }
 
-def parse_config(backup_el, filename):
+def parse_config(backup_el, dflt_id):
     if backup_el.tagName != 'backup':
         raise ConfigException('Invalid config file, the top level element must be <backup>')
     id = backup_el.getAttribute('id')
-    if not id: id = filename
+    if not id: id = dflt_id
 
     host_el = backup_el.getElementsByTagName('host')
     if host_el:
