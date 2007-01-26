@@ -243,7 +243,7 @@ def parse_locs(cfglocs):
         else:
             print >> sys.stderr, 'Inaccessible configuration, ignoring:', cfg
 
-    cfgs = []
+    cfgs = {}
     for filepath in cfgfiles:
         filename = os.path.splitext(os.path.basename(filepath))[0]
 
@@ -257,7 +257,7 @@ def parse_locs(cfglocs):
         finally:
             dom.unlink()
         cfg['text'] = cfg_str
-        cfgs.append(cfg)
+        cfgs[cfg['id']] = cfg
 
     return cfgs
 
@@ -527,7 +527,7 @@ def do_server_compat(client_versions):
 
 def do_server(cfgs):
     debug("Do server main loop")
-    for cfg in cfgs:
+    for cfg in cfgs.itervalues():
         if cfg['host']:
             if not os.path.isfile(cfg['key_ctrl']):
                 warn('Client %(id)s missing ctrl key %(key_ctrl)s, skipping' % cfg)
@@ -598,7 +598,7 @@ def do_server(cfgs):
 
 def do_keys(cfgs, ids, status, dump, deploy):
     matches = []
-    for cfg in cfgs:
+    for cfg in cfgs.itervalues():
         id = cfg['id']
         if ids and id not in ids: continue
         info('Handling keys for client: %s' % id)
