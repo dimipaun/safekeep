@@ -777,7 +777,7 @@ def main():
     except getopt.GetoptError:
         usage(2)
 
-    mode = 'server'
+    mode = None
     email = []
     smtp = ''
     cfglocs = []
@@ -820,19 +820,21 @@ def main():
 
     if len(cfglocs) == 0:
         cfglocs.append(config_dir)
+    if mode is None:
+        mode = 'server'
 
     cfgs = parse_locs(cfglocs)
     try:
         global is_client, verbosity_level
-        if mode == 'server':
+        if mode is 'server':
             is_client = False
             verbosity_level = 1 + verbosity
             do_server(cfgs)
-        elif mode == 'client':
+        elif mode is 'client':
             is_client = True
             verbosity_level = 3 + verbosity
             do_client()
-        elif mode == 'keys':
+        elif mode is 'keys':
             is_client = False
             verbosity_level = 1 + verbosity
             if not keys_status and not keys_print and not keys_deploy: 
