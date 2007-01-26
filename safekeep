@@ -525,9 +525,13 @@ def do_server_compat(client_versions):
     if server_major != client_major:
         raise Exception('Incompatible protocols: %s <> %s' % (PROTOCOL, client_protocol))
 
-def do_server(cfgs):
+def do_server(cfgs, ids):
     debug("Do server main loop")
     for cfg in cfgs.itervalues():
+        id = cfg['id']
+        if ids and id not in ids: continue
+        info('Server backup starting for client: %s' % id)
+
         if cfg['host']:
             if not os.path.isfile(cfg['key_ctrl']):
                 warn('Client %(id)s missing ctrl key %(key_ctrl)s, skipping' % cfg)
@@ -539,8 +543,6 @@ def do_server(cfgs):
         rdiff_logdir = os.path.join(cfg['dir'], 'rdiff-backup-data')
         if cfg['retention'] and os.path.isdir(rdiff_logdir):
             do_server_data_cleanup(cfg)
-
-        debug('Do server backup [' + cfg['id'] + ']')
 
         if cfg['host']:
             cmd = 'ssh -T -i %(key_ctrl)s -l %(user)s %(host)s' % cfg
@@ -554,7 +556,7 @@ def do_server(cfgs):
         client_versions = do_server_getanswer(cout)
         do_server_compat(client_versions)
 
-        cin.write('CONFIG: %d: %s\n' % (len(cfg['text'].splitlines()), cfg['id']))
+        cin.write('CONFIG: %d: %s\n' % (len(cfg['text'].splitlines()), id))
         cin.write(cfg['text'] + '\n')
         cin.flush()
         do_server_getanswer(cout)
@@ -592,7 +594,7 @@ def do_server(cfgs):
         cin.flush()
         do_server_getanswer(cout)
 
-        debug('Server backup [' + cfg['id'] + '] done')
+        debug('Server backup done for client: %s' % id)
 
     debug('Server backup done')
 
@@ -741,9 +743,9 @@ def parse_authorized_keys(keystext):
 ######################################################################
 
 def usage(exitcode=None):
-    print 'usage: %s [--server] [common options] [server options]' % (sys.argv[0])
+    print 'usage: %s [--server] [common options] [server options] <client-id>*' % (sys.argv[0])
     print '       %s --client [common options]' % (sys.argv[0])
-    print '       %s --keys [common options] [keys options] [clientid1 [clientid2] ...]' % (sys.argv[0])
+    print '       %s --keys [common options] [keys options] <client-id>*' % (sys.argv[0])
     print
     print 'mode selection (pick one):'
     print '--server            launch in server mode (default)'
@@ -848,7 +850,7 @@ def main():
         if mode is 'server':
             is_client = False
             verbosity_level = 1 + verbosity
-            do_server(cfgs)
+            do_server(cfgs, args)
         elif mode is 'client':
             is_client = True
             verbosity_level = 3 + verbosity
