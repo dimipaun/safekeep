@@ -10,6 +10,10 @@ tagname     := $(shell echo Release-$(releasename) | tr . _)
 dirname     := $(shell basename $(PWD))
 rpmroot     := $(shell grep '%_topdir' ~/.rpmmacros | sed 's/^[^ \t]*[ \t]*//')
 svnroot     := $(shell  LANG=C svn info |grep Root |cut -c 18-)
+MAN_TXT     := doc/safekeep.txt
+DOC_HTML    := $(patsubst %.txt,%.html,$(MAN_TXT))
+DOC_MAN     := $(patsubst %.txt,%.1,$(MAN_TXT))
+
 
 all: help
 
@@ -17,6 +21,7 @@ help:
 	@echo "Targets:"
 	@echo "    help        Displays this message"
 	@echo "    info        Displays package information (version, tag, etc.)"
+	@echo "    docs        Builds all documentation formats"
 	@echo "    build       Builds everything needed for an installation"
 	@echo "    deb         Builds snapshot binary and source DEBs"
 	@echo "    rpm         Buidls snapshot binary and source RPMs"
@@ -34,8 +39,8 @@ info:
 	@echo "RPM Root       = $(rpmroot)"
 	@echo "SVN Root       = $(svnroot)"
 
-build:
-	$(MAKE) -C doc build
+
+build: docs
 
 release: check-info commit-release tag-release rpm-release
 
@@ -48,6 +53,23 @@ tag-release:
 check-info: info
 	@echo -n 'Is this information correct? (yes/No) '
 	@read x; if [ "$$x" != "yes" ]; then exit 1; fi
+
+docs: html man
+
+html: $(DOC_HTML)
+
+man: $(DOC_MAN)
+
+%.html: %.txt
+	asciidoc -b xhtml11 -d manpage -f doc/asciidoc.conf $<
+
+%.1: %.xml
+	xmlto -o doc -m doc/callouts.xsl man $<
+
+%.xml: %.txt
+	asciidoc -b docbook -d manpage -f doc/asciidoc.conf $<
+
+$(DOC_HTML) $(DOC_MAN): doc/asciidoc.conf
 
 tar: tar-snapshot
 
@@ -96,6 +118,6 @@ test-remote:
 	safekeep-test --remote
 
 clean:
-	$(MAKE) -C doc clean
-	rm -rf `find -name "*.py[co]" -o -name "*~"```
+	rm -f {.,doc,debian}/*~ *.py[co] 
 	rm -f $(name).spec debian/changelog
+	rm -f doc/*.xml doc/*.html doc/*.1
