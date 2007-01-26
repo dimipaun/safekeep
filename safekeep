@@ -588,7 +588,7 @@ def do_server(cfgs):
 
     debug('Server backup done')
 
-def do_keys(cfgs, ids, action):
+def do_keys(cfgs, ids, status, dump, deploy):
     matches = []
     for cfg in cfgs:
         id = cfg['id']
@@ -608,13 +608,13 @@ def do_keys(cfgs, ids, action):
                 if os.path.isfile(publickeyfile):
                     error('%s: Public key exists %s, but private key is missing. Skipping client.' % (id, publickeyfile))
                     break
-                if action is 'print':
-                    print '%s: Key do not exist: %s.' % (id, privatekeyfile)
+                if dump:
+                    print '%s: Key does not exist: %s.' % (id, privatekeyfile)
                     break
-                if action is 'status':
-                    print '%s: Key do not exist: %s. Will be generated.' % (id, privatekeyfile)
+                if status:
+                    print '%s: Key does not exist: %s. Will be generated.' % (id, privatekeyfile)
                     break
-                elif action is 'deploy':
+                if deploy:
                     info('%s: Key do not exist, generating it now: %s' % (id, privatekeyfile))
                     gencmd = 'ssh-keygen -q -b 1024 -t dsa -N "" -C "SafeKeep auto generated key at %s@%s" -f %s' % \
                           (os.environ['LOGNAME'], os.uname()[1], privatekeyfile)
@@ -637,9 +637,9 @@ def do_keys(cfgs, ids, action):
             continue
 
         output = '\n'.join(lines)
-        if action is 'print':
+        if dump:
             print output
-        elif action in ('status', 'deploy'):
+        if status or deploy:
             cmd = 'ssh %s@%s "if test -f .ssh/authorized_keys; then cat .ssh/authorized_keys; fi"' % (cfg['user'], cfg['host'])
             debug(cmd)
             out = os.popen(cmd, 'r')
@@ -655,21 +655,19 @@ def do_keys(cfgs, ids, action):
                 else:
                     new_keys.append(this_key)
             if not new_keys:
-                if action is 'status':
+                if status:
                     print '%s: Client is up to date.' % id
                 continue
 
-            if action is 'deploy':
+            if status:
+                print '%s: Keys will be deployed on the client.' % id
+            if deploy:
                 cmd = 'ssh %s@%s "umask 077; test -d .ssh || mkdir .ssh; cat >> .ssh/authorized_keys"' % (cfg['user'], cfg['host'])
                 debug(cmd)
                 pipe = os.popen(cmd, 'w')
                 pipe.write('\n'.join([key[4] for key in new_keys]))
                 if pipe.close():
                     error('Failed to deliver the keys to the client')
-            elif action is 'status':
-                print '%s: Keys will be deployed on the client.' % id
-        else:
-            assert False, 'Unknown action: %s' % action
 
     for id in ids:
         if id not in matches:
@@ -776,7 +774,9 @@ def main():
     cfglocs = []
     verbosity = 0
     clientid = None
-    action = None
+    keys_status = None
+    keys_print = None
+    keys_deploy = None
     for o, a in opts:
         if o in ('-C', '--cfg'):
             cfglocs.append(a)
@@ -794,11 +794,11 @@ def main():
         elif o in ('--keys', ):
             mode = 'keys'
         elif o in ('--status', ):
-            action = 'status'
+            keys_status = True
         elif o in ('--print', ):
-            action = 'print'
+            keys_print = True
         elif o in ('--deploy', ):
-            action = 'deploy'
+            keys_deploy = True
         elif o in ('-q', '--quiet'):
             verbosity -= 1
         elif o in ('-v', '--verbose'):
@@ -824,8 +824,9 @@ def main():
         elif mode == 'keys':
             is_client = False
             verbosity_level = 1 + verbosity
-            if not action: action = 'status'
-            do_keys(cfgs, args, action)
+            if not keys_status and not keys_print and not keys_deploy: 
+                keys_status = True
+            do_keys(cfgs, args, keys_status, keys_print, keys_deploy)
         else:
             assert False, 'Unkown mode: ' + mode
     except Exception, ex:

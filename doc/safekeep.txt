@@ -11,7 +11,7 @@ SYNOPSIS
 
 'safekeep' --client
 
-'safekeep' --keys [-q] [-v] [--status|--print|--deploy] <clientid>*
+'safekeep' --keys [-q] [-v] [--status] [--print] [--deploy] <clientid>*
 
 'safekeep' -h | -V
 
@@ -43,8 +43,8 @@ the setup of the SSH authentification keys.
 
 Each mode accepts a few options as described below.
 
-OPTIONS
--------
+OPERATION MODE
+--------------
 --server::
 	Selects the server mode (default)
 
@@ -56,6 +56,9 @@ OPTIONS
 --keys::
 	Selects the SSH key management mode
 
+
+GENERAL OPTIONS
+---------------
 -h, --help::
 	Selects the help mode, in which safekeep prints out the
 	online help and exits.
@@ -72,6 +75,8 @@ OPTIONS
 	Increases the verbosity level. Can be specified more than
 	once.
 
+SERVER OPTIONS
+--------------
 -C, --cfg=FILE|DIR::
 	Specifies the configuration file location.
 	This can be a single file (for a single client configuration)
@@ -88,14 +93,20 @@ OPTIONS
 	Specifies the SMTP server used for sending
 	mails when `-e` is used. Defaults to `localhost`.
 
+KEYS OPTIONS
+------------
 --status::
-	(key mode only) Display the key status for the clients.
+	Display the key status for the clients. It is implied if no other
+        option is specified. In effect this option prints the steps that
+        will be taken when the keys are deployed to the client.
 
 --print::
-	(key mode only) Display the authorization keys for the clients.
+	Display the authorization keys for the clients. This is useful in
+        case you want to manually copy it into the client's 
+        `~/.ssh/authorized_keys` file. This option is seldom useful.
 
 --deploy::
-	(key mode only) Deploy the authorization keys on the clients.
+	Deploy the authorization keys on the clients.
 
 Configuration file
 ------------------
