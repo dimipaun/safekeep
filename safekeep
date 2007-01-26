@@ -820,6 +820,13 @@ def main():
 
     if mode is None:
         mode = 'server'
+
+    if mode is not 'keys' and (keys_status or keys_print or keys_deploy):
+        usage(2)
+
+    if mode is not 'server' and (cfglocs or email or smtp):
+        usage(2)
+
     if len(cfglocs) == 0:
         cfglocs.append(config_dir)
     cfgs = parse_locs(cfglocs)
