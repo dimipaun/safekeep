@@ -818,12 +818,24 @@ def main():
             print 'safekeep', VERSION
             return
 
-    if len(cfglocs) == 0:
-        cfglocs.append(config_dir)
     if mode is None:
         mode = 'server'
-
+    if len(cfglocs) == 0:
+        cfglocs.append(config_dir)
     cfgs = parse_locs(cfglocs)
+
+    if mode is 'client':
+        if len(args) > 0: usage(2)
+    else:
+        ok = True
+        for arg in args:
+            if arg in cfgs: continue
+            error('Unknown client ID: %s' % arg)
+            if os.path.isfile(arg):
+                error('It appears to be a file, configuration files are passed via the -C/--cfg switch.')
+            ok = False
+        if not ok: sys.exit(2)
+
     try:
         global is_client, verbosity_level
         if mode is 'server':
