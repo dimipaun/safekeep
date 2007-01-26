@@ -599,12 +599,10 @@ def do_server(cfgs, ids):
     debug('Server backup done')
 
 def do_keys(cfgs, ids, status, dump, deploy):
-    matches = []
     for cfg in cfgs.itervalues():
         id = cfg['id']
         if ids and id not in ids: continue
         info('Handling keys for client: %s' % id)
-        matches.append(id)
         if not cfg['host']:
             info('%s: Client is local, it needs no keys' % id)
             continue
@@ -679,9 +677,6 @@ def do_keys(cfgs, ids, status, dump, deploy):
                 if pipe.close():
                     error('Failed to deliver the keys to the client')
 
-    for id in ids:
-        if id not in matches:
-            error('No client with id \'%s\'' % id)
 
 # parses authozied_keys, see sshd(8) man page for details
 def parse_authorized_keys(keystext):
