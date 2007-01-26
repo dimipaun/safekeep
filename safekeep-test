@@ -211,7 +211,7 @@ def takeOver(host, role):
 
 def createKey(user, host, keyname, comment):
     key = '/home/%s/.ssh/%s' % (user, keyname)
-    cmd = 'test -f %s || ssh-keygen -q -b 1024 -t dsa -N \'\' -C \'%s\' -f %s' % (key, comment, key)
+    cmd = 'test -f %s || ssh-keygen -q -b 1024 -t dsa -N \'\' -c \'%s\' -f %s' % (key, comment, key)
     rcmd(cmd, user, host, 'create %s on server' % keyname)
     return key
 

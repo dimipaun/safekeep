@@ -7,7 +7,7 @@ safekeep - Client/server backup script
 
 SYNOPSIS
 --------
-'safekeep' [--server] [-q] [-v] [-C file] [-e <email>] [-m <smtp>] <clientid>*
+'safekeep' [--server] [-q] [-v] [-c file] [-e <email>] [-m <smtp>] <clientid>*
 
 'safekeep' --client
 
@@ -82,7 +82,7 @@ GENERAL OPTIONS
 
 SERVER OPTIONS
 --------------
--C, --cfg=FILE|DIR::
+-c, --cfg=FILE|DIR::
 	Specifies the configuration file location.
 	This can be a single file (for a single client configuration)
 	or a directory containing several configuration files (one per

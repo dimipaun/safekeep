@@ -759,14 +759,14 @@ def usage(exitcode=None):
     print '--deploy            deploy the authorization keys'
     print
     print 'server options:'
-    print '-C, --cfg=FILE|DIR  use the given configuration file/directory'
+    print '-c, --cfg=FILE|DIR  use the given configuration file/directory'
     print '-e, --email=EMAIL   send results by email (can appear multiple times)'
     print '-m, --smtp=SMTP     SMTP server to use when sending mails (default: built-in SMTP)'
     if exitcode is not None: sys.exit(exitcode)
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'C:e:hm:qvV',
+        opts, args = getopt.getopt(sys.argv[1:], 'c:e:hm:qvV',
                                    [ 'cfg=', 'client', 'clientid=', 'deploy',
                                      'email=', 'help', 'keys', 'print',
                                      'quiet', 'server', 'smtp=', 'status',
@@ -784,7 +784,7 @@ def main():
     keys_print = None
     keys_deploy = None
     for o, a in opts:
-        if o in ('-C', '--cfg'):
+        if o in ('-c', '--cfg'):
             cfglocs.append(a)
         elif o in ('-e', '--email'):
             email.append(a)
@@ -836,7 +836,7 @@ def main():
             if arg in cfgs: continue
             error('Unknown client ID: %s' % arg)
             if os.path.isfile(arg):
-                error('It appears to be a file, configuration files are passed via the -C/--cfg switch.')
+                error('It appears to be a file, configuration files are passed via the -c/--cfg switch.')
             ok = False
         if not ok: sys.exit(2)
 
