@@ -100,11 +100,6 @@ def reroot(root, path):
     if path.startswith('/'): return root + path
     return os.path.join(root, path)
 
-def getenv(var, defval=None):
-    val = os.environ.get(var)
-    if val is None: return defval
-    return val
-
 ######################################################################
 # Configuration file parser
 ######################################################################
@@ -168,7 +163,7 @@ def parse_config(backup_el, dflt_id):
         host = user = key_ctrl = key_data = None
     if host and not user:
         user = 'root'
-    home = getenv('HOME', '/root')
+    home = os.getenv('HOME', '/root')
     if host and not key_ctrl:
         key_ctrl = os.path.join(home, '.ssh', 'safekeep-server-ctrl-key')
     if host and not key_data:
@@ -627,7 +622,7 @@ def do_keys(cfgs, ids, status, dump, deploy):
                 if deploy:
                     info('%s: Key do not exist, generating it now: %s' % (id, privatekeyfile))
                     gencmd = 'ssh-keygen -q -b 1024 -t dsa -N "" -C "SafeKeep auto generated key at %s@%s" -f %s' % \
-                          (getenv('LOGNAME', 'root'), os.uname()[1], privatekeyfile)
+                          (os.getenv('LOGNAME', 'root'), os.uname()[1], privatekeyfile)
                     debug(gencmd)
                     if os.system(gencmd):
                         error('%s: Failed to generate key %s. Skipping client.' % (id, privatekeyfile))
