@@ -735,24 +735,30 @@ def parse_authorized_keys(keystext):
 ######################################################################
 
 def usage():
-    print 'usage: %s <mode> [options]' % (sys.argv[0])
-    print '       %s [-k|--keys] [--status|--print|--deploy] [clientid1 [clientid2] ...]' % (sys.argv[0])
+    print 'usage: %s [-s|--server] [common options] [server options]' % (sys.argv[0])
+    print '       %s [-c|--client] [common options]' % (sys.argv[0])
+    print '       %s [-k|--keys] [common options] [keys options] [clientid1 [clientid2] ...]' % (sys.argv[0])
+    print
     print 'mode selection (pick one):'
     print '-s, --server        launch in server mode (default)'
     print '-c, --client        launch in client mode'
-    print '-k, --keys          manage SSH keys'
+    print '-k, --keys          launch in keys management mode'
+    print
+    print 'common options:'
     print '-h, --help          show this help message and exit'
+    print '-q, --quiet         decreases the verbosity level'
+    print '-v, --verbose       increases the verbosity level'
     print '-V, --version       show the version number and exit'
     print
-    print 'options:'
+    print 'keys options:'
+    print '--status            display the key status for the clients (default)'
+    print '--print             display the authorization keys'
+    print '--deploy            deploy the authorization keys'
+    print
+    print 'server options:'
     print '-C, --cfg=FILE|DIR  use the given configuration file/directory'
     print '-e, --email=EMAIL   send results by email (can appear multiple times)'
     print '-m, --smtp=SMTP     SMTP server to use when sending mails (default: built-in SMTP)'
-    print '--status            display the key status for the clients (keys mode only, default)'
-    print '--print             display the authorization keys (keys mode only)'
-    print '--deploy            deploy the authorization keys (keys mode only)'
-    print '-q, --quiet         decreases the verbosity level'
-    print '-v, --verbose       increases the verbosity level'
 
 def main():
     try:
