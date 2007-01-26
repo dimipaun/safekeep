@@ -735,14 +735,14 @@ def parse_authorized_keys(keystext):
 ######################################################################
 
 def usage():
-    print 'usage: %s [-s|--server] [common options] [server options]' % (sys.argv[0])
-    print '       %s [-c|--client] [common options]' % (sys.argv[0])
-    print '       %s [-k|--keys] [common options] [keys options] [clientid1 [clientid2] ...]' % (sys.argv[0])
+    print 'usage: %s [--server] [common options] [server options]' % (sys.argv[0])
+    print '       %s --client [common options]' % (sys.argv[0])
+    print '       %s --keys [common options] [keys options] [clientid1 [clientid2] ...]' % (sys.argv[0])
     print
     print 'mode selection (pick one):'
-    print '-s, --server        launch in server mode (default)'
-    print '-c, --client        launch in client mode'
-    print '-k, --keys          launch in keys management mode'
+    print '--server            launch in server mode (default)'
+    print '--client            launch in client mode'
+    print '--keys              launch in keys management mode'
     print
     print 'common options:'
     print '-h, --help          show this help message and exit'
@@ -762,7 +762,7 @@ def usage():
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'C:e:hkm:scqvV',
+        opts, args = getopt.getopt(sys.argv[1:], 'C:e:hm:qvV',
                                    [ 'cfg=', 'client', 'clientid=', 'deploy',
                                      'email=', 'help', 'keys', 'print',
                                      'quiet', 'server', 'smtp=', 'status',
@@ -787,11 +787,11 @@ def main():
             sys.exit()
         elif o in ('-m', '--smtp'):
             smtp = a
-        elif o in ('-s', '--server'):
+        elif o in ('--server', ):
             mode = 'server'
-        elif o in ('-c', '--client'):
+        elif o in ('--client', ):
             mode = 'client'
-        elif o in ('-k', '--keys'):
+        elif o in ('--keys', ):
             mode = 'keys'
         elif o in ('--status', ):
             action = 'status'

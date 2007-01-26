@@ -7,11 +7,11 @@ safekeep - Client/server backup script
 
 SYNOPSIS
 --------
-'safekeep' [-s] [-q] [-v] [-C file] [-e <email>] [-m <smtp>]
+'safekeep' [--server] [-q] [-v] [-C file] [-e <email>] [-m <smtp>]
 
-'safekeep' -c
+'safekeep' --client
 
-'safekeep' -k [-q] [-v] [--status|--print|--deploy] <clientid>*
+'safekeep' --keys [-q] [-v] [--status|--print|--deploy] <clientid>*
 
 'safekeep' -h | -V
 
@@ -45,15 +45,15 @@ Each mode accepts a few options as described below.
 
 OPTIONS
 -------
--s, --server::
+--server::
 	Selects the server mode (default)
 
--c, --client::
+--client::
 	Selects the client mode. This should never be invoked manually, the
 	clients are started automatically by the server on the client machines
 	using SSH.
 
--k, --keys::
+--keys::
 	Selects the SSH key management mode
 
 -h, --help::
