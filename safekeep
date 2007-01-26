@@ -740,7 +740,7 @@ def parse_authorized_keys(keystext):
 # Main routine
 ######################################################################
 
-def usage():
+def usage(exitcode=None):
     print 'usage: %s [--server] [common options] [server options]' % (sys.argv[0])
     print '       %s --client [common options]' % (sys.argv[0])
     print '       %s --keys [common options] [keys options] [clientid1 [clientid2] ...]' % (sys.argv[0])
@@ -765,6 +765,7 @@ def usage():
     print '-C, --cfg=FILE|DIR  use the given configuration file/directory'
     print '-e, --email=EMAIL   send results by email (can appear multiple times)'
     print '-m, --smtp=SMTP     SMTP server to use when sending mails (default: built-in SMTP)'
+    if exitcode is not None: sys.exit(exitcode)
 
 def main():
     try:
@@ -774,8 +775,8 @@ def main():
                                      'quiet', 'server', 'smtp=', 'status',
                                      'verbose', 'version'])
     except getopt.GetoptError:
-        usage()
-        sys.exit(2)
+        usage(2)
+
     mode = 'server'
     email = []
     smtp = ''
@@ -791,8 +792,7 @@ def main():
         elif o in ('-e', '--email'):
             email.append(a)
         elif o in ('-h', '--help'):
-            usage()
-            sys.exit()
+            usage(0)
         elif o in ('-m', '--smtp'):
             smtp = a
         elif o in ('--server', ):
