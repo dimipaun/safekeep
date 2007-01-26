@@ -257,6 +257,8 @@ def parse_locs(cfglocs):
         finally:
             dom.unlink()
         cfg['text'] = cfg_str
+        if cfg['id'] in cfgs:
+            raise ConfigException('Duplicate client ID: %s' % cfg['id'])
         cfgs[cfg['id']] = cfg
 
     return cfgs
