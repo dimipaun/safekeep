@@ -7,7 +7,7 @@ safekeep - Client/server backup script
 
 SYNOPSIS
 --------
-'safekeep' [--server] [-q] [-v] [-C file] [-e <email>] [-m <smtp>]
+'safekeep' [--server] [-q] [-v] [-C file] [-e <email>] [-m <smtp>] <clientid>*
 
 'safekeep' --client
 
@@ -25,7 +25,7 @@ SafeKeep can work in server mode, client mode or SSH key management mode.
 In server mode, SafeKeep parses a set of configurations files which
 defines a set of backup clients. For each backup client, SafeKeep
 connects to the client host over SSH (using a public key authentification
-system previously set up using `safekeep -k --deploy`), and launches
+system previously set up using `safekeep -keys --deploy`), and launches
 `safekeep --client` onto the client host. The client does the real backup
 and sends the data over SSH to the SafeKeep server which stores it in
 the specified location.
@@ -40,6 +40,11 @@ this mode is meant to be used only by the server mode of SafeKeep.
 
 The SSH key management mode is a helper mode for deploying or verifying
 the setup of the SSH authentification keys.
+
+In both server and keys management mode, you can restrict the operation
+to a specific set of clients by listing the desired client IDs as
+arguments. If no client ID is given, SafeKeep will operate over all known
+clients.
 
 Each mode accepts a few options as described below.
 
@@ -81,7 +86,10 @@ SERVER OPTIONS
 	Specifies the configuration file location.
 	This can be a single file (for a single client configuration)
 	or a directory containing several configuration files (one per
-	backup client)
+	backup client). Can be specified multiple times.
+        If not specified at all, SafeKeep will default to searching 
+        `/etc/safekeep.d/` for configuration files. 
+        Simply using this default is the recommended usage. 
 
 -e, --email=EMAIL::
 	In addition to writing the session logs
@@ -108,8 +116,9 @@ KEYS OPTIONS
 --deploy::
 	Deploy the authorization keys on the clients.
 
-Configuration file
-------------------
+
+CONFIGURATION
+-------------
 
 Each backup client is described by a configuration file in XML format of the
 following form:
@@ -119,7 +128,7 @@ following form:
 <backup id="my.host.com primary backup">
 
   <!-- the client backup host, the user under which the servers will connect,
-       the SSH keys used for launching "safekeep -c" and "rdiff-backup" -->
+       the SSH keys used for launching "safekeep --client" and "rdiff-backup" -->
   <host
     name="localhost" user="guest"
     key-ctrl="/home/dimi/.ssh/backup_id_dsa"
@@ -172,11 +181,14 @@ following form:
 </backup>
 ------------------------------------------------------------------------
 
-See Also
+Normally the configuration files are placed in the `/etc/safekeep.d/` directory
+from where they will get picked up automatically by SafeKeep.
+
+SEE ALSO
 --------
 rdiff-backup(1)
 
-Author
+AUTHOR
 ------
 Written by Dimi Paun <dimi@lattica.com> and Stelian Pop <stelian@lattica.com>.
 
