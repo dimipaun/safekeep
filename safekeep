@@ -796,10 +796,13 @@ def main():
         elif o in ('-m', '--smtp'):
             smtp = a
         elif o in ('--server', ):
+            if mode: usage(2)
             mode = 'server'
         elif o in ('--client', ):
+            if mode: usage(2)
             mode = 'client'
         elif o in ('--keys', ):
+            if mode: usage(2)
             mode = 'keys'
         elif o in ('--status', ):
             keys_status = True
