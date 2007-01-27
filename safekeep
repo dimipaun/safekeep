@@ -84,11 +84,19 @@ def send_notification(email, smtp):
     hostname = socket.gethostname()
     msg = 'From: SafeKeep@' + hostname + \
           '\r\nTo: ' + ', '.join(email) + \
-          '\r\nSubject: SafeKeep results on ' + hostname + \
-          '\r\n\r\n' + '\n'.join(logbuf)
-    server = smtplib.SMTP(smtp)
-    server.sendmail('SafeKeep@' + hostname, email, msg)
-    server.quit()
+          '\r\nSubject: SafeKeep results for ' + hostname + \
+          '\r\n\r\n' + '\r\n'.join(logbuf)
+    if smtp:
+        server = smtplib.SMTP(smtp)
+        server.sendmail('SafeKeep@' + hostname, email, msg)
+        server.quit()
+    else:
+        cmd = '/usr/sbin/sendmail -t'
+        pin = os.popen(cmd, 'w')
+        try:
+            pin.write(msg)
+        finally:
+            pin.close()
 
 def is_temp_root(dir):
     return dir != '/'
@@ -758,7 +766,7 @@ def usage(exitcode=None):
     print 'server options:'
     print '-c, --conf=FILE|DIR use the given configuration file/directory'
     print '-e, --email=EMAIL   send results by email (can appear multiple times)'
-    print '-m, --smtp=SMTP     SMTP server to use when sending mails (default: built-in SMTP)'
+    print '-m, --smtp=SMTP     SMTP server to use when sending mails (default: sendmail)'
     if exitcode is not None: sys.exit(exitcode)
 
 def main():

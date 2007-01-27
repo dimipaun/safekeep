@@ -99,7 +99,7 @@ SERVER OPTIONS
 
 -m, --smtp=SMTP::
 	Specifies the SMTP server used for sending
-	mails when `-e` is used. Defaults to `localhost`.
+	mails when `-e` is used. Defaults to using `/usr/sbin/sendmail`.
 
 KEYS OPTIONS
 ------------
