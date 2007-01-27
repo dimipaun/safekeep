@@ -9,9 +9,9 @@ SYNOPSIS
 --------
 'safekeep' [--server] [-q] [-v] [-c file] [-e <email>] [-s <smtp>] <clientid>*
 
-'safekeep' --client
-
 'safekeep' --keys [-q] [-v] [-c file] [--status] [--print] [--deploy] <clientid>*
+
+'safekeep' --client
 
 'safekeep' -h | -V
 

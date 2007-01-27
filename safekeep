@@ -744,28 +744,25 @@ def parse_authorized_keys(keystext):
 
 def usage(exitcode=None):
     print 'usage: %s [--server] [common options] [server options] <client-id>*' % (sys.argv[0])
-    print '       %s --client [common options]' % (sys.argv[0])
     print '       %s --keys [common options] [keys options] <client-id>*' % (sys.argv[0])
     print
     print 'mode selection (pick one):'
     print '--server            launch in server mode (default)'
-    print '--client            launch in client mode'
     print '--keys              launch in keys management mode'
     print
     print 'common options:'
+    print '-c, --conf=FILE|DIR use the given configuration file/directory'
     print '-h, --help          show this help message and exit'
     print '-q, --quiet         decreases the verbosity level'
     print '-v, --verbose       increases the verbosity level'
     print '-V, --version       show the version number and exit'
     print
     print 'keys options:'
-    print '-c, --conf=FILE|DIR use the given configuration file/directory'
     print '--status            display the key status for the clients (default)'
     print '--print             display the authorization keys'
     print '--deploy            deploy the authorization keys'
     print
     print 'server options:'
-    print '-c, --conf=FILE|DIR use the given configuration file/directory'
     print '-e, --email=EMAIL   send results by email (can appear multiple times)'
     print '-s, --smtp=SMTP     SMTP server to use when sending mails (default: sendmail)'
     if exitcode is not None: sys.exit(exitcode)
