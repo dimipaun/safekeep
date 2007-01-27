@@ -759,6 +759,7 @@ def usage(exitcode=None):
     print '-V, --version       show the version number and exit'
     print
     print 'keys options:'
+    print '-c, --conf=FILE|DIR use the given configuration file/directory'
     print '--status            display the key status for the clients (default)'
     print '--print             display the authorization keys'
     print '--deploy            deploy the authorization keys'
@@ -826,7 +827,10 @@ def main():
     if mode is not 'keys' and (keys_status or keys_print or keys_deploy):
         usage(2)
 
-    if mode is not 'server' and (cfglocs or email or smtp):
+    if mode is not 'server' and (email or smtp):
+        usage(2)
+
+    if mode is 'client' and cfglocs:
         usage(2)
 
     if len(cfglocs) == 0:

@@ -11,7 +11,7 @@ SYNOPSIS
 
 'safekeep' --client
 
-'safekeep' --keys [-q] [-v] [--status] [--print] [--deploy] <clientid>*
+'safekeep' --keys [-q] [-v] [-c file] [--status] [--print] [--deploy] <clientid>*
 
 'safekeep' -h | -V
 
