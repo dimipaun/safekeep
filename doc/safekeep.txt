@@ -7,7 +7,7 @@ safekeep - Client/server backup script
 
 SYNOPSIS
 --------
-'safekeep' [--server] [-q] [-v] [-c file] [-e <email>] [-m <smtp>] <clientid>*
+'safekeep' [--server] [-q] [-v] [-c file] [-e <email>] [-s <smtp>] <clientid>*
 
 'safekeep' --client
 
@@ -97,9 +97,9 @@ SERVER OPTIONS
 	the mail address where the logs are to be send. Can be specified
 	more than once to send reports to multiple addresses.
 
--m, --smtp=SMTP::
-	Specifies the SMTP server used for sending
-	mails when `-e` is used. Defaults to using `/usr/sbin/sendmail`.
+-s, --smtp=SMTP::
+	Specifies the SMTP server used for sending mails when `-e` is used. 
+	Defaults to using `/usr/sbin/sendmail`.
 
 KEYS OPTIONS
 ------------

@@ -766,12 +766,12 @@ def usage(exitcode=None):
     print 'server options:'
     print '-c, --conf=FILE|DIR use the given configuration file/directory'
     print '-e, --email=EMAIL   send results by email (can appear multiple times)'
-    print '-m, --smtp=SMTP     SMTP server to use when sending mails (default: sendmail)'
+    print '-s, --smtp=SMTP     SMTP server to use when sending mails (default: sendmail)'
     if exitcode is not None: sys.exit(exitcode)
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'c:e:hm:qvV',
+        opts, args = getopt.getopt(sys.argv[1:], 'c:e:hs:qvV',
                                    [ 'conf=', 'client', 'clientid=', 'deploy',
                                      'email=', 'help', 'keys', 'print',
                                      'quiet', 'server', 'smtp=', 'status',
@@ -795,7 +795,7 @@ def main():
             email.append(a)
         elif o in ('-h', '--help'):
             usage(0)
-        elif o in ('-m', '--smtp'):
+        elif o in ('-s', '--smtp'):
             smtp = a
         elif o in ('--server', ):
             if mode: usage(2)
