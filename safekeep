@@ -236,6 +236,7 @@ def parse_locs(cfglocs):
         if os.path.isdir(cfg):
             for ent in os.listdir(cfg):
                 if not ent.endswith(config_ext):
+                    print >> sys.stderr, 'Ignoring file %s not ending in %s' % (os.path.join(cfg, ent), config_ext)
                     continue
                 filepath = os.path.join(cfg, ent)
                 if not os.path.isfile(filepath):
