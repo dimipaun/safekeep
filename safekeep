@@ -757,14 +757,14 @@ def usage(exitcode=None):
     print '-v, --verbose       increases the verbosity level'
     print '-V, --version       show the version number and exit'
     print
+    print 'server options:'
+    print '-e, --email=EMAIL   send results by email (can appear multiple times)'
+    print '-s, --smtp=SMTP     SMTP server to use when sending mails (default: sendmail)'
+    print
     print 'keys options:'
     print '--status            display the key status for the clients (default)'
     print '--print             display the authorization keys'
     print '--deploy            deploy the authorization keys'
-    print
-    print 'server options:'
-    print '-e, --email=EMAIL   send results by email (can appear multiple times)'
-    print '-s, --smtp=SMTP     SMTP server to use when sending mails (default: sendmail)'
     if exitcode is not None: sys.exit(exitcode)
 
 def main():
