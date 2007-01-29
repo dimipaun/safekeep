@@ -551,7 +551,7 @@ def do_server(cfgs, ids):
             do_server_data_cleanup(cfg)
 
         if cfg['host']:
-            cmd = 'ssh -T -i %(key_ctrl)s -l %(user)s %(host)s' % cfg
+            cmd = 'ssh -T -i %(key_ctrl)s -l %(user)s %(host)s safekeep --client' % cfg
         else:
             cmd = 'safekeep --client'
         debug('Run [' + cmd + ']')
