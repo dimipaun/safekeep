@@ -211,7 +211,7 @@ def parse_config(backup_el, dflt_id):
             cludes.append(parse_clude(child_el))
         cludes.append({ 'type' : 'exclude', 'path' : '', 'glob' : '', 'regexp' : '.*' })
     else:
-        path_xcludes = [ '/dev/', '/media/', '/mnt/', '/net/', '/proc/', '/sys/',
+        path_xcludes = [ '/dev/', '/media/', '/mnt/', '/net/', '/proc/', '/selinux/', '/sys/',
                          '/tmp/', '/var/cache', '/var/lock', '/var/run', '/var/tmp',
                          '/var/named/chroot/dev', '/var/named/chroot/proc', 
                          '/var/named/chroot/var/run', '/var/named/chroot/var/tmp' ]
