@@ -211,23 +211,11 @@ def parse_config(backup_el, dflt_id):
             cludes.append(parse_clude(child_el))
         cludes.append({ 'type' : 'exclude', 'path' : '', 'glob' : '', 'regexp' : '.*' })
     else:
-        cludes = [
-            { 'type' : 'exclude', 'path' : '/dev/',              'glob' : None, 'regexp' : None },
-            { 'type' : 'exclude', 'path' : '/media/',            'glob' : None, 'regexp' : None },
-            { 'type' : 'exclude', 'path' : '/mnt/',              'glob' : None, 'regexp' : None },
-            { 'type' : 'exclude', 'path' : '/net/',              'glob' : None, 'regexp' : None },
-            { 'type' : 'exclude', 'path' : '/proc/',             'glob' : None, 'regexp' : None },
-            { 'type' : 'exclude', 'path' : '/sys/',              'glob' : None, 'regexp' : None },
-            { 'type' : 'exclude', 'path' : '/tmp/',              'glob' : None, 'regexp' : None },
-            { 'type' : 'exclude', 'path' : '/var/cache',         'glob' : None, 'regexp' : None },
-            { 'type' : 'exclude', 'path' : '/var/lock',          'glob' : None, 'regexp' : None },
-            { 'type' : 'exclude', 'path' : '/var/named/dev',     'glob' : None, 'regexp' : None },
-            { 'type' : 'exclude', 'path' : '/var/named/proc',    'glob' : None, 'regexp' : None },
-            { 'type' : 'exclude', 'path' : '/var/named/var/run', 'glob' : None, 'regexp' : None },
-            { 'type' : 'exclude', 'path' : '/var/named/var/tmp', 'glob' : None, 'regexp' : None },
-            { 'type' : 'exclude', 'path' : '/var/run',           'glob' : None, 'regexp' : None },
-            { 'type' : 'exclude', 'path' : '/var/tmp',           'glob' : None, 'regexp' : None },
-        ]
+        path_xcludes = [ '/dev/', '/media/', '/mnt/', '/net/', '/proc/', '/sys/',
+                         '/tmp/', '/var/cache', '/var/lock', '/var/run', '/var/tmp',
+                         '/var/named/chroot/dev', '/var/named/chroot/proc', 
+                         '/var/named/chroot/var/run', '/var/named/chroot/var/tmp' ]
+        cludes = [{ 'type' : 'exclude', 'path' : path, 'glob' : None, 'regexp' : None } for path in path_xcludes]
 
     return { 'id': id, 'host' : host, 'user' : user, 'key_ctrl' : key_ctrl, 'key_data' : key_data,
              'dir' : dir, 'retention' : retention, 'dumps' : dumps, 'snaps' : snaps,
