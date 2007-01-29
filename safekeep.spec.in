@@ -1,11 +1,13 @@
 %define name    safekeep
 %define version TBD
 %define release 1
+%define homedir %{_localstatedir}/lib/%{name}
 
 Name:           %{name}
 Version:        %{version}
 Release:        %{release}%{?dist}
 Summary:        The SafeKeep backup system
+Vendor:         Lattica, Inc.
 
 Group:          Applications/System
 License:        GPL
@@ -15,14 +17,46 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Prefix:         %{_prefix}
 
 BuildArch:      noarch
-
 BuildRequires:	xmlto, asciidoc > 6.0.3
-Requires:	rdiff-backup
-Provides:	safekeep
 
 %description
-SafeKeep is a client/server backup script which enhances the
+SafeKeep is a client/server backup system which enhances the
 power of rdiff-backup with simple configuration and use.
+
+%package common
+Summary:        The SafeKeep backup system (common component)
+Group:          Applications/System
+Requires:       rdiff-backup
+Requires(pre):  python >= 2.3
+
+%description common
+The common component of the SafeKeep backup system.
+This is shared in between the client/server components.
+
+%package client
+Summary:        The SafeKeep backup system (client component)
+Group:          Applications/System
+Requires:       openssh-server
+Requires:       coreutils
+Requires:       util-linux
+Requires(pre):  safekeep-common = %{PACKAGE_VERSION}
+
+%description client
+The client component of the SafeKeep backup system.
+This component should be installed on all hosts that
+need to be backed-up.
+
+%package server
+Summary:        The SafeKeep backup system (server component)
+Group:          Applications/System
+Prereq:         /usr/sbin/useradd
+Requires:       openssh, openssh-clients
+Requires(pre):  safekeep-common = %{PACKAGE_VERSION}
+
+%description server
+The server component of the SafeKeep backup system.
+This compoenent should be installed on the server on
+which the data will be backed-up to.
 
 %prep
 %setup -q
@@ -40,12 +74,24 @@ install -m 755 doc/safekeep.1 "%{buildroot}%{_mandir}/man1/"
 %clean
 rm -rf "%{buildroot}"
 
-%files
+%pre server
+%{_sbindir}/useradd -r -d %{homedir} -s /sbin/nologin -u 186 %{name} 2> /dev/null || :
+
+%preun server
+if [ "$1" = "0" ]; then
+    %{_sbindir}/userdel %{name} >> /dev/null 2>&1 || :
+fi
+
+%files common
 %defattr(-,root,root,-)
-%dir %{_sysconfdir}/safekeep.d
 %{_bindir}/safekeep
 %{_mandir}/man1/safekeep.1*
-%doc AUTHORS COPYING LICENSE README safekeep-test sample.conf
+%doc AUTHORS COPYING LICENSE README
+
+%files server
+%dir %{homedir}
+%dir %{_sysconfdir}/safekeep.d
+%doc safekeep-test sample.conf
 
 %changelog
 
