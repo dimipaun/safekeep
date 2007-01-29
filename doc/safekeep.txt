@@ -158,7 +158,12 @@ A more realistic example:
     <exclude path="/var/lock"/>
     <exclude path="/var/run"/>
     <exclude path="/var/tmp"/>
+    <include path="/var/named/chroot/etc"/>
+    <include path="/var/named/chroot/var/named"/>
+    <exclude path="/var/named/chroot"/>
     <include path="/var"/>
+
+    <exclude path="/"/>
   </data>
 </backup>
 ------------------------------------------------------------------------
