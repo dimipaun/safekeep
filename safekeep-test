@@ -218,8 +218,8 @@ def takeOver(host, role, verrel):
     rcmd(cmd, 'root', host, 'install safekeep')
 
 def createKey(user, host, keyname, comment):
-    key = '/home/%s/.ssh/%s' % (user, keyname)
-    cmd = 'test -f %s || ssh-keygen -q -b 1024 -t dsa -N \'\' -c \'%s\' -f %s' % (key, comment, key)
+    key = '.ssh/%s' % keyname
+    cmd = 'test -f %s || ssh-keygen -q -b 1024 -t dsa -N \'\' -C \'%s\' -f %s' % (key, comment, key)
     rcmd(cmd, user, host, 'create %s on server' % keyname)
     return key
 
@@ -300,20 +300,20 @@ def remoteTest(tmproot, client, server):
     takeOver(server, 'server', verrel)
 
     # setup the server
+    cmd = 'chsh -s /bin/bash safekeep'
+    rcmd(cmd, 'root', server, 'Allow access to the safekeep account')
     client_addr = socket.gethostbyname(client)
     if client_addr != client:
         cmd = '(grep -iv %s /etc/hosts; echo "%s   %s") > /etc/hosts.new; mv -f /etc/hosts.new /etc/hosts' % (client, client_addr, client)
         rcmd(cmd, 'root', server, 'install the client name in /etc/hosts')
 
-    cmd = 'useradd backup-op || true'
-    rcmd(cmd, 'root', server, 'create backup-op user')
-    cmd = 'cd ~backup-op; umask 077; test -d .ssh || mkdir .ssh; ' + \
+    cmd = 'cd ~safekeep; ' + \
           'cp /root/.ssh/authorized_keys .ssh/authorized_keys; ' + \
-          'chown -R backup-op.backup-op .ssh'
-    rcmd(cmd, 'root', server, 'install key for backup-op user')
-    key_id   = createKey('backup-op', server, 'id_dsa', 'SafeKeep server ID')
-    key_ctrl = createKey('backup-op', server, 'safekeep-server-ctrl-key', 'SafeKeep server control key')
-    key_data = createKey('backup-op', server, 'id-safekeep-data-key', 'SafeKeep server data key')
+          'chown -R safekeep.safekeep .ssh'
+    rcmd(cmd, 'root', server, 'install key for the safekeep user')
+    key_id   = createKey('safekeep', server, 'id_dsa', 'SafeKeep server ID')
+    key_ctrl = createKey('safekeep', server, 'safekeep-server-ctrl-key', 'SafeKeep server control key')
+    key_data = createKey('safekeep', server, 'id-safekeep-data-key', 'SafeKeep server data key')
 
     cmd = 'if ! rpm -q postgresql-server; then p=postgresql-server; fi; ' + \
           'if ! rpm -q mysql-server; then p="$p mysql-server"; fi; ' + \
@@ -327,7 +327,7 @@ def remoteTest(tmproot, client, server):
     fingerprint = rcmdout(cmd, None, None, 'read the client fingerprint')
     if fingerprint:
         cmd = '(if test -f .ssh/known_hosts; then grep -iv %s .ssh/known_hosts; fi; cat) > .ssh/known_hosts.new; mv -f .ssh/known_hosts.new .ssh/known_hosts' % (client, )
-        rcmdin(cmd, fingerprint, 'backup-op', server, 'deploy client fingerprint on server')
+        rcmdin(cmd, fingerprint, 'safekeep', server, 'deploy client fingerprint on server')
 
     snap_conf = ''
     if perform_snapshots:
@@ -335,7 +335,7 @@ def remoteTest(tmproot, client, server):
     conf = """
         <backup id="test-client">
           <host name="%s" key-data="%s" />
-          <repo path="/home/backup-op/client/data" retention="5h"/>
+          <repo path="/var/lib/safekeep/client/data" retention="5h"/>
           <setup>
               %s
           </setup>
@@ -352,22 +352,22 @@ def remoteTest(tmproot, client, server):
 
     writefile('/etc/safekeep.d/test-client.conf', conf, '664', 'w', 'root', server)
     cmd = 'rm -rf client; mkdir -p client/data'
-    rcmd(cmd, 'backup-op', server, 'create data repo') 
+    rcmd(cmd, 'safekeep', server, 'create data repo') 
 
     # setup the client
     cmd = 'umask 077; test -d .ssh || mkdir .ssh; if test -f .ssh/authorized_keys; then cat .ssh/authorized_keys; fi'
     clkeys_txt = rcmdout(cmd, 'root', client, 'fetch client keys')
-    key_id_enc = readfile('.ssh/id_dsa.pub', 'backup-op', server)
+    key_id_enc = readfile('.ssh/id_dsa.pub', 'safekeep', server)
     if key_id_enc not in clkeys_txt.splitlines():
         writefile('.ssh/authorized_keys', key_id_enc, None, 'a', 'root', client)
 
     cmd = 'safekeep %s --keys --deploy' % safekeep_args
-    rcmd(cmd, 'backup-op', server, 'deploy keys to client')
+    rcmd(cmd, 'safekeep', server, 'deploy keys to client')
 
     # run the test
     for i in range(test_reps):
         cmd = 'rm -f md5sum.client md5sum.server'
-        rcmd(cmd, 'backup-op', server, 'cleanup MD5 sums')
+        rcmd(cmd, 'safekeep', server, 'cleanup MD5 sums')
         FILES = (
             '/etc/a-simple-file', 
             '/etc/another-file.nobackup', 
@@ -380,14 +380,14 @@ def remoteTest(tmproot, client, server):
                "grep -v '\.nobackup$' | grep -v '^/etc/cups/certs/' | " + \
                "grep -v '^/etc/mtab' | grep -v '^/etc/lvm/' | " + \
                "sort | sed s/.// | xargs md5sum"
-        cmd2 = "cat > /home/backup-op/md5sum.client"
-        rpipe(cmd1, 'root', client, 'do MD5 sums on client', cmd2, 'backup-op', server)
+        cmd2 = "cat > /var/lib/safekeep/md5sum.client"
+        rpipe(cmd1, 'root', client, 'do MD5 sums on client', cmd2, 'safekeep', server)
         cmd = 'safekeep %s' % safekeep_args
-        rcmd(cmd, 'backup-op', server, 'backup data')
-        cmd = 'cd /home/backup-op/client/data; find -type f | grep -v rdiff-backup-data/ | sort | sed s/..// | xargs md5sum > /home/backup-op/md5sum.server'
-        rcmd(cmd, 'backup-op', server, 'do MD5 sums on server')
-        cmd = 'diff -q /home/backup-op/md5sum.client /home/backup-op/md5sum.server'
-        rcmd(cmd, 'backup-op', server, 'compare MD5 sums')
+        rcmd(cmd, 'safekeep', server, 'backup data')
+        cmd = 'cd /var/lib/safekeep/client/data; find -type f | grep -v rdiff-backup-data/ | sort | sed s/..// | xargs md5sum > /var/lib/safekeep/md5sum.server'
+        rcmd(cmd, 'safekeep', server, 'do MD5 sums on server')
+        cmd = 'diff -q /var/lib/safekeep/md5sum.client /var/lib/safekeep/md5sum.server'
+        rcmd(cmd, 'safekeep', server, 'compare MD5 sums')
         
         # TODO: list available backups
         # TODO: compare against retention policy, fail if different
