@@ -26,6 +26,7 @@ power of rdiff-backup with simple configuration and use.
 %package common
 Summary:        The SafeKeep backup system (common component)
 Group:          Applications/System
+Obsoletes:      safekeep
 Requires:       rdiff-backup
 Requires(pre):  python >= 2.3
 
