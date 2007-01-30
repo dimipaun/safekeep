@@ -70,7 +70,7 @@ install -d -m 755 "%{buildroot}%{_bindir}/"
 install -m 755 safekeep "%{buildroot}%{_bindir}/"
 install -d -m 755 "%{buildroot}%{_mandir}/man1/"
 install -m 755 doc/safekeep.1 "%{buildroot}%{_mandir}/man1/"
-install -d -m 750 %{homedir}
+install -d -m 750 "%{buildroot}%{homedir}"
 
 %clean
 rm -rf "%{buildroot}"
