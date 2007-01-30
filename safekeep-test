@@ -206,7 +206,10 @@ def takeOver(host, role):
     lattica_repo = '\n'.join([line.strip() for line in lattica_repo.splitlines()])
     cmd = 'echo %s > /etc/yum.repos.d/lattica-development.repo' % (mkarg(lattica_repo).strip())
     rcmd(cmd, 'root', host, 'install Lattica Repo')
-    cmd = 'rm -rf /var/cache/yum/lattica-development/; if rpm -q safekeep; then yum update -y safekeep; else yum install -y safekeep; fi'
+    cmd = 'rm -rf /var/cache/yum/lattica-development/; ' + \
+          'if rpm -q safekeep-%(role)s; ' + \
+          'then yum update -y safekeep-%(role)s; ' + \
+          'else yum install -y safekeep-%(role)s; fi' % { 'role': role }
     rcmd(cmd, 'root', host, 'install safekeep')
 
 def createKey(user, host, keyname, comment):
@@ -251,22 +254,28 @@ def packageAndUpload(pkgroot, keyname, repodirs, user, host):
     if os.system(cmd):
         raise TestFailure('Failed to nuke the tar')
 
-    basename = mytar[0:-len('.tar.gz')]
-    binrpm = os.path.join(pkgroot, 'RPMS/noarch', basename + '-1.noarch.rpm')
-    if not os.path.isfile(binrpm):
-        raise TestFailure('Failed to find binary rpm: %s' % binrpm)
+    ver = mytar[len('safekeep-'):-len('.tar.gz')]
+    binrpm_common = os.path.join(pkgroot, 'RPMS/noarch', 'safekeep-common-' + ver + '-1.noarch.rpm')
+    binrpm_client = os.path.join(pkgroot, 'RPMS/noarch', 'safekeep-client-' + ver + '-1.noarch.rpm')
+    binrpm_server = os.path.join(pkgroot, 'RPMS/noarch', 'safekeep-server-' + ver + '-1.noarch.rpm')
+
+    for binrpm in (binrpm_common, binrpm_client, binrpm_server):
+        if not os.path.isfile(binrpm):
+            raise TestFailure('Failed to find binary rpm: %s' % binrpm)
 
     if sign_packages:   
-        cmd = 'rpm --define %s --addsign %s' % (mkarg('_gpg_name ' + keyname), mkarg(binrpm))
+        cmd = 'rpm --define %s --addsign %s %s %s' % \
+              (mkarg('_gpg_name ' + keyname), binrpm_common, binrpm_client, binrpm_server)
         print cmd
         if os.system(cmd):
             raise TestFailure('Failed to sign rpms')
 
     for repodir in repodirs:
-        cmd = '%s %s %s@%s:%s' % (mkssh('scp'), mkarg(binrpm), user, host, repodir)
+        cmd = '%s %s %s %s %s@%s:%s' % \
+              (mkssh('scp'), binrpm_common, binrpm_client, binrpm_server, user, host, repodir)
         print cmd
         if os.system(cmd):
-            raise TestFailure('Failed to copy %s to the repository' % binrpm) 
+            raise TestFailure('Failed to copy safekee-*-%s-1.noarch.rpm to the repository' % ver) 
     
         cmd = 'createrepo %s' % mkarg(repodir)
         rcmd(cmd, user, host, 'update repo metadata') 
