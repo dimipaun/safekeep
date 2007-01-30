@@ -165,7 +165,7 @@ def localTest(tmproot):
         shutil.rmtree(os.path.join(tmproot, 'restore'))
         time.sleep(1) 
 
-def takeOver(host, role):
+def takeOver(host, role, verrel):
     cmd = 'ssh -o PasswordAuthentication=no root@%s true' % (host)
     if os.system(cmd): 
         print 'The box %s does not appear to have been initialized' % (host)
@@ -207,9 +207,12 @@ def takeOver(host, role):
     cmd = 'echo %s > /etc/yum.repos.d/lattica-development.repo' % (mkarg(lattica_repo).strip())
     rcmd(cmd, 'root', host, 'install Lattica Repo')
     cmd = 'rm -rf /var/cache/yum/lattica-development/; ' + \
-          'if rpm -q safekeep-%(role)s; ' + \
-          'then yum update -y safekeep-%(role)s; ' + \
-          'else yum install -y safekeep-%(role)s; fi' % { 'role': role }
+          'if rpm -q safekeep-%(role)s-%(verrel)s; ' + \
+          'then yum update -y safekeep-%(role)s-%(verrel); ' + \
+          'else yum install -y safekeep-%(role)s-%(verrel); ' + \
+          'fi; ' + \
+          'rpm -q safekeep-%(role)s | grep %(verrel)s' \
+          % { 'role': role, 'verrel': verrel }
     rcmd(cmd, 'root', host, 'install safekeep')
 
 def createKey(user, host, keyname, comment):
@@ -278,7 +281,9 @@ def packageAndUpload(pkgroot, keyname, repodirs, user, host):
             raise TestFailure('Failed to copy safekee-*-%s-1.noarch.rpm to the repository' % ver) 
     
         cmd = 'createrepo %s' % mkarg(repodir)
-        rcmd(cmd, user, host, 'update repo metadata') 
+        rcmd(cmd, user, host, 'update repo metadata')
+
+    return ver + '-1'
 
 def remoteTest(tmproot, client, server):
     # build, sign and upload the .rpm
@@ -287,10 +292,10 @@ def remoteTest(tmproot, client, server):
         '/var/www/repos/lattica/yum/fedora/6/devel/i386',
         '/var/www/repos/lattica/yum/centos/4/devel/i386',
     ]
-    packageAndUpload(tmproot, 'Lattica, Inc. (Devel Key) <devel@lattica.com>', repodirs, 'root', 'ulysses')
+    verrel = packageAndUpload(tmproot, 'Lattica, Inc. (Devel Key) <devel@lattica.com>', repodirs, 'root', 'ulysses')
 
-    takeOver(client, 'client')
-    takeOver(server, 'server')
+    takeOver(client, 'client', verrel)
+    takeOver(server, 'server', verrel)
 
     # setup the server
     client_addr = socket.gethostbyname(client)
