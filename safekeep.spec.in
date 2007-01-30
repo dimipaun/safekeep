@@ -89,10 +89,14 @@ fi
 %{_mandir}/man1/safekeep.1*
 %doc AUTHORS COPYING LICENSE README
 
+%files client
+%doc AUTHORS COPYING LICENSE
+
 %files server
 %attr(750,%{name},%{name}) %dir %{homedir}
 %dir %{_sysconfdir}/safekeep.d
 %doc safekeep-test sample.conf
+%doc AUTHORS COPYING LICENSE
 
 %changelog
 
