@@ -1,0 +1,1674 @@
+2007-01-30 19:31 +0000 [r340]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Use the regular logging functions to
+	  complain about ignored files
+
+2007-01-30 19:21 +0000 [r339]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Make use of the standard safekeep
+	  user instead of inventing our own backup-op user.
+
+2007-01-30 17:15 +0000 [r338]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in: Create the .ssh dir at install
+	  time too
+
+2007-01-30 16:55 +0000 [r337]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Fix string interpolation
+
+2007-01-30 16:27 +0000 [r336]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Fix installation of packages on the
+	  test boxes
+
+2007-01-30 15:33 +0000 [r335]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in: The new packages superseed the
+	  old ones
+
+2007-01-30 15:32 +0000 [r334]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Make sure the version we expect
+	  ends up being installed
+
+2007-01-30 15:25 +0000 [r333]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Instrument the fulltest to deal
+	  with the multiple packages
+
+2007-01-30 15:01 +0000 [r332]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in: Add the licensing files to all
+	  packages
+
+2007-01-30 04:45 +0000 [r331]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in: Create the homedir in the build
+	  root
+
+2007-01-30 04:43 +0000 [r330]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in: Create the home dir during build
+
+2007-01-29 21:46 +0000 [r329]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in: Split RPM into 3 packages:
+	  -common, -client, -server Add a bunch more Requires, etc. Create
+	  a 'safekeep' user for the server part.
+
+2007-01-29 19:13 +0000 [r328]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.txt: Fix the example with the latest
+	  results
+
+2007-01-29 17:22 +0000 [r327]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Ignode /selinux/ too.
+
+2007-01-29 05:40 +0000 [r326]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: A more compact representation for the
+	  excludes
+
+2007-01-29 05:22 +0000 [r325]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Exclude unneeded stuff from named's
+	  chroot. No need to include /, it's implicit in rdiff-backup.
+
+2007-01-29 01:31 +0000 [r324]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: "Stelian Pop" <stelian@lattica.com>
+	  Invoke remote command explicitly in case the wrong SSH key is
+	  used with the client.
+
+2007-01-28 23:34 +0000 [r323]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/safekeep: Let the user know we're excluding some
+	  files because of wrong suffix.
+
+2007-01-28 23:23 +0000 [r322]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/safekeep: List the options in the same order as
+	  the modes.
+
+2007-01-27 18:13 +0000 [r321]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep, safekeep/trunk/doc/safekeep.txt: Remove
+	  the --client mode from the online help screen, this is an
+	  internal-only mode, and it just makes the output more confusing
+	  and difficult to read.
+
+2007-01-27 18:10 +0000 [r320]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep, safekeep/trunk/doc/safekeep.txt: We need
+	  to support the -c/--conf in --keys mode too
+
+2007-01-27 17:11 +0000 [r319]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep, safekeep/trunk/doc/safekeep.txt: Rename
+	  the -m option to -s, now that it's available.
+
+2007-01-27 17:09 +0000 [r318]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep, safekeep/trunk/doc/safekeep.txt: Use
+	  sendmail is no SMTP server is specified.
+
+2007-01-26 23:25 +0000 [r317]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Use the standard os.getenv() instead our
+	  ad-hoc version
+
+2007-01-26 23:16 +0000 [r316]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.txt: Document some more realistic
+	  configuration examples.
+
+2007-01-26 22:17 +0000 [r315]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Protect against duplicated client IDs
+
+2007-01-26 22:04 +0000 [r314]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/sample.conf: Cleanup a bit the sample file
+
+2007-01-26 22:02 +0000 [r313]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/debian/docs, safekeep/trunk/sample.cfg (removed),
+	  safekeep/trunk/safekeep-test, safekeep/trunk/safekeep.spec.in,
+	  safekeep/trunk/safekeep, safekeep/trunk/sample.conf (added),
+	  safekeep/trunk/doc/safekeep.txt: Rename the .cfg extension to
+	  .conf, and the --cfg option to --conf
+
+2007-01-26 21:46 +0000 [r312]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test, safekeep/trunk/safekeep,
+	  safekeep/trunk/doc/safekeep.txt: Rename the -C option to -c now
+	  that it is available.
+
+2007-01-26 21:16 +0000 [r311]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.txt: Cleanup the docs a bit
+
+2007-01-26 21:13 +0000 [r310]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/Makefile, safekeep/trunk/doc/Makefile (removed):
+	  Merge the doc Makefile into the main Makefile. It makes it easier
+	  if everything is in one place.
+	  http://members.canb.auug.org.au/~millerp/rmch/recu-make-cons-harm.html
+
+2007-01-26 20:35 +0000 [r309]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Less confusing name
+
+2007-01-26 20:28 +0000 [r308]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.txt: Update documentation
+
+2007-01-26 19:03 +0000 [r307]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Cleanup code, we check now the arguments
+	  ahead of time.
+
+2007-01-26 18:40 +0000 [r306]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Add support for filtering by client-ids
+	  in server mode
+
+2007-01-26 18:27 +0000 [r305]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Complain if inappropriate options are
+	  used in selected mode
+
+2007-01-26 18:18 +0000 [r304]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Validate arguments as clientIDs where
+	  appropriate
+
+2007-01-26 18:10 +0000 [r303]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Transform the list of configurations
+	  into a dictionary. It should make it easier to look through the
+	  known ids.
+
+2007-01-26 16:47 +0000 [r302]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Default to server mode only at the end.
+	  Small cleanups.
+
+2007-01-26 16:33 +0000 [r301]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Allow only one mode at a time.
+
+2007-01-26 16:32 +0000 [r300]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Teach usage() to exit if need be,
+	  simplify the code a bit.
+
+2007-01-26 16:26 +0000 [r299]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Be a little more careful when accessing
+	  environment variables, provide fallbacks in case they are not
+	  defined
+
+2007-01-26 11:04 +0000 [r298]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/safekeep: Fix backup.log marker logic.
+
+2007-01-26 04:27 +0000 [r297]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep, safekeep/trunk/doc/safekeep.txt: Make
+	  the keys options more like options rather then mode selectors.
+	  This means that any combination of them is now valid as input on
+	  the command line. Addition documentation work to match these
+	  changes.
+
+2007-01-26 04:09 +0000 [r296]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep, safekeep/trunk/doc/safekeep.txt: Remove
+	  the short options for selecting the operation mode, since they
+	  were polluting the namespace and they weren't all that useful: -
+	  the server mode is the defalt mode, no switch is required - the
+	  client mode should never be invoked manually - the keys mode
+	  benefits slighly from the additional clarity. This should allow
+	  us in the future more freedom to add other options with those
+	  names.
+
+2007-01-26 03:56 +0000 [r295]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Reorganize the help message for clarity
+
+2007-01-25 18:36 +0000 [r294]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: According to the FHS
+	  (http://www.pathname.com/fhs/), we can also exclude the following
+	  dirs: /var/cache /var/lock /var/run /var/tmp
+
+2007-01-25 16:46 +0000 [r293]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Use os.environ['LOGNAME'] instead of
+	  os.getlogin() to avoid errors when the controlling terminal goes
+	  missing (http://docs.python.org/lib/os-procinfo.html)
+
+2007-01-25 14:50 +0000 [r292]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/safekeep: Fix 'safekeep -k --deploy' problem.
+
+2007-01-25 04:57 +0000 [r291]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Always nuke yum's cache of our
+	  repo, it's changing too fast and causes problems
+
+2007-01-25 04:47 +0000 [r290]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in: Create the config dir so it is
+	  available to receive config files
+
+2007-01-25 04:21 +0000 [r289]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Fix server namer.
+
+2007-01-25 04:09 +0000 [r288]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: If the backup.log exists, mark current
+	  possition and dump starting from the marker only
+
+2007-01-24 19:58 +0000 [r287]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Provide a reasonable set of
+	  includes/excludes if not specified
+
+2007-01-23 22:11 +0000 [r286]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in: Create dirs for the man page too
+
+2007-01-23 22:04 +0000 [r285]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/README: Document the build requirements
+
+2007-01-23 22:04 +0000 [r284]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in: We need to create the dir for
+	  the binary
+
+2007-01-12 11:53 +0000 [r281]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/debian/rules, safekeep/trunk/debian/control: Fix
+	  the debian build rules for the manpage.
+
+2007-01-12 11:45 +0000 [r280]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/debian/rules, safekeep/trunk/Makefile,
+	  safekeep/trunk/sample.cfg, safekeep/trunk/doc/callouts.xsl
+	  (added), safekeep/trunk/safekeep.spec.in,
+	  safekeep/trunk/debian/control, safekeep/trunk/doc/Makefile
+	  (added), safekeep/trunk/safekeep, safekeep/trunk/doc (added),
+	  safekeep/trunk/doc/safekeep.txt (added),
+	  safekeep/trunk/doc/asciidoc.conf (added): Add documentation and
+	  rework the sample configuration file.
+
+2007-01-12 05:02 +0000 [r279]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/.project: Fix project name
+
+2007-01-04 00:36 +0000 [r276]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/README: Test checkin 2
+
+2007-01-04 00:31 +0000 [r275]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/README: Test checkin 1
+
+2007-01-03 14:36 +0000 [r274]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/Makefile: Update packaging/versionning to SVN
+	  instead of CVS.
+
+2007-01-03 14:18 +0000 [r273]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in: No need for python_sitelib for
+	  SafeKeep.
+
+2007-01-03 06:46 +0000 [r272]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/README: Fix protocol docs
+
+2007-01-03 00:32 +0000 [r271]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/safekeep: Misc typo fixes. Use python provided
+	  os.getlogin() and os.uname()[1] instead of looking at possibly
+	  inexistent environment variables.
+
+2007-01-03 00:30 +0000 [r270]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/sample.cfg: Fix retention parameter and XML syntax
+
+2007-01-02 23:39 +0000 [r269]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/safekeep: Fix --status argument parsing and
+	  reorganize the option list.
+
+2007-01-02 23:18 +0000 [r268]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/safekeep: Whitespace cleanup.
+
+2007-01-02 23:11 +0000 [r267]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/debian/docs (added), safekeep/trunk/debian/rules,
+	  safekeep/trunk/Makefile, safekeep/trunk/safekeep.spec.in (added),
+	  safekeep/trunk/debian/dirs: Packaging (rpm and deb) enhancements:
+	  - first version of safekeep.spec.in - install documentations
+	  (AUTHORS, README, LICENSE, etc) - use $(name) in Makefile instead
+	  of safekeep when possible
+
+2006-12-27 21:21 +0000 [r266]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/debian/rules, safekeep/trunk/Makefile,
+	  safekeep/trunk/README, safekeep/trunk/debian/changelog.in,
+	  safekeep/trunk/sample.cfg, safekeep/trunk/safekeep-test,
+	  safekeep/trunk/LICENSE, safekeep/trunk/debian/control,
+	  safekeep/trunk/safekeep, safekeep/trunk/AUTHORS: Rename LaBackup
+	  to SafeKeep, using the following rules: - in natural language, it
+	  is spelled SafeKeep - the binary, package, dirs, etc. are all
+	  lower case: safekeep This follows the pattern used by
+	  SpamAssassin. Please note that the files have been manipulated in
+	  the CVS repo to maintain the history. The new CVS module is
+	  called 'SafeKeep', the old 'LaBackup' module still exists in CVS
+	  as read-only.
+
+2006-12-27 20:50 +0000 [r265]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/LICENSE (added), safekeep/trunk/AUTHORS (added),
+	  safekeep/trunk/COPYING (added): Add OSS structure
+
+2006-12-27 20:39 +0000 [r264]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/README, safekeep/trunk/safekeep: Add protocol
+	  versioning.
+
+2006-12-24 17:04 +0000 [r263]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Pass the default id to the client as
+	  well.
+
+2006-12-20 03:55 +0000 [r262]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Make use of our wrapper spawn()
+	  function.
+
+2006-12-20 03:46 +0000 [r261]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/Makefile: Replace the '+' in the snapshot version
+	  with '.', the '+' is too unusual. Report the date in UTC to avoid
+	  the need for a timezone. Don't separate time from date to create
+	  one nr for the snapshot id.
+
+2006-12-20 03:40 +0000 [r260]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Get rid of extranous white space at end
+	  of line
+
+2006-12-20 03:36 +0000 [r259]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Capture stdout and stderr of child
+	  processes and redirect it to the logs
+
+2006-12-19 05:50 +0000 [r258]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Exclude /etc/mtab and /etc/lvm
+	  during backup, they change during snapshotting
+
+2006-12-19 05:36 +0000 [r257]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Add ability to pass extra args to
+	  LaBackup, such as -vv flags for debugging
+
+2006-12-19 05:30 +0000 [r256]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Add parameter to control nr of test
+	  iterations
+
+2006-12-19 05:29 +0000 [r255]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Fix typo
+
+2006-12-19 01:34 +0000 [r254]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Rerooting the paths on the rbind root
+	  requires special attention
+
+2006-12-19 01:27 +0000 [r253]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Fix snapshot syntax and enable
+	  snapshots during testing.
+
+2006-12-14 04:49 +0000 [r252]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Fix typo
+
+2006-12-14 04:45 +0000 [r251]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Always reset the known_hosts file
+
+2006-12-14 04:32 +0000 [r250]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Always reset the host file
+
+2006-12-14 04:21 +0000 [r249]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Be a bit more explicit
+
+2006-12-14 04:19 +0000 [r248]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Fix typo
+
+2006-12-14 04:07 +0000 [r247]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Fix typo
+
+2006-12-14 04:05 +0000 [r246]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Add support for deploying to
+	  multiple distros
+
+2006-12-14 04:03 +0000 [r245]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Add automatic distribution
+	  detection
+
+2006-12-14 03:49 +0000 [r244]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Use a more distinctive name for the
+	  devel repo
+
+2006-12-14 03:26 +0000 [r243]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Bunch of little fixes
+
+2006-12-14 02:57 +0000 [r242]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: If the client is remote (that is, we
+	  have a host), we must have a username and an identity file, so
+	  reflect that in the code by removing all the code testing for
+	  their existance.
+
+2006-12-14 02:46 +0000 [r241]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Use the default user too
+
+2006-12-14 02:45 +0000 [r240]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Use the default key for ctrl to
+	  test that portion of the code
+
+2006-12-14 02:42 +0000 [r239]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Always perform the LVM check for
+	  now
+
+2006-12-14 02:42 +0000 [r238]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Check for removed --rbinds
+
+2006-12-14 02:40 +0000 [r237]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Mark the rbind dir so we can later find
+	  it easily
+
+2006-12-14 02:32 +0000 [r236]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Add conditional snapshotting
+
+2006-12-14 02:23 +0000 [r235]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Mark TODOs clearly
+
+2006-12-14 02:21 +0000 [r234]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/README: More instructions.
+
+2006-12-14 02:21 +0000 [r233]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Ensure RDBMSes are installed and
+	  running
+
+2006-12-13 04:43 +0000 [r232]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Ignore clients that don't have proper
+	  keys
+
+2006-12-13 04:39 +0000 [r231]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/README (added): Add a small README with info about
+	  the full test
+
+2006-12-13 04:37 +0000 [r230]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Add client automatically to the
+	  server's /etc/hosts
+
+2006-12-13 04:08 +0000 [r229]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Move fingerprint setup in the
+	  server section
+
+2006-12-13 04:00 +0000 [r228]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Automatically deploy client's
+	  fingerprint to the server so we avoid any kind of interactivity
+	  during key management.
+
+2006-12-13 03:24 +0000 [r227]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Add support for local commands to
+	  all helper functions. Take over client before we take over the
+	  server.
+
+2006-12-12 05:21 +0000 [r226]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/Makefile: Rename testfull to fulltest, it's easier
+	  on the tongue.
+
+2006-12-12 05:20 +0000 [r225]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/debian/rules: Rename /etc/LaBackup to
+	  /etc/LaBackup.d
+
+2006-12-12 05:16 +0000 [r224]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/debian/rules, safekeep/trunk/Makefile,
+	  safekeep/trunk/debian/changelog.in, safekeep/trunk/sample.cfg,
+	  safekeep/trunk/safekeep-test, safekeep/trunk/debian/control,
+	  safekeep/trunk/safekeep: Standardize capitalization to
+	  'LaBackup'. Rename /etc/labackuip --> /etc/LaBackup.d
+
+2006-12-12 04:49 +0000 [r223]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Backup /srv instead of /var, there
+	  we have too many files changing. Exclude a few problematic files
+	  from the backup. Small misc fixes.
+
+2006-12-11 19:05 +0000 [r222]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Make the MD5 sums gathered on
+	  client and server as simialar as possible in terms of the
+	  filenames
+
+2006-12-11 04:21 +0000 [r221]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Prepare the server to receive the
+	  data; better tracing
+
+2006-12-11 03:55 +0000 [r220]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Fix copy&paste bug
+
+2006-12-11 03:46 +0000 [r219]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Install/upgrade appropriately. Also
+	  make sure to blow the cache away to we get the latest
+
+2006-12-11 03:35 +0000 [r218]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: We renamed the key-{ctrl,data} to
+	  key_{ctrl,data}
+
+2006-12-11 03:33 +0000 [r217]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Do not attempt to cleanup non-existant
+	  dir
+
+2006-12-11 03:31 +0000 [r216]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Make package optional, and turn it
+	  off by default.
+
+2006-12-11 03:28 +0000 [r215]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Tiny fix
+
+2006-12-11 02:56 +0000 [r214]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Now we have LaBack in repo, install
+	  it
+
+2006-12-11 02:55 +0000 [r213]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Build, sign and deploy the .rpm
+
+2006-12-11 01:45 +0000 [r212]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Deploty the server's ID to the
+	  cliend a bit smarter, so we don't keep on adding it ad-infinitum.
+
+2006-12-11 01:40 +0000 [r211]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Getting rid of the .ssh dir is not
+	  a good idea as we lose access to the box
+
+2006-12-11 01:38 +0000 [r210]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Add the key blindly to make sure we
+	  have it, and we are asked the passwd only once.
+
+2006-12-11 01:32 +0000 [r209]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Fix typo
+
+2006-12-11 01:31 +0000 [r208]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Use the new func to reimplement
+	  writefile()
+
+2006-12-11 01:29 +0000 [r207]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Add function that supports feeding
+	  input to the remote command
+
+2006-12-11 01:28 +0000 [r206]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Generate a server id file, and
+	  install it on client. Then install the control and data keys via
+	  key management functionality.
+
+2006-12-10 19:48 +0000 [r205]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Nicer key naming for test server
+
+2006-12-10 19:05 +0000 [r204]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Introduce a --status action for the
+	  --keys mode, and made it default. It displays the key status
+	  (e.g. what will happen on --deploy) for each of the named
+	  clients. Fix a few bugs left over in the key management code.
+
+2006-12-10 08:00 +0000 [r203]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Remove debug statement
+
+2006-12-10 07:56 +0000 [r202]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Remember the original line and feed that
+	  to the client
+
+2006-12-10 07:54 +0000 [r201]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Render the keys back to text form
+
+2006-12-10 07:51 +0000 [r200]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Actually returned the parsed keys
+
+2006-12-10 07:50 +0000 [r199]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Implement parse_authorized_keys()
+	  function. Disable agent forwarding for the commands we are
+	  running on clients.
+
+2006-12-10 00:36 +0000 [r198]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Never return non-zero exit code
+
+2006-12-09 22:07 +0000 [r197]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Better key comment
+
+2006-12-09 22:04 +0000 [r196]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Automatically generate keys if they
+	  don't exist. Rename some variables for clarity.
+
+2006-12-09 21:36 +0000 [r195]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: On the server side, tracing information
+	  should go to the stderr.
+
+2006-12-09 21:35 +0000 [r194]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Better tracing
+
+2006-12-09 21:31 +0000 [r193]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Better error reporting
+
+2006-12-09 21:28 +0000 [r192]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Get rid of the --clientid option, pass
+	  the ids, if any, as arguments. Handle all clients if no id was
+	  specified on the command line.
+
+2006-12-09 06:29 +0000 [r191]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Smartly deploy keys to the client (in an
+	  idempotentic manner)
+
+2006-12-09 06:01 +0000 [r190]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: No need to restrict by host, it
+	  overcomplicates things
+
+2006-12-09 05:59 +0000 [r189]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Output all key lines at once
+
+2006-12-09 05:56 +0000 [r188]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/sample.cfg, safekeep/trunk/safekeep-test,
+	  safekeep/trunk/safekeep: Rename key/key2 to key_ctrl/key_data
+	  respectively
+
+2006-12-09 05:48 +0000 [r187]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Provide default values for key and key2
+
+2006-12-08 05:34 +0000 [r186]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Replace ssh-copy-id with our own
+	  (better) implementation. Fix a nasty copy & paste bug, better
+	  tracing.
+
+2006-12-08 04:58 +0000 [r185]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Better trace
+
+2006-12-08 04:56 +0000 [r184]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Fix copy & paste error
+
+2006-12-08 04:54 +0000 [r183]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Factor out capturing of output from
+	  remote host
+
+2006-12-08 04:49 +0000 [r182]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: More verbosity, add missing mode
+
+2006-12-08 04:41 +0000 [r181]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Add readfile() abstraction (able to
+	  read content from remote hosts as well), and make use of it
+
+2006-12-08 04:33 +0000 [r180]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Install the key in backup-op's home
+	  dir, not in root's dir. Lighter quoting, we don't need to be so
+	  strict.
+
+2006-12-08 04:27 +0000 [r179]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Do not attempt to get LaBackup via
+	  yum for now, it's not available just yet
+
+2006-12-07 22:32 +0000 [r178]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Fix typo
+
+2006-12-07 22:31 +0000 [r177]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Take over the client & server
+	  unconditionally, so we have less chances of breakaage in the test
+
+2006-12-07 20:28 +0000 [r176]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Quote remote commands properly
+
+2006-12-07 20:14 +0000 [r175]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Fix the command generation now that
+	  we abstracted away mkssh()
+
+2006-12-07 16:51 +0000 [r174]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Fix typo, and declare
+	  ssh_id_file_keys as global
+
+2006-12-07 16:47 +0000 [r173]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/Makefile: Add ability to invoke test via the
+	  Makefile
+
+2006-12-07 16:46 +0000 [r172]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Avoid errors on non-existant
+	  environment variables
+
+2006-12-07 16:37 +0000 [r171]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Provide decent company wide
+	  defaults for LaBackup test boxes
+
+2006-12-07 16:35 +0000 [r170]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Read the client/server address from
+	  the environment if available
+
+2006-12-07 16:27 +0000 [r169]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Separate rcmd from rpipe for
+	  clarity. Allow them to return the exit status if no description
+	  is passed it
+
+2006-12-07 16:21 +0000 [r168]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Add comment on what we need to do
+	  to get rid of ssh-copy-id
+
+2006-12-07 15:26 +0000 [r167]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Try to guess SSH id files/keys
+	  automatically
+
+2006-12-07 14:26 +0000 [r166]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Allow ability to specify identity
+	  file
+
+2006-12-07 14:19 +0000 [r165]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Fix a bunch of obvious bugs
+
+2006-12-05 05:16 +0000 [r164]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Remove extraneous line
+
+2006-12-05 05:15 +0000 [r163]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Allow for specifying the address of
+	  the client and server in the remote test
+
+2006-12-05 05:11 +0000 [r162]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: For now, run the full test only for
+	  2 interations
+
+2006-12-05 05:10 +0000 [r161]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Remove stale arg
+
+2006-12-05 04:58 +0000 [r160]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Create the base .cfg file for the
+	  full test. Small cleanups and reorgs.
+
+2006-12-05 04:42 +0000 [r159]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test, safekeep/trunk/safekeep: Implement
+	  the --print flag for the --keys mode.
+
+2006-12-05 04:39 +0000 [r158]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Install the keys on the client.
+
+2006-12-05 04:31 +0000 [r157]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Merge the lbc-copy-id script into
+	  LaBackup.
+
+2006-12-05 04:27 +0000 [r156]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Better id
+
+2006-12-05 04:26 +0000 [r155]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Merge key management into LaBackup
+
+2006-12-05 03:49 +0000 [r154]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Refactor the parsing code to a separate
+	  function
+
+2006-12-05 02:23 +0000 [r153]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Fix typo
+
+2006-12-05 02:23 +0000 [r152]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Reorg help output, add more checks
+
+2006-12-05 02:03 +0000 [r151]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Fix glob pattern
+
+2006-12-05 01:36 +0000 [r150]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Fix typo
+
+2006-12-04 06:09 +0000 [r149]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Compute the MD5 sums of all files
+	  that were backed up
+
+2006-12-04 06:08 +0000 [r148]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Implement big chunk of remote test
+
+2006-12-04 05:57 +0000 [r147]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Add ability to pipe from one remote
+	  machine to another
+
+2006-12-04 05:39 +0000 [r146]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Create files on client
+
+2006-12-04 05:35 +0000 [r145]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Add support for creating file on a
+	  remote machine as well
+
+2006-12-03 21:38 +0000 [r144]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Add start for test-remote, plus
+	  document remaining steps to accomplish
+
+2006-12-03 19:21 +0000 [r143]  Mihai Popa <mihai@lattica.com>
+
+	* safekeep/trunk/safekeep-test: fix comments
+
+2006-12-03 18:26 +0000 [r142]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Just do 2 iterations for the local
+	  test, we don't need more
+
+2006-12-03 18:25 +0000 [r141]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Make the database name optional, and
+	  dump all databases if it's not specified.
+
+2006-12-03 18:05 +0000 [r140]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: We are ready for a 0.1.0 release
+
+2006-12-03 17:48 +0000 [r139]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Add support for controlling the
+	  verbosity level both on client and server
+
+2006-12-03 17:17 +0000 [r138]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Invert the meaning of the client/server
+	  flag
+
+2006-12-03 17:11 +0000 [r137]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Move function in more appropriate place
+
+2006-12-03 17:10 +0000 [r136]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Log the data in the correct format
+	  directly on the client side
+
+2006-12-03 17:03 +0000 [r135]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Get rid of trailing whitespace in lines
+	  we read from a file
+
+2006-12-03 17:02 +0000 [r134]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Lighter output
+
+2006-12-03 17:02 +0000 [r133]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Turn the logbuf into a list for
+	  performance reasons
+
+2006-12-03 17:00 +0000 [r132]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Wait a bit between tests,
+	  rdiff-backup can't run within the same second
+
+2006-12-03 16:47 +0000 [r131]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Don't bother setting the remote schema
+	  if we don't have a host
+
+2006-12-03 16:43 +0000 [r130]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/Makefile: Add help info for test
+
+2006-12-03 16:42 +0000 [r129]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Don't recreate things unnecessarily
+	  in between tests
+
+2006-12-03 15:41 +0000 [r128]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Correctly compute the MD5 sums
+
+2006-12-03 15:36 +0000 [r127]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Do not assume the rdiff-backup-data dir
+	  always exists
+
+2006-12-03 15:33 +0000 [r126]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Do not default host and user to
+	  localhost and root, simply run the backup in local mode if not
+	  present. Debug and logging enhancements.
+
+2006-12-03 05:41 +0000 [r125]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/Makefile, safekeep/trunk/safekeep-test (added):
+	  Add testing harness
+
+2006-12-02 23:15 +0000 [r124]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Small syntax fix
+
+2006-12-02 20:28 +0000 [r123]  Eduard Malinschi <ed@lattica.com>
+
+	* safekeep/trunk/sample.cfg: update comments
+
+2006-12-02 00:39 +0000 [r122]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/sample.cfg: Fix sample.cfg
+
+2006-11-30 06:07 +0000 [r121]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Properly quote command passed to 'su -c'
+
+2006-11-30 06:01 +0000 [r120]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Whitespace fix
+
+2006-11-30 06:00 +0000 [r119]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Don't bother with fancy error handling
+	  on server, client knows to cleanup after itself in case it loses
+	  connection with the server.
+
+2006-11-30 05:58 +0000 [r118]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Move rdiff-backup logs handling closer
+	  to where it's needed
+
+2006-11-30 05:56 +0000 [r117]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Remove the BDIR protocol command, do
+	  everything in SETUP. This way we can atomically create and test
+	  if we can --rbind the bdir. Move sending of reposes from client
+	  to server in the main client loop. Allow for bdir to simply be
+	  '/' if we don't need a temporary root. Create a temporarry root
+	  in bdir only if we have snapshots. Fix a bunch more of path and
+	  string manipulations.
+
+2006-11-30 04:41 +0000 [r116]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Rename the '<dir>' element to '<repo>'
+	  for clarity. Add a 'retention' attribute to '<repo>' that
+	  controls the amount of time data will be retained in the repo.
+
+2006-11-30 04:27 +0000 [r115]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: More path handling cleanups
+
+2006-11-30 03:49 +0000 [r114]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Dump the backup.log and statistics file.
+
+2006-11-30 03:33 +0000 [r113]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: We now separate server/client output by
+	  case
+
+2006-11-30 03:31 +0000 [r112]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Add support function to dump content of
+	  file to logs
+
+2006-11-30 03:26 +0000 [r111]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Move send_notification to a more
+	  appropriate portion of the file
+
+2006-11-30 03:25 +0000 [r110]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Tiny clarification.
+
+2006-11-30 03:24 +0000 [r109]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Support multiple email addresses. Small
+	  fixes for the help output.
+
+2006-11-29 21:59 +0000 [r108]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Factor out the logging of data into one
+	  function called log(). Rename the log buffer to logbuf. Better
+	  display of messages from client.
+
+2006-11-29 21:46 +0000 [r107]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: ERROR is a reserved word
+
+2006-11-29 19:05 +0000 [r106]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Follow the smtplib convention for
+	  missing SMTP host
+
+2006-11-29 18:32 +0000 [r105]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: A bit more clear message
+
+2006-11-29 18:31 +0000 [r104]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Factor out email notifications from
+	  server business. Handle all exceptions at the higher level.
+
+2006-11-29 16:40 +0000 [r103]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Small cleanup
+
+2006-11-29 04:42 +0000 [r102]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Encode the instance information in the
+	  snapshot name
+
+2006-11-29 04:39 +0000 [r101]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Add missing param
+
+2006-11-29 04:38 +0000 [r100]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Refactor snapshot info handling in one
+	  function. Use the long option names where possible for clarity.
+	  Small cleanups.
+
+2006-11-29 04:15 +0000 [r99]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Factor out process spawning.
+
+2006-11-29 02:53 +0000 [r98]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: More standard handling of paths, and a
+	  few little cleanups.
+
+2006-11-28 05:56 +0000 [r97]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Fix error in cleanup logic, rename
+	  variable for readability.
+
+2006-11-28 05:50 +0000 [r96]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: We don't snapshot without a bdir
+
+2006-11-28 05:48 +0000 [r95]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Better error handling and dealing with
+	  no bind-dir in client cleanup.
+
+2006-11-28 05:37 +0000 [r94]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Abstract the sending of the data a bit
+
+2006-11-28 05:30 +0000 [r93]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Bit cleaner error reporting
+
+2006-11-28 01:18 +0000 [r92]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: This is a config file problem
+
+2006-11-28 01:16 +0000 [r91]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Make the --rbind optional, just skip the
+	  snapshots if we don't have it
+
+2006-11-28 01:05 +0000 [r90]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: We no longer crap out of DB dump
+
+2006-11-28 01:01 +0000 [r89]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Cleanup error handling and logging for
+	  snapshot setup and teardown.
+
+2006-11-19 21:52 +0000 [r88]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/debian/changelog.in: gpg does a full string search
+	  on the email.
+
+2006-11-19 21:49 +0000 [r87]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/debian/changelog.in: Use devel@lattica.com so
+	  debuild will automatically sign the package
+
+2006-11-19 21:46 +0000 [r86]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/Makefile: '_' is a reserved character in DEB
+	  package naming, try with '+'
+
+2006-11-19 21:41 +0000 [r85]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/debian/rules, safekeep/trunk/Makefile: Now make it
+	  also work...
+
+2006-11-19 21:18 +0000 [r84]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/Makefile (added): Add a central Makefile which
+	  facilitates the build.
+
+2006-11-19 21:17 +0000 [r83]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/debian/copyright (added),
+	  safekeep/trunk/debian/rules (added),
+	  safekeep/trunk/debian/changelog.in (added), safekeep/trunk/debian
+	  (added), safekeep/trunk/debian/control (added),
+	  safekeep/trunk/debian/dirs (added), safekeep/trunk/safekeep,
+	  safekeep/trunk/debian/compat (added): RPM and DEB packaging, all
+	  with a global Makefile.
+
+2006-11-08 08:57 +0000 [r82]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/sample.cfg: Correct some typos.
+
+2006-11-08 05:04 +0000 [r81]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Add a new option: -C, --cfg=<file|dir>
+	  If the argument is a filename, it will use it as a configuration
+	  file. No attention is payed to the extension. If it is a
+	  directory, it will scan it for files that have the extension
+	  .cfg, and use those as configuration files. If no such
+	  configuration option is present on the command line, the program
+	  simply scans '/etc/labackup' for .cfg files, as before. (It
+	  behaves as if it was involved with -C /etc/labackup).
+
+2006-11-06 21:03 +0000 [r80]  Eduard Malinschi <ed@lattica.com>
+
+	* safekeep/trunk/sample.cfg: changed comment style
+
+2006-11-05 21:16 +0000 [r79]  Eduard Malinschi <ed@lattica.com>
+
+	* safekeep/trunk/sample.cfg: Added comments to the config file
+
+2006-11-01 21:47 +0000 [r78]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/safekeep: Let the user specify (using -m/--smtp
+	  command line options) the mail server to use when sending mails.
+
+2006-11-01 21:39 +0000 [r77]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/safekeep: Include hostname in the subject of
+	  emails from LaBackup.
+
+2006-10-30 14:07 +0000 [r76]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/safekeep: Doh. lvcreate/lvremove prefer the
+	  /dev/<group>/<volume> syntax over the
+	  /dev/mapper/<group>-<volume> one.
+
+2006-10-30 03:26 +0000 [r75]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Replace more of the leftover symbols
+
+2006-10-30 03:04 +0000 [r74]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Fix some leftover code
+
+2006-10-29 23:24 +0000 [r73]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/safekeep: Accept both
+	  '/dev/mapper/<group>-<volume>' and '/dev/<group>/<volume>'
+	  syntaxes for LVM snapshotting.
+
+2006-10-16 21:01 +0000 [r72]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/safekeep: Add a proper subject: header to the
+	  notification email.
+
+2006-10-16 20:44 +0000 [r71]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/safekeep: Whitespace cleanups.
+
+2006-10-16 20:43 +0000 [r70]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/safekeep: Implement email notifications.
+
+2006-10-01 00:48 +0000 [r69]  Mihai Popa <mihai@lattica.com>
+
+	* safekeep/trunk/safekeep: remove typo ? not sure how it got there
+	  in the first place
+
+2006-07-17 04:02 +0000 [r68]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Issue warnings instead of crashing
+	  during DB dumping process.
+
+2006-07-17 04:00 +0000 [r67]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Separate the DB user from the Unix user,
+	  make them both optional. If Unix user is specified, run the dump
+	  command as that user. This way we don't require to implement
+	  "trust" policy for users.
+
+2006-07-13 19:16 +0000 [r66]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Test the DB type, not database instance
+	  name.
+
+2006-07-13 19:14 +0000 [r65]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Always cleanup before exiting the
+	  client.
+
+2006-07-13 18:36 +0000 [r64]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Catch errors early on.
+
+2006-07-13 18:33 +0000 [r63]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Mark config errors differently, they are
+	  user errors.
+
+2006-07-13 18:10 +0000 [r62]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Avoid asserts, be explicit about the
+	  problem.
+
+2006-07-13 17:47 +0000 [r61]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Use recommended popen() calls.
+
+2006-07-13 17:13 +0000 [r60]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Force the remove of the snapshot,
+	  otherwise we get prompted.
+
+2006-07-13 17:12 +0000 [r59]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: read the config file only once, to avoid
+	  races. Fix syntax for splice operation.
+
+2006-07-13 17:02 +0000 [r58]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Default the id to the filename of the
+	  config file. Factor out the config extension into a constant.
+
+2006-07-13 16:56 +0000 [r57]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Pick a more direct name for the dev->mp
+	  function.
+
+2006-07-13 16:28 +0000 [r56]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/safekeep: Fix /proc/mount parsing.
+
+2006-07-13 16:26 +0000 [r55]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/safekeep: Another try at fixing snap paths.
+
+2006-07-13 16:16 +0000 [r54]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/safekeep: Don't use '-snap' because we replace -
+	  with / later...
+
+2006-07-13 16:10 +0000 [r53]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/safekeep: Deduct mountpoint from /dev/mapper/
+	  specification.
+
+2006-07-13 15:53 +0000 [r52]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/safekeep: Correct mount point (its the third
+	  element in 'mount').
+
+2006-07-13 15:42 +0000 [r51]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Read the mount points from the output of
+	  mount, /proc/mounts does not least the LVM volumes on certain
+	  kernels.
+
+2006-07-13 14:29 +0000 [r50]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/safekeep: Go back to a single client instance, it
+	  was a bad idea to separate SETUP and CLEANUP Add a separate BDIR
+	  command to create the backup dir Implement the mount --rbind
+	  thingie Finish the LVM snapshot implementation using the mount
+	  --rbind namespace (not tested...) Cleanup the info/error messages
+	  Threat the client errors in the client's while loop (we don't
+	  want to exit the client on errors)
+
+2006-07-13 10:35 +0000 [r49]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/safekeep: Make the temp dir name part of the
+	  client/server protocol. Client generates it in SETUP and returns
+	  it to the server, which passes it back to the client in the
+	  CLEANUP command.
+
+2006-07-13 10:17 +0000 [r48]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/safekeep: Factorized some code Make separate
+	  invocations for setup and cleanup to ease cleanups in case of
+	  errors
+
+2006-07-13 03:57 +0000 [r47]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Remove the client-side semaphore, rely
+	  on a second key to be used by rdiff-backup for the data-channel.
+
+2006-07-13 03:54 +0000 [r46]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Revert inocent refactoring, it's
+	  breaking the code for mysterious reasons (I'm willing to pay
+	  money for a good explanation)
+
+2006-07-13 03:19 +0000 [r45]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Remove unused code
+
+2006-07-13 03:17 +0000 [r44]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Refactor the client backup bit into its
+	  own function.
+
+2006-07-13 03:13 +0000 [r43]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/sample.cfg, safekeep/trunk/safekeep: Add the
+	  (optional) second key to be used by rdiff-backup. Build the
+	  remote-schema for rdiff-backup explicitely, don't rely on the
+	  default one.
+
+2006-07-12 22:20 +0000 [r42]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Remove redundant exit
+
+2006-07-12 22:01 +0000 [r41]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Fix slice for good
+
+2006-07-12 21:36 +0000 [r40]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/sample.cfg, safekeep/trunk/safekeep: Allow for an
+	  explicit identity file/public key.
+
+2006-07-12 21:11 +0000 [r39]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/safekeep: Make expandtab automatic for the one
+	  true editor.
+
+2006-07-12 21:06 +0000 [r38]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Retab to avoid ugly diffs.
+
+2006-07-12 21:04 +0000 [r37]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Fix slice, simplify code a bit.
+
+2006-07-12 20:35 +0000 [r36]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Make the <dir> optional. Fix the
+	  traceback.
+
+2006-07-12 20:16 +0000 [r35]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Fix indentation
+
+2006-07-12 19:57 +0000 [r34]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Use exceptions consistently throughout
+	  the code when dealing with problems (instead of the fatal()
+	  routine). Handle exceptions centrally, at the outer layer. Use
+	  Python's try/finally statement to handle cleanup.
+
+2006-07-12 19:35 +0000 [r33]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Separate the protocol for the config
+	  file format. Reorganize the code a bit as a result.
+
+2006-07-12 18:17 +0000 [r32]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Make good use of the log() function. Add
+	  a fatal() funtion, similar to log(), taht quits the app. Add
+	  ability to log exceptions with tracebacks.
+
+2006-07-12 17:57 +0000 [r31]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: More Pythoneque comparisons.
+
+2006-07-12 17:50 +0000 [r30]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Exclude by default stuff that is not
+	  explicitly included. More debugging code.
+
+2006-07-12 17:43 +0000 [r29]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Default the 'dir' to the 'id' of the
+	  backup job.
+
+2006-07-12 17:40 +0000 [r28]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Default 'host' to localhost. More
+	  pythonesque comparison.
+
+2006-07-12 17:39 +0000 [r27]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/sample.cfg, safekeep/trunk/safekeep: Remove the
+	  'root' attribute, always use '/'. It is not useful without a way
+	  to control destination directory.
+
+2006-07-12 04:07 +0000 [r26]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Unify handling of the
+	  <include>/<exclude> directives so that we can easily maintain
+	  their relative order.
+
+2006-07-11 18:26 +0000 [r25]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: It almost always make sense to run the
+	  client as root, so default the user name to 'root'.
+
+2006-07-11 16:25 +0000 [r24]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/safekeep: Use manual read()/write() instead of
+	  pexpect methods, the pexpect module is not standard in RHEL4.
+
+2006-07-11 15:53 +0000 [r23]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Make the <setup> element optional for
+	  the config file.
+
+2006-07-11 15:50 +0000 [r22]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Dump the traceback for easier debugging.
+
+2006-07-11 15:42 +0000 [r21]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/safekeep: Use a temporary directory instead of
+	  /mnt for mounting LVM snapshots
+
+2006-07-11 14:44 +0000 [r20]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/sample.cfg, safekeep/trunk/safekeep: Implemented
+	  LVM snapshots. Changed the 'volume' attribute to 'device' and
+	  added the 'size' attribute.
+
+2006-07-11 11:20 +0000 [r19]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/safekeep: Implement --include/--exclude options.
+
+2006-07-11 09:16 +0000 [r18]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/safekeep: Final retab.
+
+2006-07-11 09:14 +0000 [r17]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/safekeep: Combine hard tabs with spaces.
+
+2006-07-11 09:08 +0000 [r16]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/safekeep: Retab with 4 spaces instead of real
+	  tabs.
+
+2006-07-11 08:46 +0000 [r15]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/sample.cfg (added): Sample config file for
+	  LaBackup
+
+2006-07-11 08:45 +0000 [r14]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/safekeep: Fix Dimi's changes.
+
+2006-07-11 04:42 +0000 [r13]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Make 'root' be an attribute to <data>
+	  rather then an element inside it.
+
+2006-07-11 04:39 +0000 [r12]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Add dump implementation. Add 'user'
+	  (optional) attribute to <dump> to specify the database user to
+	  connect as. It may also need to support an option 'passwd'
+	  attribute too.
+
+2006-07-10 23:14 +0000 [r11]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Introduce a new attribute to <dump>
+	  called cleanup. Default it to false, must be explicitily set to
+	  true for the dump to be deleted after the backup. Remove the dump
+	  file for the ones requesting cleanup of exit.
+
+2006-07-10 16:18 +0000 [r10]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/safekeep: Use 'id' for presentation purposes.
+
+2006-07-10 15:58 +0000 [r9]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/safekeep: Client/server works now Implemented the
+	  new style config file.
+
+2006-07-07 12:37 +0000 [r8]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/safekeep: Half-implemented the client/server
+	  protocol. It does not work yet...
+
+2006-07-03 15:47 +0000 [r7]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Fix indentation and cleanups.
+
+2006-07-03 15:42 +0000 [r6]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Outout errors to stderr.
+
+2006-07-03 15:32 +0000 [r5]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: This is a python file, it's text.
+
+2006-07-03 15:31 +0000 [r4]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/.project: We no longer need yaml.
+
+2006-07-03 15:31 +0000 [r3]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Switch from yaml to xml to avoid
+	  dependence on non-standard lib.
+
+2006-07-03 06:32 +0000 [r2]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep (added), safekeep/trunk/.project (added):
+	  Add first cut at our backup script.
+
+2006-07-03 06:32 +0000 [r1]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/tags (added), safekeep (added), safekeep/trunk (added),
+	  safekeep/branches (added): New repository initialized by cvs2svn.
+
