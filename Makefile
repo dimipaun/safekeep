@@ -71,6 +71,9 @@ man: $(DOC_MAN)
 
 $(DOC_HTML) $(DOC_MAN): doc/asciidoc.conf
 
+changelog:
+	svn log -v --xml | svn2log.py -D 0 -u doc/users
+
 tar: tar-snapshot
 
 tar-snapshot:
