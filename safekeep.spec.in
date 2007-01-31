@@ -56,7 +56,7 @@ Requires(pre):  safekeep-common = %{PACKAGE_VERSION}
 
 %description server
 The server component of the SafeKeep backup system.
-This compoenent should be installed on the server on
+This component should be installed on the server on
 which the data will be backed-up to.
 
 %prep
