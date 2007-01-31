@@ -1,0 +1,27 @@
+safekeep.conf(5)
+================
+
+NAME
+----
+safekeep.conf - Configuration file for 'safekeep(1)'
+
+SYNOPSIS
+--------
+TODO
+
+DESCRIPTION
+-----------
+TODO
+
+PARAMETERS
+----------
+TODO
+
+FILES
+-----
+    /etc/safekeep.d/
+
+SEE ALSO
+--------
+safekeep(1), rdiff-backup(1)
+

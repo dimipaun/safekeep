@@ -10,9 +10,9 @@ tagname     := $(shell echo Release-$(releasename) | tr . _)
 dirname     := $(shell basename $(PWD))
 rpmroot     := $(shell grep '%_topdir' ~/.rpmmacros | sed 's/^[^ \t]*[ \t]*//')
 svnroot     := $(shell  LANG=C svn info |grep Root |cut -c 18-)
-MAN_TXT     := doc/safekeep.txt
+MAN_TXT     := doc/safekeep.txt doc/safekeep.conf.txt
+DOC_MAN     := doc/safekeep.1 doc/safekeep.conf.5
 DOC_HTML    := $(patsubst %.txt,%.html,$(MAN_TXT))
-DOC_MAN     := $(patsubst %.txt,%.1,$(MAN_TXT))
 
 
 all: help
@@ -63,7 +63,7 @@ man: $(DOC_MAN)
 %.html: %.txt
 	asciidoc -b xhtml11 -d manpage -f doc/asciidoc.conf $<
 
-%.1: %.xml
+%.1 %.5: %.xml
 	xmlto -o doc -m doc/callouts.xsl man $<
 
 %.xml: %.txt
@@ -123,4 +123,4 @@ test-remote:
 clean:
 	rm -f {.,doc,debian}/*~ *.py[co] 
 	rm -f $(name).spec debian/changelog
-	rm -f doc/*.xml doc/*.html doc/*.1
+	rm -f doc/*.xml doc/*.html doc/*.[15]
