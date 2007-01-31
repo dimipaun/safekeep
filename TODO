@@ -1,0 +1,15 @@
+These are ideas that we need to look at post 1.0.
+
+
+Future:
+  * Find a way to show man page on website with header and footer
+  * decide how big the snapshot size should be automagically
+  * fully automatic shapshotting mode
+  * configuration inheritance
+  * transactional store of ops on server side, and automagic recovery from errors
+  * Windows support for the client
+  * Write SE Linux rules to limit access rights (akin to the httpd ones)
+  * Add tests db dumps
+  * Run the server in a chroot-jail
+  * Compare mirroring with a straight `rsync`
+
