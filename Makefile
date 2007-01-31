@@ -93,14 +93,14 @@ tar-release:
 deb: deb-snapshot
 
 deb-snapshot: tar-snapshot
-	tar xz -f $(snapshotname).tar.gz
-	cd $(snapshotname) && debuild --check-dirname-regex 'safekeep(-.*)?'
-	rm -rf $(snapshotname) $(snapshotname).tar.gz
+	tar xz -C /tmp -f $(snapshotname).tar.gz
+	rm -rf $(snapshotname).tar.gz
+	cd /tmp/$(snapshotname) && debuild --check-dirname-regex 'safekeep(-.*)?'
 
 deb-release: tar-release
-	tar xz -f $(releasename).tar.gz
-	cd $(releasename) && debuild --check-dirname-regex 'safekeep(-.*)?'
-	rm -rf $(releasename) $(releasename).tar.gz
+	tar xz -C /tmp -f $(releasename).tar.gz
+	rm -rf $(releasename).tar.gz
+	cd /tmp/$(releasename) && debuild --check-dirname-regex 'safekeep(-.*)?'
 
 rpm: rpm-snapshot
 
