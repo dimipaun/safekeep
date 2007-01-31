@@ -1,0 +1,6 @@
+#!/bin/sh
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+
+sudo -H -u safekeep safekeep --server
+
