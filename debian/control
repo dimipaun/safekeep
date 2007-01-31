@@ -5,9 +5,34 @@ Maintainer: Lattica, Inc.
 Build-Depends: debhelper (>= 4.0.0), xmlto, asciidoc (> 6.0.3)
 Standards-Version: 3.6.2
 
-Package: safekeep
+Package: safekeep-server
+Architecture: all
+Depends: safekeep-common, rdiff-backup, adduser, ssh-client
+Replaces: safekeep
+Description: The server component of the SafeKeep backup system.
+ SafeKeep is a client/server backup system which enhances the
+ power of rdiff-backup with simple configuration and use.
+ .
+ This component should be installed on the server on
+ which the data will be backed-up to.
+
+Package: safekeep-client
+Architecture: all
+Depends: safekeep-common, ssh-server
+Replaces: safekeep
+Description: The client component of the SafeKeep backup system.
+ SafeKeep is a client/server backup system which enhances the
+ power of rdiff-backup with simple configuration and use.
+ .
+ This component should be installed on all hosts that
+ need to be backed-up.
+
+Package: safekeep-common
 Architecture: all
 Depends: ${python:Depends}, rdiff-backup
-Description: Lattica's backup script
-  SafeKeep is a client/server backup script which enhances the
-  power of rdiff-backup with simple configuration and use.
+Replaces: safekeep
+Description: The common component of the SafeKeep backup system.
+ SafeKeep is a client/server backup system which enhances the
+ power of rdiff-backup with simple configuration and use.
+ .
+ This is shared in between the client/server components.

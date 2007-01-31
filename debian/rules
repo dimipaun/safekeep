@@ -14,12 +14,15 @@ install:
 
 	make build
 
-	mkdir -p $(CURDIR)/debian/safekeep/usr/bin
-	mkdir -p $(CURDIR)/debian/safekeep/etc/safekeep.d
-	mkdir -p $(CURDIR)/debian/safekeep/usr/share/man/man1
+	install -d -m 755 $(CURDIR)/debian/safekeep-common/usr/bin
+	install -d -m 755 $(CURDIR)/debian/safekeep-common/usr/share/man/{man1,man5}
+	install -m 755 safekeep $(CURDIR)/debian/safekeep-common/usr/bin
+	install -m 755 doc/safekeep.1 $(CURDIR)/debian/safekeep-common/usr/share/man/man1
+	install -m 755 doc/safekeep.conf.5 $(CURDIR)/debian/safekeep-common/usr/share/man/man5
 
-	install -m 755 safekeep $(CURDIR)/debian/safekeep/usr/bin
-	install -m 755 doc/safekeep.1 $(CURDIR)/debian/safekeep/usr/share/man/man1
+	install -d -m 755 $(CURDIR)/debian/safekeep-server/etc/safekeep.d
+	install -d -m 755 $(CURDIR)/debian/safekeep-server/etc/cron.daily
+	install -m 755 safekeep.cron $(CURDIR)/debian/safekeep-server/etc/cron.daily/safekeep
 
 binary-indep: install
 	dh_testdir

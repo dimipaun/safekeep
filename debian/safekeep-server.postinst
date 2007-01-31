@@ -1,0 +1,20 @@
+#!/bin/sh
+
+set -e
+
+case "$1" in
+    configure)
+    	adduser --quiet --system --home /var/lib/safekeep safekeep
+	install -d -m 700 -o safekeep -g nogroup /var/lib/safekeep/.ssh
+	;;
+
+    abort-upgrade|abort-remove|abort-deconfigure)
+	;;
+
+    *)
+	echo "postinst called with unknown argument \`$1'" >&2
+	exit 0
+	;;
+esac
+
+exit 0
