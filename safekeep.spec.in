@@ -21,7 +21,7 @@ BuildRequires:	xmlto, asciidoc > 6.0.3
 
 %description
 SafeKeep is a client/server backup system which enhances the
-power of rdiff-backup with simple configuration and use.
+power of rdiff-backup with simple, centralized configuration.
 
 %package common
 Summary:        The SafeKeep backup system (common component)
@@ -31,8 +31,11 @@ Requires:       rdiff-backup
 Requires(pre):  python >= 2.3
 
 %description common
-The common component of the SafeKeep backup system.
-This is shared in between the client/server components.
+SafeKeep is a client/server backup system which enhances the
+power of rdiff-backup with simple, centralized configuration.
+
+This is the common component of SafeKeep. It is shared in 
+between the client/server components.
 
 %package client
 Summary:        The SafeKeep backup system (client component)
@@ -43,9 +46,11 @@ Requires:       util-linux
 Requires(pre):  safekeep-common = %{PACKAGE_VERSION}
 
 %description client
-The client component of the SafeKeep backup system.
-This component should be installed on all hosts that
-need to be backed-up.
+SafeKeep is a client/server backup system which enhances the
+power of rdiff-backup with simple, centralized configuration.
+
+This is the client component of SafeKeep. It should be
+installed on all hosts that need to be backed-up.
 
 %package server
 Summary:        The SafeKeep backup system (server component)
@@ -55,9 +60,11 @@ Requires:       openssh, openssh-clients
 Requires(pre):  safekeep-common = %{PACKAGE_VERSION}
 
 %description server
-The server component of the SafeKeep backup system.
-This component should be installed on the server on
-which the data will be backed-up to.
+SafeKeep is a client/server backup system which enhances the
+power of rdiff-backup with simple, centralized configuration.
+
+This is the server component of SafeKeep. It should be
+installed on the server on which the data will be backed-up to.
 
 %prep
 %setup -q
