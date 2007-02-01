@@ -7,15 +7,81 @@ safekeep.conf - Configuration file for 'safekeep(1)'
 
 SYNOPSIS
 --------
-TODO
+These files are usually placed in `/etc/safekeep.d/` to be picked
+up automatically be 'safekeep(1)'. They must have a `.conf` extension.
 
 DESCRIPTION
 -----------
-TODO
+Each configuration file controls the backup of a host. They are typically
+named after the hostname of the machine they control the backup for, and
+have a '.conf' extesion (e.g. `mailbox.conf`). These files are written
+in XML. Virtually all elements and attributes are optional; if not present,
+`safekeep(1)` will provide reasonable, useful defaults.
+
+The full set of supported elements and attributes looks as follows:
+------------------------------------------------------------------------
+<backup id="my_workstation">
+
+  <!-- the client backup host, the user under which the servers will connect,
+       the SSH keys used for launching "safekeep --client" and "rdiff-backup"
+-->
+  <host
+    name="my_workstation.corp.com" user="root"
+    key-ctrl="/home/jdoe/.ssh/backup_id_dsa"
+    key-data="/home/jdoe/.ssh/backup2_id_dsa"
+  />
+
+  <!-- location where the backuped data will be stored on the server
+       and for how long (s=sec, m=min, h=hours, D=days, W=weeks, M=months, or
+Y=years) -->
+  <repo path="./data" retention="10D"/>
+
+  <!-- settings for database dump and for volume snapshot -->
+  <setup>
+
+    <!-- database type ("postgres" or "mysql"), user with backup rights,
+         location of the dump file on the client host, and flag to remove
+         or not the dump file after the backup is done -->
+    <dump
+      type="postgres"
+      db="dbname"
+      user="foobar"
+      file="/var/backup/dumps/mydata"
+      cleanup="true"
+    />
+
+    <!-- what volume is to be snapshoted (device location) and the size
+         of the snapshot (unallocated space must exist in the volume group)
+-->
+    <snapshot
+      device="/path/to/volume"
+      size="500M"
+    />
+
+  </setup>
+
+  <!-- data to be backuped -->
+  <data>
+    <!-- each type of tag can be present more than one time -->
+    <!-- if a database dump was created, it must be added in this section -->
+    <include path="/home"/>
+    <exclude path="/home/guest"/>
+
+    <include glob="**/important/"/>
+    <exclude glob="/home/*/tmp"/>
+
+    <include regexp=".*\.ogg"/>
+    <exclude regexp=".*\.mp3"/>
+  </data>
+</backup>
+------------------------------------------------------------------------
 
 PARAMETERS
 ----------
-TODO
+id::
+	This is the ID by which `safekeep(1)` will address this host.
+	If specified it overrides the default value derived from the
+	filename without the `.conf` extension. Optional.
 
 FILES
 -----
