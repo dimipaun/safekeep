@@ -22,7 +22,7 @@ install:
 
 	install -d -m 755 $(CURDIR)/debian/safekeep-server/etc/safekeep.d
 	install -d -m 755 $(CURDIR)/debian/safekeep-server/etc/cron.daily
-	install -m 755 safekeep.cron $(CURDIR)/debian/safekeep-server/etc/cron.daily
+	install -m 755 safekeep.cron $(CURDIR)/debian/safekeep-server/etc/cron.daily/safekeep
 
 binary-indep: install
 	dh_testdir
