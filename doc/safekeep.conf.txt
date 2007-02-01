@@ -14,7 +14,7 @@ DESCRIPTION
 -----------
 Each configuration file controls the backup of a host. They are typically
 named after the hostname of the machine they control the backup for, and
-have a '.conf' extesion (e.g. `mailbox.conf`). These files are written
+have a '.conf' extension (e.g. `mailbox.conf`). These files are written
 in XML. Virtually all elements and attributes are optional; if not present,
 `safekeep(1)` will provide reasonable, useful defaults.
 
@@ -23,22 +23,19 @@ The full set of supported elements and attributes looks as follows:
 <backup id="my_workstation">
 
   <!-- the client backup host, the user under which the servers will connect,
-       the SSH keys used for launching "safekeep --client" and "rdiff-backup"
--->
+       the SSH keys used for control and data transfer -->
   <host
-    name="my_workstation.corp.com" user="root"
+    name="myhost" user="root"
     key-ctrl="/home/jdoe/.ssh/backup_id_dsa"
     key-data="/home/jdoe/.ssh/backup2_id_dsa"
   />
 
-  <!-- location where the backuped data will be stored on the server
-       and for how long (s=sec, m=min, h=hours, D=days, W=weeks, M=months, or
-Y=years) -->
+  <!-- location where the backups will be stored on the server
+       and for how long (D=days, W=weeks, M=months, or Y=years) -->
   <repo path="./data" retention="10D"/>
 
   <!-- settings for database dump and for volume snapshot -->
   <setup>
-
     <!-- database type ("postgres" or "mysql"), user with backup rights,
          location of the dump file on the client host, and flag to remove
          or not the dump file after the backup is done -->
@@ -50,9 +47,8 @@ Y=years) -->
       cleanup="true"
     />
 
-    <!-- what volume is to be snapshoted (device location) and the size
-         of the snapshot (unallocated space must exist in the volume group)
--->
+    <!-- what volume is to be snapshot (device location) and the size
+         of the snapshot (free space must exist in the volume group) -->
     <snapshot
       device="/path/to/volume"
       size="500M"
@@ -60,7 +56,7 @@ Y=years) -->
 
   </setup>
 
-  <!-- data to be backuped -->
+  <!-- data to be backup -->
   <data>
     <!-- each type of tag can be present more than one time -->
     <!-- if a database dump was created, it must be added in this section -->
@@ -78,10 +74,169 @@ Y=years) -->
 
 PARAMETERS
 ----------
-id::
+XML elements and attributes are referred to via XPath expressions: elements
+are separated by '/', attributes are introduced by '@':
+
+/backup::
+	The root element of the XML file.
+	Mandatory.
+
+/backup/@id::
 	This is the ID by which `safekeep(1)` will address this host.
 	If specified it overrides the default value derived from the
-	filename without the `.conf` extension. Optional.
+	filename. Use of the default value is recommended. 
+	Optional, defaults to the filename without the `.conf` extension.
+          
+/backup/host/@name::
+	The name or IP address of the client. If you need to backup the
+	box that the server is running from, you can set this to "localhost".
+	This is different from leaving it blank, as it will establish a
+	SSH session and use the user specified by `/backup/host/@user`.
+	Optional, defaults to local access.
+
+/backup/host/@user::
+	The user name to use when connecting to the client. This user
+	must have read permissions for the files that will be backed up,
+	so it most likely needs to be 'root'.
+	Optional, defaults to 'root'.
+
+/backup/host/@key-ctrl::
+	This is the private key used to establish the SSH connection
+	to the client for the control channel. Use of the default value 
+	is recommended.
+	Optional, defaults to `~/.ssh/safekeep-server-ctrl-key`.
+
+/backup/host/@key-data::
+	This is the private key used to establish the SSH connection
+	to the client for the data channel. Use of the default value 
+	is recommended.
+	Optional, defaults to `~/.ssh/safekeep-server-data-key`.
+
+/backup/repo/@path::
+	The path under which the backups will be stored. Relative
+	paths are based on the home directory of the user under
+	which `safekeep(1)` runs on the server.
+	Optional, defaults to the client ID, see `/backup/@id`.
+
+/backup/repo/@retention::
+	Specifies the duration for which the backup data will be retained.
+	The incremental backup information in the destination directory that 
+	has been around longer than the retention time will be removed. 
+	The value specified by this attribute is an time interval: an integer 
+	followed by the character s, m, h, D, W, M, or Y, indicating seconds, 
+	minutes, hours, days, weeks, months, or years respectively, or a
+	number of these concatenated. For example, 32m means 32 minutes, and 
+	3W2D10h7s means 3 weeks, 2 days, 10 hours, and 7 seconds. In this
+	context, a month means 30 days, a year is 365 days, and a day is 
+	always 86400 seconds.
+	Note that backups of deleted files are covered by this operation. 
+	Thus if you deleted a file two weeks ago, backed up immediately
+	afterward, and then ran `safekeep(1)` with a retention of '10D' 
+	today, no trace of that file would remain. Finally, file selection 
+	options don't affect removal of incremental data.
+	Optional, defaults to empty (unlimited retention).
+
+/backup/setup/dump/@type::
+	One of "postgres" or "mysql".
+	Mandatory for a `<dump>` element.
+	
+/backup/setup/dump/@db::
+	Name of the database to dump. If not specified, it defaults
+	to all databases maintained in the RDBMS specified by `type`.
+	Optional, defaults to all databases.
+
+/backup/setup/dump/@dbuser::
+	Name of the database user to use while doing the dump. 
+	Optional, defaults to whatever the database determines
+	based on the system user. 
+
+/backup/setup/dump/@user::
+	The system user under which the dump should take place.
+	Please note that using this feature requires that `safekeep(1)`
+	runs as `root` on the client.
+	Optional, defaults to the user under which `safekeep(1)` runs
+	on the client side.
+
+/backup/setup/dump/@file::
+	The full path to the dump file on the client host.
+	Mandatory for a `<dump>` element.
+	
+/backup/setup/dump/@cleanup::
+	One of "true" or "false". If "true", the dump file will
+	be deleted from the client system once the backup is over.
+	It is usually futile to delete it, since it will be created
+	for each backup, and hence you will need to have the space
+	available.   
+	Optional, defaults to "false". 
+
+/backup/setup/snapshot/@device::
+	The path (device location) to the LVM volume to snapshot
+	before the backup commences. It is recommended 
+	Please note that using this feature requires that `safekeep(1)`
+	runs as `root` on the client.
+	Mandatory for a `<snapshot>` element.
+	  
+/backup/setup/snapshot/@size::
+	The size of the snapshot. Unallocated space must exist on
+	the volume group. It is recommended that it is about 15-20%
+	of the original device's size.
+	Mandatory for a `<snapshot>` element.
+
+/backup/data/exclude/@path::
+	Exclude the file or files matched by the path. 
+	If a directory is matched, then files under that directory will also
+be matched.
+	See the `FILE SELECTION` section for more information.
+	
+/backup/data/include/@path::
+	Include the file or files matched by the path. 
+	If a directory is matched, then files under that directory will also
+be matched.
+	See the `FILE SELECTION` section for more information.
+
+/backup/data/exclude/@glob::
+	Exclude the file or files matched by the shell pattern. 
+	If a directory is matched, then files under that directory will also
+be matched.
+	See the `FILE SELECTION` section for more information.
+
+/backup/data/include/@glob::
+	Include the file or files matched by the shell pattern. 
+	If a directory is matched, then files under that directory will also
+be matched.
+	See the `FILE SELECTION` section for more information.
+
+/backup/data/exclude/@regexp::	 
+	Exclude the file or files matched by the regular expression. 
+	If a directory is matched, then files under that directory will also
+be matched.
+	See the `FILE SELECTION` section for more information.
+
+/backup/data/include/@regexp::	 
+	Include the file or files matched by the regular expression. 
+	If a directory is matched, then files under that directory will also
+be matched.
+	See the `FILE SELECTION` section for more information.
+
+FILE SELECTION
+--------------
+`safekeep(1)` supports file selection options similar to `rdiff-backup(1)`. 
+When rdiff-backup is run, it searches through the given source directory 
+and backs up all the files specified by the file selection system. 
+
+The file selection system comprises a number of file selection conditions, 
+which are set using one of the `<include>`/`<exclude>` elements.
+Each file selection condition either matches or doesn't match a given file. 
+A given file is excluded by the file selection system exactly when the first 
+matching file selection condition specifies that the file be excluded;
+otherwise 
+the file is included. When backing up, if a file is excluded, `safekeep(1)`
+acts 
+as if that file does not exist in the source directory. 
+
+For more information on file selection semantics, please see
+`rdiff-backup(1)`.
+
 
 FILES
 -----
@@ -89,5 +244,5 @@ FILES
 
 SEE ALSO
 --------
-safekeep(1), rdiff-backup(1)
+safekeep(1), rdiff-backup(1), lvcreate(8)
 
