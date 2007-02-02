@@ -2,6 +2,9 @@ These are ideas that we need to look at post 1.0.
 
 
 Future:
+  * Modify the test to not rely on Lattica's servers
+  * Support more of rdiff-backup special file selectors
+  * Document data restore
   * Find a way to show man page on website with header and footer
   * decide how big the snapshot size should be automagically
   * fully automatic shapshotting mode
