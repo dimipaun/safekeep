@@ -196,18 +196,18 @@ def takeOver(host, role, verrel):
         raise TestFailure('Unknown distro %s in release %s' % (distro, release))
 
     lattica_repo = """
-        [lattica-development]
-        name=Lattica - Development Tree  for Fedora Core $releasever $basearch
-        baseurl=http://lattica.com/repos/lattica/yum/%s/$releasever/devel/$basearch
+        [safekeep-test-lattica-devel]
+        name=Lattica - Development Tree for Fedora Core $releasever $basearch
+        baseurl=http://lattica.com/repos/lattica/devel/%s/$releasever
         gpgkey=http://lattica.com/keys/RPM-GPG-KEY-lattica-devel
         enabled=1
         gpgcheck=%s
     """ % (distro, sign_packages)
     lattica_repo = '\n'.join([line.strip() for line in lattica_repo.splitlines()])
-    cmd = 'echo %s > /etc/yum.repos.d/lattica-development.repo' % (mkarg(lattica_repo).strip())
+    cmd = 'echo %s > /etc/yum.repos.d/safekeep-test-lattica-devel.repo' % (mkarg(lattica_repo).strip())
     rcmd(cmd, 'root', host, 'install Lattica Repo')
     cmd = """
-        rm -rf /var/cache/yum/lattica-development/; 
+        rm -rf /var/cache/yum/safekeep-test-lattica-devel/; 
         if rpm -q safekeep-%(role)s-%(verrel)s; then 
             yum update -y safekeep-%(role)s-%(verrel)s; 
         else 
@@ -276,7 +276,7 @@ def packageAndUpload(pkgroot, keyname, repodirs, user, host):
             raise TestFailure('Failed to sign rpms')
 
     for repodir in repodirs:
-        cmd = '%s %s %s %s %s@%s:%s' % \
+        cmd = '%s %s %s %s %s@%s:%s/noarch' % \
               (mkssh('scp'), binrpm_common, binrpm_client, binrpm_server, user, host, repodir)
         print cmd
         if os.system(cmd):
@@ -290,9 +290,9 @@ def packageAndUpload(pkgroot, keyname, repodirs, user, host):
 def remoteTest(tmproot, client, server):
     # build, sign and upload the .rpm
     repodirs = [
-        '/var/www/repos/lattica/yum/fedora/5/devel/i386',
-        '/var/www/repos/lattica/yum/fedora/6/devel/i386',
-        '/var/www/repos/lattica/yum/centos/4/devel/i386',
+        '/var/www/repos/lattica/devel/fedora/5',
+        '/var/www/repos/lattica/devel/fedora/6',
+        '/var/www/repos/lattica/devel/centos/4',
     ]
     verrel = packageAndUpload(tmproot, 'Lattica, Inc. (Devel Key) <devel@lattica.com>', repodirs, 'root', 'ulysses')
 
