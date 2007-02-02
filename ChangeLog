@@ -1,3 +1,75 @@
+2007-02-01 04:13 +0000 [r352]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.conf.txt: Start documenting the
+	  configuration format
+
+2007-02-01 03:43 +0000 [r351]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/debian/rules: Keep the file names consistent
+	  between the .deb and .rpm packages. If we decide to rename them,
+	  we'll do so across both formats.
+
+2007-02-01 03:40 +0000 [r350]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in: Repeat the generic description
+	  of the package in all subpackages.
+
+2007-01-31 23:49 +0000 [r349]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/Makefile: Build DEBs in /tmp to avoid cluttering
+	  the source dir.
+
+2007-01-31 23:28 +0000 [r348]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/debian/docs (removed),
+	  safekeep/trunk/debian/safekeep-common.dirs (added),
+	  safekeep/trunk/debian/safekeep-server.postinst (added),
+	  safekeep/trunk/debian/rules,
+	  safekeep/trunk/debian/safekeep-server.prerm (added),
+	  safekeep/trunk/debian/safekeep-server.docs (added),
+	  safekeep/trunk/debian/control,
+	  safekeep/trunk/debian/safekeep-common.docs (added),
+	  safekeep/trunk/debian/dirs (removed),
+	  safekeep/trunk/debian/safekeep-client.docs (added),
+	  safekeep/trunk/debian/safekeep-server.dirs (added): Update the
+	  DEB packaging: - split into -server, -client, -common subpackages
+	  - create the 'safekeep' user for the server - install a daily
+	  cron task - etc.
+
+2007-01-31 20:57 +0000 [r347]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in: Typo.
+
+2007-01-31 20:06 +0000 [r346]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.conf.txt (added),
+	  safekeep/trunk/Makefile, safekeep/trunk/safekeep.spec.in: Add
+	  skeletal man page for the configuration file.
+
+2007-01-31 19:25 +0000 [r345]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in, safekeep/trunk/TODO (added): Add
+	  a TODO file with ideas for the future
+
+2007-01-31 16:20 +0000 [r344]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/ChangeLog (added): Add a ChangeLog file
+
+2007-01-31 16:19 +0000 [r343]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/Makefile, safekeep/trunk/doc/users (added): Add
+	  ChangeLog generation support
+
+2007-01-31 15:55 +0000 [r342]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.cron: Make the reports look a bit more
+	  interesting.
+
+2007-01-31 15:21 +0000 [r341]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in, safekeep/trunk/safekeep.cron
+	  (added): Install a daily cron task for safekeep
+
 2007-01-30 19:31 +0000 [r340]  Dimi Paun <dimi@lattica.com>
 
 	* safekeep/trunk/safekeep: Use the regular logging functions to
