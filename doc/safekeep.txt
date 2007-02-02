@@ -182,6 +182,22 @@ filenames without the extension. E.g. if a configuration file is named
 `my_workstation.conf`, the client ID becomes `my_workstation`. For more
 information on this topic, see safekeep.conf(5).
 
+KEY DEPLOYMENT
+--------------
+The `safekeep(1)` server needs to access the clients in order to conduct
+the backup. To that end, it establishes two ssh(1) pipes: one for control,
+and one for data. To simplify the deployment of the keys, `safekeep(1)`
+has a key deploy mode. 
+
+When deploying keys using the built-in key management functionality,
+`safekeep(1)` needs to be invoked as the user under which it will function
+as a server. By default, that user is 'safekeep'. For extra security,
+you can not login into that account, so you have to invoke `safekeep(1)`
+as follows:
+------------------------------------------------------------------------
+	# sudo -H -u safekeep safekeep --keys --deploy
+------------------------------------------------------------------------
+
 SEE ALSO
 --------
 rdiff-backup(1), safekeep.conf(5)
