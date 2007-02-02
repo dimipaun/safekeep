@@ -1,3 +1,45 @@
+2007-02-02 00:57 +0000 [r361]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/Makefile: Whitespace fix
+
+2007-02-02 00:53 +0000 [r360]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.txt: Add documentation about keys
+	  deployment
+
+2007-02-02 00:43 +0000 [r359]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/TODO: Update TODO
+
+2007-02-02 00:40 +0000 [r358]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/ChangeLog: Update ChangeLog
+
+2007-02-02 00:39 +0000 [r357]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Bump version to 0.9.0
+
+2007-02-02 00:36 +0000 [r356]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Adjust test to match the new
+	  structure used by the repos
+
+2007-02-02 00:06 +0000 [r355]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in: Fix safekeep.conf missing
+	  extension
+
+2007-02-01 22:18 +0000 [r354]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.conf.txt: Finish documenting the
+	  configuration format
+
+2007-02-01 15:32 +0000 [r353]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/debian/rules, safekeep/trunk/safekeep.spec.in:
+	  Install the daily cron task as 'safekeep', not 'safekeep.cron' to
+	  follow the common practice.
+
 2007-02-01 04:13 +0000 [r352]  Dimi Paun <dimi@lattica.com>
 
 	* safekeep/trunk/doc/safekeep.conf.txt: Start documenting the
