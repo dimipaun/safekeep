@@ -100,7 +100,7 @@ fi
 %defattr(-,root,root,-)
 %{_bindir}/safekeep
 %{_mandir}/man1/safekeep.1*
-%{_mandir}/man5/safekeep.5*
+%{_mandir}/man5/safekeep.conf.5*
 %doc AUTHORS COPYING LICENSE README TODO
 
 %files client
