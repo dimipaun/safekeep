@@ -84,7 +84,7 @@ tar-snapshot:
 	rm -rf $(snapshotname)
 
 tar-release:
-	svn export $(svnroot)/safekeep/tags/$(tagname) $(snapshotname)
+	svn export $(svnroot)/safekeep/tags/$(tagname) $(releasename)
 	cat $(releasename)/$(name).spec.in | sed 's/^%define version.*/%define version $(version)/' > $(releasename)/$(name).spec
 	cat $(releasename)/debian/changelog.in | sed 's/^safekeep.*/safekeep ($(version)) unstable; urgency=low/' > $(releasename)/debian/changelog
 	tar cz -f $(releasename).tar.gz $(releasename)
