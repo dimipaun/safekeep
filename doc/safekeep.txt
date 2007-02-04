@@ -25,7 +25,7 @@ SafeKeep can work in server mode, client mode or SSH key management mode.
 In server mode, SafeKeep parses a set of configurations files which
 defines a set of backup clients. For each backup client, SafeKeep
 connects to the client host over SSH (using a public key authentification
-system previously set up using `safekeep -keys --deploy`), and launches
+system previously set up using `safekeep --keys --deploy`), and launches
 `safekeep --client` onto the client host. The client does the real backup
 and sends the data over SSH to the SafeKeep server which stores it in
 the specified location.
