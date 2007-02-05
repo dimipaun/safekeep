@@ -87,8 +87,8 @@ SERVER OPTIONS
 	This can be a single file (for a single client configuration)
 	or a directory containing several configuration files (one per
 	backup client). Can be specified multiple times.
-        If not specified at all, SafeKeep will default to searching 
-        `/etc/safekeep.d/` for configuration files. 
+        If not specified at all, SafeKeep will default in non-client mode
+        to searching `/etc/safekeep.d/` for configuration files. 
         Simply using this default is the recommended usage. 
 
 -e, --email=EMAIL::

@@ -822,7 +822,7 @@ def main():
     if mode is 'client' and cfglocs:
         usage(2)
 
-    if len(cfglocs) == 0:
+    if mode is not 'client' and len(cfglocs) == 0:
         cfglocs.append(config_dir)
     cfgs = parse_locs(cfglocs)
 
