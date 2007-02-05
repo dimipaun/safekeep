@@ -188,37 +188,37 @@ are separated by '/', attributes are introduced by '@':
 /backup/data/exclude/@path::
 	Exclude the file or files matched by the path. 
 	If a directory is matched, then files under that directory will also
-be matched.
+	be matched.
 	See the `FILE SELECTION` section for more information.
 	
 /backup/data/include/@path::
 	Include the file or files matched by the path. 
 	If a directory is matched, then files under that directory will also
-be matched.
+	be matched.
 	See the `FILE SELECTION` section for more information.
 
 /backup/data/exclude/@glob::
 	Exclude the file or files matched by the shell pattern. 
 	If a directory is matched, then files under that directory will also
-be matched.
+	be matched.
 	See the `FILE SELECTION` section for more information.
 
 /backup/data/include/@glob::
 	Include the file or files matched by the shell pattern. 
 	If a directory is matched, then files under that directory will also
-be matched.
+	be matched.
 	See the `FILE SELECTION` section for more information.
 
 /backup/data/exclude/@regexp::	 
 	Exclude the file or files matched by the regular expression. 
 	If a directory is matched, then files under that directory will also
-be matched.
+	be matched.
 	See the `FILE SELECTION` section for more information.
 
 /backup/data/include/@regexp::	 
 	Include the file or files matched by the regular expression. 
 	If a directory is matched, then files under that directory will also
-be matched.
+	be matched.
 	See the `FILE SELECTION` section for more information.
 
 FILE SELECTION
