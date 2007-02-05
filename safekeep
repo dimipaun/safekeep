@@ -537,7 +537,15 @@ def do_server(cfgs, ids):
                 warn('Client %(id)s missing data key %(id)s, skipping' % cfg)
                 continue
 
-        rdiff_logdir = os.path.join(cfg['dir'], 'rdiff-backup-data')
+        datadir = os.path.join(os.getcwd(), cfg['dir'])
+        if not os.path.isdir(datadir):
+            try:
+                os.makedirs(datadir)
+            except EnvironmentError, ex:
+                error('Can not create data store dir: %s' % datadir)
+                return
+
+        rdiff_logdir = os.path.join(datadir, 'rdiff-backup-data')
         if cfg['retention'] and os.path.isdir(rdiff_logdir):
             do_server_data_cleanup(cfg)
 
