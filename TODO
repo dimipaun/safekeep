@@ -1,18 +1,20 @@
-These are ideas that we need to look at post 1.0.
-
-
-Future:
-  * Modify the test to not rely on Lattica's servers
+Next release:
   * Support more of rdiff-backup special file selectors
-  * Document data restore
+  * Automatically create repo dirs if they don't exist
+  * Document data restore in man page
+  * Study and test hard links behaviour
+  * Add tests db dumps
+
+Future (post 1.0):
+  * Package it up for Fedora Extras and Ubuntu/Debian
+  * Modify the test to not rely on Lattica's servers
   * Find a way to show man page on website with header and footer
-  * decide how big the snapshot size should be automagically
-  * fully automatic shapshotting mode
-  * configuration inheritance
-  * transactional store of ops on server side, and automagic recovery from errors
+  * Decide how big the snapshot size should be automagically
+  * Fully automatic shapshotting mode
+  * Configuration inheritance
+  * Transactional store of ops on server side, and automagic recovery from errors
   * Windows support for the client
   * Write SE Linux rules to limit access rights (akin to the httpd ones)
-  * Add tests db dumps
   * Run the server in a chroot-jail
-  * Compare mirroring with a straight `rsync`
+  * Compare mirroring with a straight rsync(1)
 
