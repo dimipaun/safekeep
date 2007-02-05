@@ -230,11 +230,12 @@ and backs up all the files specified by the file selection system.
 The file selection system comprises a number of file selection conditions, 
 which are set using one of the `<include>`/`<exclude>` elements.
 Each file selection condition either matches or doesn't match a given file. 
-A given file is excluded by the file selection system exactly when the first 
-matching file selection condition specifies that the file be excluded;
-otherwise 
-the file is included. When backing up, if a file is excluded, `safekeep(1)`
-acts 
+A given file is included or excluded by the file selection system when the
+first matching file selection condition specifies that the file be included
+or excluded respecively; if the file matches no include or exclude 
+statement, it is by default excluded.
+
+When backing up, if a file is excluded, `safekeep(1)` acts 
 as if that file does not exist in the source directory. 
 
 For more information on file selection semantics, please see
