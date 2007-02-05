@@ -1,8 +1,6 @@
 Next release:
   * Support more of rdiff-backup special file selectors
-  * Automatically create repo dirs if they don't exist
   * Document data restore in man page
-  * Study and test hard links behaviour
   * Add tests db dumps
 
 Future (post 1.0):
