@@ -114,8 +114,11 @@ are separated by '/', attributes are introduced by '@':
 
 /backup/repo/@path::
 	The path under which the backups will be stored. Relative
-	paths are based on the home directory of the user under
-	which `safekeep(1)` runs on the server.
+	paths are based on current working directory where `safekeep(1)`
+	server is run. Typically this working directory will be the home 
+	directory of the user under which `safekeep(1)` runs on the server.
+	As a result, in a typical installation the data will be stored
+	under `/var/lib/safekeep/<id>/`.
 	Optional, defaults to the client ID, see `/backup/@id`.
 
 /backup/repo/@retention::
