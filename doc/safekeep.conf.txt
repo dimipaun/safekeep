@@ -118,7 +118,9 @@ are separated by '/', attributes are introduced by '@':
 	server is run. Typically this working directory will be the home 
 	directory of the user under which `safekeep(1)` runs on the server.
 	As a result, in a typical installation the data will be stored
-	under `/var/lib/safekeep/<id>/`.
+	under `/var/lib/safekeep/<id>/`. If the directory does not exist,
+	`safekeep(1)` will attempt to create it automatically. The backup
+	will fail altogether if the directory can not be created.
 	Optional, defaults to the client ID, see `/backup/@id`.
 
 /backup/repo/@retention::
