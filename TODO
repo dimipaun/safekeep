@@ -1,6 +1,7 @@
 Next release:
   * Support installation from the Makefile
-  * Document the release process
+  * Add an ANNOUNCE file
+  * Add an INSTALL file
   * Support more of rdiff-backup special file selectors
   * Add tests db dumps
 
