@@ -1,6 +1,5 @@
 Next release:
   * Support more of rdiff-backup special file selectors
-  * Document data restore in man page
   * Add tests db dumps
 
 Future (post 1.0):

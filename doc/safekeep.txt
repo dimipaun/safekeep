@@ -198,6 +198,26 @@ as follows:
 	# sudo -H -u safekeep safekeep --keys --deploy
 ------------------------------------------------------------------------
 
+RESTORING
+---------
+Since `safekeep(1)` is built around `rdiff-backup(1)`, it doesn't have any
+built-in restore capabilities. It simply relies on `rdiff-backup` to perform
+this task.
+
+To do so, you just need to know the directory where the data is actually
+stored. In a typical installation, for a box configured via the file
+`/etc/safekeep.d/mybox.conf`, the data will be stored under
+`/var/lib/safekeep/mybox/`. Please refer to `safekeep.conf(5)` for more
+information on this matter.
+
+Once you have determined where the data will be stored (we'll continue
+the example above), all you have to do is run `rdiff-backup`:
+------------------------------------------------------------------------
+	# rdiff-backup /var/lib/safekeep/mybox my-restore-dir
+------------------------------------------------------------------------
+You will be able to find more information on the restore procedure in
+the `rdiff-backup(1)` man page.
+
 SEE ALSO
 --------
 rdiff-backup(1), safekeep.conf(5)
