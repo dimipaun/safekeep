@@ -4,6 +4,8 @@ Requirements
   * rdiff-backup
   * asciidoc
   * xmlto
+  * python
+  * openssh
 
 Full Test
 ~~~~~~~~~
