@@ -28,7 +28,7 @@ Summary:        The SafeKeep backup system (common component)
 Group:          Applications/System
 Obsoletes:      safekeep
 Requires:       rdiff-backup
-Requires(pre):  python >= 2.3
+Requires(pre):  python >= 2.2
 
 %description common
 SafeKeep is a client/server backup system which enhances the

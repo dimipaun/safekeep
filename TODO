@@ -3,7 +3,6 @@ Next release:
   * Add an ANNOUNCE file
   * Add an INSTALL file
   * Add reference to SF
-  * Relax the Python requirements
   * Add note on include/excludes
   * Support more of rdiff-backup special file selectors
   * Add tests db dumps
