@@ -218,6 +218,32 @@ the example above), all you have to do is run `rdiff-backup`:
 You will be able to find more information on the restore procedure in
 the `rdiff-backup(1)` man page.
 
+FILE SELECTION
+--------------
+It is important to note that the `include`/`exclude` directives that
+control file selection are matched in the order they appear in the
+configuration file, and the first one that matches dictates whether
+the file will be included or excluded. As a result, you have to
+add the more specific ones first, or the more generic specifications
+will always win. For example:
+------------------------------------------------------------------------
+...
+    <include path="/home"/>
+    <exclude path="/home/joe"/>
+...
+------------------------------------------------------------------------
+will NOT do what you expect, because the `/home` will match before 
+`/home/joe`, and thus all files under `/home` will be included.
+The correct way is to flip the two around
+------------------------------------------------------------------------
+...
+    <exclude path="/home/joe"/>
+    <include path="/home"/>
+...
+------------------------------------------------------------------------
+
+Please see safekeep.conf(5) for more information on file selection.
+
 SEE ALSO
 --------
 rdiff-backup(1), safekeep.conf(5)
