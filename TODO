@@ -1,5 +1,4 @@
 Next release:
-  * Add an ANNOUNCE file
   * Add an INSTALL file
   * Add reference to SF
   * Support more of rdiff-backup special file selectors
