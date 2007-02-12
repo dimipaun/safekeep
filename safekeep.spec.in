@@ -7,14 +7,12 @@ Name:           %{name}
 Version:        %{version}
 Release:        %{release}%{?dist}
 Summary:        The SafeKeep backup system
-Vendor:         Lattica, Inc.
 
 Group:          Applications/System
 License:        GPL
 URL:            http://safekeep.sourceforge.net
-Source0:        %{name}-%{version}.tar.gz
+Source0:        http://prdownloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-Prefix:         %{_prefix}
 
 BuildArch:      noarch
 BuildRequires:	xmlto, asciidoc > 6.0.3
@@ -26,9 +24,8 @@ power of rdiff-backup with simple, centralized configuration.
 %package common
 Summary:        The SafeKeep backup system (common component)
 Group:          Applications/System
-Obsoletes:      safekeep
 Requires:       rdiff-backup
-Requires(pre):  python >= 2.2
+Requires:       python >= 2.2
 
 %description common
 SafeKeep is a client/server backup system which enhances the
@@ -43,7 +40,7 @@ Group:          Applications/System
 Requires:       openssh-server
 Requires:       coreutils
 Requires:       util-linux
-Requires(pre):  safekeep-common = %{PACKAGE_VERSION}
+Requires:       safekeep-common = %{PACKAGE_VERSION}
 
 %description client
 SafeKeep is a client/server backup system which enhances the
@@ -55,9 +52,10 @@ installed on all hosts that need to be backed-up.
 %package server
 Summary:        The SafeKeep backup system (server component)
 Group:          Applications/System
-Prereq:         /usr/sbin/useradd
+Requires(pre):  /usr/sbin/useradd
+Requires(unpre):/usr/sbin/userdel
 Requires:       openssh, openssh-clients
-Requires(pre):  safekeep-common = %{PACKAGE_VERSION}
+Requires:       safekeep-common = %{PACKAGE_VERSION}
 
 %description server
 SafeKeep is a client/server backup system which enhances the
@@ -115,4 +113,5 @@ fi
 %doc AUTHORS COPYING LICENSE
 
 %changelog
-
+* Sun Feb 11 2007 Jef Spaleta <jspaleta@gmail.com> 0.9.0-1
+- Initial build meant for Fedora package submission
