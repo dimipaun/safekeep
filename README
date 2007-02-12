@@ -1,3 +1,15 @@
+Introduction
+~~~~~~~~~~~~
+SafeKeep is a centralized and easy to use backup application that 
+combines the best features of a mirror and an incremental backup.
+It is build around rdiff-backup, a well-known backup utility,
+enhancing it with easy deployment, database dumps, as well as 
+LVM snapshot handling.
+
+For more information, visit the project's homepage:
+    http://safekeep.sourceforge.net/
+or contact us via email on our mailing list:
+    safekeep-devel@lists.sourceforge.net
 
 Requirements
 ~~~~~~~~~~~~
