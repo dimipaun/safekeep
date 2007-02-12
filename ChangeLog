@@ -1,3 +1,118 @@
+2007-02-12 05:28 +0000 [r419]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Up the version to 0.9.1
+
+2007-02-12 05:27 +0000 [r418]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/TODO: Update TODO
+
+2007-02-12 05:07 +0000 [r416]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/TODO, safekeep/trunk/ANNOUNCE (added): dd an
+	  ANNOUNCE file for release 0.9.1
+
+2007-02-12 04:36 +0000 [r415]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/README: Add a little intro about the project
+
+2007-02-12 04:30 +0000 [r414]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/Makefile, safekeep/trunk/README,
+	  safekeep/trunk/TODO: Add a way to install SafeKeep from source.
+
+2007-02-12 00:40 +0000 [r413]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in: "Jeff Spaleta"
+	  <jspaleta@gmail.com> Get RPM into shape for a fedora project
+	  submission.
+
+2007-02-11 01:17 +0000 [r412]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/TODO, safekeep/trunk/doc/safekeep.txt: More on
+	  include/exclude directives
+
+2007-02-11 01:07 +0000 [r411]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/README: Update requirements
+
+2007-02-11 01:03 +0000 [r410]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in, safekeep/trunk/TODO: Python 2.2
+	  is good enough
+
+2007-02-10 17:00 +0000 [r409]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/TODO: Update TODO
+
+2007-02-07 20:02 +0000 [r405]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/TODO: Update TODO
+
+2007-02-07 01:53 +0000 [r404]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/TODO: Update TODO
+
+2007-02-07 01:42 +0000 [r402]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/TODO, safekeep/trunk/doc/safekeep.txt: Add some
+	  documentation about data restoration
+
+2007-02-06 16:30 +0000 [r399]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.conf.txt: Document the auto dir
+	  creation
+
+2007-02-05 22:33 +0000 [r398]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.conf.txt: Formatting fixes
+
+2007-02-05 22:18 +0000 [r397]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/TODO: Update TODO
+
+2007-02-05 22:15 +0000 [r396]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Try to automatically create the data
+	  store dir if it doesn't exist.
+
+2007-02-05 21:01 +0000 [r395]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: When adding lines to authorized_keys,
+	  always end the last line with a NL
+
+2007-02-05 18:28 +0000 [r394]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep, safekeep/trunk/doc/safekeep.txt: Avoid
+	  scanning /etc/safekeep.d in non-client mode.
+
+2007-02-05 06:19 +0000 [r388]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.conf.txt: By default, we exclude
+	  non-matching files, which is different from what rdiff-backup
+	  does. So make it more explicit in the documentation.
+
+2007-02-05 06:13 +0000 [r387]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.conf.txt: Correct and clarify where
+	  the data will go by default.
+
+2007-02-05 06:07 +0000 [r386]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/TODO: Update the TODO
+
+2007-02-04 05:18 +0000 [r369]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.txt: Eduard Malinschi
+	  <ed@lattica.com> Fix typo.
+
+2007-02-02 01:16 +0000 [r364]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/Makefile: Fix copy and paste bug
+
+2007-02-02 01:05 +0000 [r362]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/ChangeLog: Update ChangeLog one more time
+
 2007-02-02 00:57 +0000 [r361]  Dimi Paun <dimi@lattica.com>
 
 	* safekeep/trunk/Makefile: Whitespace fix
