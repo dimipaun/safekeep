@@ -1,6 +1,5 @@
 Next release:
-  * Add an INSTALL file
-  * Add reference to SF
+  * Add configure script + an INSTALL file
   * Support more of rdiff-backup special file selectors
   * Add tests db dumps
 
