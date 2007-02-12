@@ -21,6 +21,7 @@ help:
 	@echo "Targets:"
 	@echo "    help        Displays this message"
 	@echo "    info        Displays package information (version, tag, etc.)"
+	@echo "    install     Installs safekeep and the online documentation"
 	@echo "    docs        Builds all documentation formats"
 	@echo "    build       Builds everything needed for an installation"
 	@echo "    deb         Builds snapshot binary and source DEBs"
@@ -73,6 +74,11 @@ $(DOC_HTML) $(DOC_MAN): doc/asciidoc.conf
 
 changelog:
 	svn log -v --xml | svn2log.py -D 0 -u doc/users
+
+install: $(DOC_MAN)
+	install -m 755 safekeep "/usr/bin/"
+	install -m 755 doc/safekeep.1 "/usr/share/man/man1/"
+	install -m 755 doc/safekeep.conf.5 "/usr/share/man/man5/"
 
 tar: tar-snapshot
 
