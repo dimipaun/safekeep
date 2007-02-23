@@ -527,80 +527,84 @@ def do_server(cfgs, ids):
     for cfg in cfgs.itervalues():
         id = cfg['id']
         if ids and id not in ids: continue
+        info('------------------------------------------------------------------')
         info('Server backup starting for client: %s' % id)
 
-        if cfg['host']:
-            if not os.path.isfile(cfg['key_ctrl']):
-                warn('Client %(id)s missing ctrl key %(key_ctrl)s, skipping' % cfg)
-                continue
-            if not os.path.isfile(cfg['key_data']):
-                warn('Client %(id)s missing data key %(id)s, skipping' % cfg)
-                continue
+        try:
+            if cfg['host']:
+                if not os.path.isfile(cfg['key_ctrl']):
+                    raise Exception('Client %(id)s missing ctrl key %(key_ctrl)s' % cfg)
+                if not os.path.isfile(cfg['key_data']):
+                    raise Exception('Client %(id)s missing data key %(id)s' % cfg)
 
-        datadir = os.path.join(os.getcwd(), cfg['dir'])
-        if not os.path.isdir(datadir):
-            try:
-                os.makedirs(datadir)
-            except EnvironmentError, ex:
-                error('Can not create data store dir: %s' % datadir)
-                return
+            datadir = os.path.join(os.getcwd(), cfg['dir'])
+            if not os.path.isdir(datadir):
+                try:
+                    os.makedirs(datadir)
+                except EnvironmentError, ex:
+                    raise Exception('Can not create data store dir: %s' % datadir)
 
-        rdiff_logdir = os.path.join(datadir, 'rdiff-backup-data')
-        if cfg['retention'] and os.path.isdir(rdiff_logdir):
-            do_server_data_cleanup(cfg)
+            rdiff_logdir = os.path.join(datadir, 'rdiff-backup-data')
+            if cfg['retention'] and os.path.isdir(rdiff_logdir):
+                do_server_data_cleanup(cfg)
 
-        if cfg['host']:
-            cmd = 'ssh -T -i %(key_ctrl)s -l %(user)s %(host)s safekeep --client' % cfg
-        else:
-            cmd = 'safekeep --client'
-        debug('Run [' + cmd + ']')
-        (cin, cout) = os.popen4(cmd)
+            if cfg['host']:
+                cmd = 'ssh -T -i %(key_ctrl)s -l %(user)s %(host)s safekeep --client' % cfg
+            else:
+                cmd = 'safekeep --client'
+            debug('Run [' + cmd + ']')
+            (cin, cout) = os.popen4(cmd)
 
-        cin.write('ALOHA: %s, %s\n' % (PROTOCOL, VERSION))
-        cin.flush()
-        client_versions = do_server_getanswer(cout)
-        do_server_compat(client_versions)
+            cin.write('ALOHA: %s, %s\n' % (PROTOCOL, VERSION))
+            cin.flush()
+            client_versions = do_server_getanswer(cout)
+            do_server_compat(client_versions)
 
-        cin.write('CONFIG: %d: %s\n' % (len(cfg['text'].splitlines()), id))
-        cin.write(cfg['text'] + '\n')
-        cin.flush()
-        do_server_getanswer(cout)
+            cin.write('CONFIG: %d: %s\n' % (len(cfg['text'].splitlines()), id))
+            cin.write(cfg['text'] + '\n')
+            cin.flush()
+            do_server_getanswer(cout)
 
-        cin.write('SETUP\n')
-        cin.flush()
-        bdir = do_server_getanswer(cout)
+            cin.write('SETUP\n')
+            cin.flush()
+            bdir = do_server_getanswer(cout)
 
-        if os.path.isdir(rdiff_logdir):
-            rdiff_logpre = os.listdir(rdiff_logdir)
-        else:
-            rdiff_logpre = []
+            if os.path.isdir(rdiff_logdir):
+                rdiff_logpre = os.listdir(rdiff_logdir)
+            else:
+                rdiff_logpre = []
 
-        backup_log = os.path.join(rdiff_logdir, 'backup.log')
-        if os.path.isfile(backup_log):
-            backup_marker = '=== Backup session on %s ===' % time.asctime()
-            fbm = open(backup_log, 'a')
-            fbm.write(backup_marker + '\n')
-            fbm.close()
-        else:
-            backup_marker = None
+            backup_log = os.path.join(rdiff_logdir, 'backup.log')
+            if os.path.isfile(backup_log):
+                backup_marker = '=== Backup session on %s ===' % time.asctime()
+                fbm = open(backup_log, 'a')
+                fbm.write(backup_marker + '\n')
+                fbm.close()
+            else:
+                backup_marker = None
 
-        do_server_rdiff(cfg, bdir)
+            do_server_rdiff(cfg, bdir)
 
-        if os.path.isdir(rdiff_logdir):
-            info_file(backup_log, backup_marker)
-            rdiff_logpost = os.listdir(rdiff_logdir)
-            for lfn in rdiff_logpost:
-                if lfn.startswith('session_statistics.') and lfn.endswith('.data') and lfn not in rdiff_logpre:
-                    info_file(os.path.join(rdiff_logdir, lfn))
-        else:
-            warn('Log dir does not exist.')
+            if os.path.isdir(rdiff_logdir):
+                info_file(backup_log, backup_marker)
+                rdiff_logpost = os.listdir(rdiff_logdir)
+                for lfn in rdiff_logpost:
+                    if lfn.startswith('session_statistics.') and lfn.endswith('.data') and lfn not in rdiff_logpre:
+                        info_file(os.path.join(rdiff_logdir, lfn))
+            else:
+                warn('Log dir does not exist.')
 
-        cin.write('CLEANUP %s\n' % bdir)
-        cin.flush()
-        do_server_getanswer(cout)
+            cin.write('CLEANUP %s\n' % bdir)
+            cin.flush()
+            do_server_getanswer(cout)
 
-        debug('Server backup done for client: %s' % id)
+            debug('Server backup done for client: %s' % id)
 
+        except Exception, e:
+            error(e)
+            error('Skipping backup for client: %s' % id)
+
+    info('------------------------------------------------------------------')
     debug('Server backup done')
 
 def do_keys(cfgs, ids, status, dump, deploy):
