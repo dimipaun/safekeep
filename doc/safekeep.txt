@@ -213,7 +213,7 @@ information on this matter.
 Once you have determined where the data will be stored (we'll continue
 the example above), all you have to do is run `rdiff-backup`:
 ------------------------------------------------------------------------
-	# rdiff-backup /var/lib/safekeep/mybox my-restore-dir
+	# rdiff-backup -r 1s /var/lib/safekeep/mybox my-restore-dir
 ------------------------------------------------------------------------
 You will be able to find more information on the restore procedure in
 the `rdiff-backup(1)` man page.
