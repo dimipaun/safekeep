@@ -1,5 +1,7 @@
 Next release:
   * Add configure script + an INSTALL file
+  * Test the sendmail delivery method
+  * Add a -u/--user parameter
   * Support more of rdiff-backup special file selectors
   * Add tests db dumps
 
