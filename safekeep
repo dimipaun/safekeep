@@ -5,8 +5,8 @@ import commands, tempfile, time, traceback
 import xml.dom.minidom
 import socket, smtplib
 
-config_dir = '/etc/safekeep.d'
-config_ext = '.conf'
+config_dir = '/etc/safekeep/clients.d'
+config_ext = '.backup'
 logbuf = []
 is_client = False
 verbosity_level = 1

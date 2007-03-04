@@ -6,6 +6,14 @@ case "$1" in
     configure)
     	adduser --quiet --system --home /var/lib/safekeep safekeep
 	install -d -m 700 -o safekeep -g nogroup /var/lib/safekeep/.ssh
+	if test -d /etc/safekeep.d; then
+	    for file in /etc/safekeep.d/*.conf; do
+	        if test -f "$file"; then
+	            mv "$file" /etc/safekeep/clients.d/`basename "$file" .conf`.backup
+	        fi
+	    done
+	    rmdir /etc/safekeep.d 2> /dev/null || true
+	fi
 	;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
