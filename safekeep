@@ -108,6 +108,21 @@ def reroot(root, path):
     if path.startswith('/'): return root + path
     return os.path.join(root, path)
 
+def parse_prop_file(file):
+    props = {}
+    fin = open(file)
+    lines = fin.readlines()
+    fin.close()
+    for line in lines:
+        line = line.strip()
+        if len(line) is 0 or line[0] is '#': continue
+        if '=' in line: 
+            key, value = line.split('=', 1)
+            props[key.strip()] = value.strip()
+        else:
+            props[line] = None
+    return props            
+
 ######################################################################
 # Configuration file parser
 ######################################################################
