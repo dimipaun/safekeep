@@ -798,7 +798,7 @@ def main():
 
     mode = None
     email = []
-    smtp = ''
+    smtp = None
     cfgfile = None
     cfglocs = []
     verbosity = 0
@@ -859,7 +859,11 @@ def main():
     if mode is not 'client':
         if cfgfile is None: 
             cfgfile = os.path.join(config_dir, 'safekeep.conf')
-        # FIXME: parse config file
+        props = parse_prop_file(cfgfile)
+        if 'email.smtp.server' in props:
+            smtp = props['email.smtp.server']
+        if 'email.to' in props:
+            email = props['email.to'].split(',')
         if len(cfglocs) == 0: 
             locs = os.path.join(config_dir, 'clients.d')
             cfglocs.append(locs)
