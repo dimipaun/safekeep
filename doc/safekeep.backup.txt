@@ -1,13 +1,13 @@
-safekeep.conf(5)
+safekeep.backup(5)
 ================
 
 NAME
 ----
-safekeep.conf - Configuration file for 'safekeep(1)'
+safekeep.backup - Configuration file for 'safekeep(1)'
 
 SYNOPSIS
 --------
-These files are usually placed in `/etc/safekeep.d/` to be picked
+These files are usually placed in `/etc/safekeep/clients.d/` to be picked
 up automatically be 'safekeep(1)'. They must have a `.conf` extension.
 
 DESCRIPTION
@@ -246,7 +246,7 @@ For more information on file selection semantics, please see
 
 FILES
 -----
-    /etc/safekeep.d/
+    /etc/safekeep/clients.d/
 
 SEE ALSO
 --------

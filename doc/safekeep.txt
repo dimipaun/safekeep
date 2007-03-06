@@ -88,7 +88,7 @@ SERVER OPTIONS
 	or a directory containing several configuration files (one per
 	backup client). Can be specified multiple times.
         If not specified at all, SafeKeep will default in non-client mode
-        to searching `/etc/safekeep.d/` for configuration files. 
+        to searching `/etc/safekeep/clients.d/` for configuration files. 
         Simply using this default is the recommended usage. 
 
 -e, --email=EMAIL::
@@ -119,10 +119,10 @@ KEYS OPTIONS
 CONFIGURATION
 -------------
 
-Normally the configuration files are placed in the `/etc/safekeep.d/` directory
-from where they will get picked up automatically by SafeKeep. Each backup
-client is described by a configuration file in XML format. The minimum 
-configuration file is:
+Normally the configuration files are placed in the `/etc/safekeep/clients.d/` 
+directory from where they will get picked up automatically by SafeKeep. 
+Each backup client is described by a configuration file in XML format. 
+The minimum configuration file is:
 ------------------------------------------------------------------------
 <backup>
   <host name="my_workstation" />
@@ -173,14 +173,14 @@ snapshot the disk via LVM, and proceed to backup `/etc`, `/home`,
 directories. Older data will be retained for 10 days.
 
 For full reference documentation of the configuration format, see
-safekeep.conf(5).
+safekeep.backup(5).
 
 CLIENT IDS
 ----------
 Normally the client IDs are generated automatically from the configuration
 filenames without the extension. E.g. if a configuration file is named
 `my_workstation.conf`, the client ID becomes `my_workstation`. For more
-information on this topic, see safekeep.conf(5).
+information on this topic, see safekeep.backup(5).
 
 KEY DEPLOYMENT
 --------------
@@ -206,8 +206,8 @@ this task.
 
 To do so, you just need to know the directory where the data is actually
 stored. In a typical installation, for a box configured via the file
-`/etc/safekeep.d/mybox.conf`, the data will be stored under
-`/var/lib/safekeep/mybox/`. Please refer to `safekeep.conf(5)` for more
+`/etc/safekeep/clients.d/mybox.backup`, the data will be stored under
+`/var/lib/safekeep/mybox/`. Please refer to `safekeep.backup(5)` for more
 information on this matter.
 
 Once you have determined where the data will be stored (we'll continue
@@ -242,11 +242,11 @@ The correct way is to flip the two around
 ...
 ------------------------------------------------------------------------
 
-Please see safekeep.conf(5) for more information on file selection.
+Please see safekeep.backup(5) for more information on file selection.
 
 SEE ALSO
 --------
-rdiff-backup(1), safekeep.conf(5)
+rdiff-backup(1), safekeep.backup(5)
 
 AUTHOR
 ------
