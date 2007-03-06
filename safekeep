@@ -5,7 +5,7 @@ import commands, tempfile, time, traceback
 import xml.dom.minidom
 import socket, smtplib
 
-config_dir = '/etc/safekeep/clients.d'
+config_dir = '/etc/safekeep'
 config_ext = '.backup'
 logbuf = []
 is_client = False
@@ -784,6 +784,7 @@ def main():
     mode = None
     email = []
     smtp = ''
+    cfgfile = None
     cfglocs = []
     verbosity = 0
     clientid = None
@@ -792,7 +793,13 @@ def main():
     keys_deploy = None
     for o, a in opts:
         if o in ('-c', '--conf'):
-            cfglocs.append(a)
+            if os.path.isdir(a) or a.endswith(config_ext):
+                cfglocs.append(a)
+            elif cfgfile is None:
+                cfgfile = a
+            else:
+                error('A main configuration file can be specified only once!')
+                sys.exit(2)
         elif o in ('-e', '--email'):
             email.append(a)
         elif o in ('-h', '--help'):
@@ -834,9 +841,14 @@ def main():
     if mode is 'client' and cfglocs:
         usage(2)
 
-    if mode is not 'client' and len(cfglocs) == 0:
-        cfglocs.append(config_dir)
-    cfgs = parse_locs(cfglocs)
+    if mode is not 'client':
+        if cfgfile is None: 
+            cfgfile = os.path.join(config_dir, 'safekeep.conf')
+        # FIXME: parse config file
+        if len(cfglocs) == 0: 
+            locs = os.path.join(config_dir, 'clients.d')
+            cfglocs.append(locs)
+        cfgs = parse_locs(cfglocs)
 
     if mode is 'client':
         if len(args) > 0: usage(2)
