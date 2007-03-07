@@ -862,6 +862,8 @@ def main():
             if os.path.isfile(propfile): cfgfile = propfile
         if cfgfile:
             props = parse_prop_file(cfgfile)
+        else:
+            props = {}
         if 'email.smtp.server' in props:
             smtp = props['email.smtp.server']
         if 'email.to' in props:
