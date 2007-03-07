@@ -3,18 +3,18 @@ safekeep.backup(5)
 
 NAME
 ----
-safekeep.backup - Configuration file for 'safekeep(1)'
+safekeep.backup - Configuration file for a 'safekeep(1)' client
 
 SYNOPSIS
 --------
 These files are usually placed in `/etc/safekeep/clients.d/` to be picked
-up automatically be 'safekeep(1)'. They must have a `.conf` extension.
+up automatically by 'safekeep(1)'. They must have a `.backup` extension.
 
 DESCRIPTION
 -----------
 Each configuration file controls the backup of a host. They are typically
 named after the hostname of the machine they control the backup for, and
-have a '.conf' extension (e.g. `mailbox.conf`). These files are written
+have a '.backup' extension (e.g. `mailbox.backup`). These files are written
 in XML. Virtually all elements and attributes are optional; if not present,
 `safekeep(1)` will provide reasonable, useful defaults.
 
