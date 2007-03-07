@@ -236,7 +236,7 @@ Please see safekeep.backup(5) for more information on file selection.
 
 SEE ALSO
 --------
-rdiff-backup(1), safekeep.backup(5)
+rdiff-backup(1), safekeep.conf(5), safekeep.backup(5)
 
 AUTHOR
 ------
