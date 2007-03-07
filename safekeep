@@ -858,15 +858,17 @@ def main():
 
     if mode is not 'client':
         if cfgfile is None: 
-            cfgfile = os.path.join(config_dir, 'safekeep.conf')
-        props = parse_prop_file(cfgfile)
+            propfile = os.path.join(config_dir, 'safekeep.conf')
+            if os.path.isfile(propfile): cfgfile = propfile
+        if cfgfile:
+            props = parse_prop_file(cfgfile)
         if 'email.smtp.server' in props:
             smtp = props['email.smtp.server']
         if 'email.to' in props:
             email = props['email.to'].split(',')
         if len(cfglocs) == 0: 
             locs = os.path.join(config_dir, 'clients.d')
-            cfglocs.append(locs)
+            if os.path.isdir(locs): cfglocs.append(locs)
         cfgs = parse_locs(cfglocs)
 
     if mode is 'client':
