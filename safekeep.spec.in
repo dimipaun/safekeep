@@ -79,6 +79,7 @@ install -m 755 safekeep "%{buildroot}%{_bindir}/"
 install -d -m 755 "%{buildroot}%{_mandir}/man1/"
 install -m 755 doc/safekeep.1 "%{buildroot}%{_mandir}/man1/"
 install -d -m 755 "%{buildroot}%{_mandir}/man5/"
+install -m 755 doc/safekeep.conf.5 "%{buildroot}%{_mandir}/man5/"
 install -m 755 doc/safekeep.backup.5 "%{buildroot}%{_mandir}/man5/"
 install -d -m 750 "%{buildroot}%{homedir}"
 install -d -m 700 "%{buildroot}%{homedir}/.ssh"
@@ -108,6 +109,7 @@ fi
 %defattr(-,root,root,-)
 %{_bindir}/safekeep
 %{_mandir}/man1/safekeep.1*
+%{_mandir}/man5/safekeep.conf.5*
 %{_mandir}/man5/safekeep.backup.5*
 %doc AUTHORS COPYING LICENSE README TODO
 
@@ -119,7 +121,7 @@ fi
 %attr(700,%{name},%{name}) %dir %{homedir}/.ssh
 %dir %{_sysconfdir}/safekeep
 %config %{_sysconfdir}/cron.daily/safekeep
-%doc safekeep-test sample.backup
+%doc safekeep-test sample.conf sample.backup
 %doc AUTHORS COPYING LICENSE
 
 %changelog

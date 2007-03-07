@@ -10,8 +10,8 @@ tagname     := $(shell echo Release-$(releasename) | tr . _)
 dirname     := $(shell basename $(PWD))
 rpmroot     := $(shell grep '%_topdir' ~/.rpmmacros | sed 's/^[^ \t]*[ \t]*//')
 svnroot     := $(shell LANG=C svn info | grep Root | cut -c 18-)
-MAN_TXT     := doc/safekeep.txt doc/safekeep.backup.txt
-DOC_MAN     := doc/safekeep.1 doc/safekeep.backup.5
+MAN_TXT     := doc/safekeep.txt doc/safekeep.conf.txt doc/safekeep.backup.txt
+DOC_MAN     := doc/safekeep.1 doc/safekeep.conf.5 doc/safekeep.backup.5
 DOC_HTML    := $(patsubst %.txt,%.html,$(MAN_TXT))
 
 
@@ -78,6 +78,7 @@ changelog:
 install: $(DOC_MAN)
 	install -m 755 safekeep "/usr/bin/"
 	install -m 755 doc/safekeep.1 "/usr/share/man/man1/"
+	install -m 755 doc/safekeep.conf.5 "/usr/share/man/man5/"
 	install -m 755 doc/safekeep.backup.5 "/usr/share/man/man5/"
 	if test -d /etc/safekeep.d; then  \
 	    for file in /etc/safekeep.d/*.conf; do  \

@@ -1,0 +1,44 @@
+safekeep.conf(5)
+================
+
+NAME
+----
+safekeep.conf - Configuration file for 'safekeep(1)'
+
+SYNOPSIS
+--------
+This file resides in `/etc/safekeep/` from where it
+will be automatically picked up by 'safekeep(1)'.
+
+DESCRIPTION
+-----------
+This configuration file holds safekeep global settings. 
+The format of the file is a simple key-value pair similar
+to Java properties files: lines starting with '#' are ignored
+as comments, keys are separated from values by '=', and
+leading and trailing spaces are ignored.
+
+PARAMETERS
+----------
+email.to::
+	In addition to writing the session logs
+	on the standard output, `safekeep` can also send the
+	logs via email to a number of recipients.
+	This comma-separated list of emails designates
+	the recipients of the logs. If not specified,
+	`safekeep` will not attempt to email the logs.
+
+email.smtp.server::
+	Specifies the SMTP server used for sending mails 
+	if the `email.to` specifies any recipients.
+	If not specified, `safekeep` will just use
+	`/usr/sbin/sendmail` to deliver the mail.
+
+FILES
+-----
+    /etc/safekeep/safekeep.conf
+
+SEE ALSO
+--------
+safekeep(1), safekeep.backup(5), rdiff-backup(1), lvcreate(8)
+
