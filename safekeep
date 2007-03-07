@@ -622,7 +622,7 @@ def do_server(cfgs, ids):
     info('------------------------------------------------------------------')
     debug('Server backup done')
 
-def do_keys(cfgs, ids, status, dump, deploy):
+def do_keys(cfgs, ids, identity, status, dump, deploy):
     for cfg in cfgs.itervalues():
         id = cfg['id']
         if ids and id not in ids: continue
@@ -671,8 +671,13 @@ def do_keys(cfgs, ids, status, dump, deploy):
         output = '\n'.join(lines)
         if dump:
             print output
+
+        basessh = 'ssh'
+        if identity: basessh += ' -i %s' % (commands.mkarg(identity))
+
         if status or deploy:
-            cmd = 'ssh %s@%s "if test -f .ssh/authorized_keys; then cat .ssh/authorized_keys; fi"' % (cfg['user'], cfg['host'])
+            if identity: cmd = "ssh -i %s" % (commands.mkarg(identity))
+            cmd = '%s %s@%s "if test -f .ssh/authorized_keys; then cat .ssh/authorized_keys; fi"' % (basessh, cfg['user'], cfg['host'])
             debug(cmd)
             out = os.popen(cmd, 'r')
             authtext = out.read()
@@ -694,7 +699,7 @@ def do_keys(cfgs, ids, status, dump, deploy):
             if status:
                 print '%s: Keys will be deployed on the client.' % id
             if deploy:
-                cmd = 'ssh %s@%s "umask 077; test -d .ssh || mkdir .ssh; cat >> .ssh/authorized_keys"' % (cfg['user'], cfg['host'])
+                cmd = '%s %s@%s "umask 077; test -d .ssh || mkdir .ssh; cat >> .ssh/authorized_keys"' % (basessh, cfg['user'], cfg['host'])
                 debug(cmd)
                 pipe = os.popen(cmd, 'w')
                 pipe.write('%s\n' % '\n'.join([key[4] for key in new_keys]))
@@ -777,6 +782,7 @@ def usage(exitcode=None):
     print '-V, --version       show the version number and exit'
     print
     print 'keys options:'
+    print '-i FILE             use FILE as identity for RSA/DSA authentication'
     print '--status            display the key status for the clients (default)'
     print '--print             display the authorization keys'
     print '--deploy            deploy the authorization keys'
@@ -784,7 +790,7 @@ def usage(exitcode=None):
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'c:e:hs:qvV',
+        opts, args = getopt.getopt(sys.argv[1:], 'c:e:i:hs:qvV',
                                    [ 'conf=', 'client', 'clientid=', 'deploy',
                                      'email=', 'help', 'keys', 'print',
                                      'quiet', 'server', 'smtp=', 'status',
@@ -799,6 +805,7 @@ def main():
     cfglocs = []
     verbosity = 0
     clientid = None
+    identity = None
     keys_status = None
     keys_print = None
     keys_deploy = None
@@ -831,6 +838,8 @@ def main():
         elif o in ('--keys', ):
             if mode: usage(2)
             mode = 'keys'
+        elif o in ('-i', ):
+            identity = a
         elif o in ('--status', ):
             keys_status = True
         elif o in ('--print', ):
@@ -848,7 +857,7 @@ def main():
     if mode is None:
         mode = 'server'
 
-    if mode is not 'keys' and (keys_status or keys_print or keys_deploy):
+    if mode is not 'keys' and (identity or keys_status or keys_print or keys_deploy):
         usage(2)
 
     if mode is not 'server' and (email or smtp):
@@ -901,7 +910,7 @@ def main():
             verbosity_level = 1 + verbosity
             if not keys_status and not keys_print and not keys_deploy: 
                 keys_status = True
-            do_keys(cfgs, args, keys_status, keys_print, keys_deploy)
+            do_keys(cfgs, args, identity, keys_status, keys_print, keys_deploy)
         else:
             assert False, 'Unkown mode: ' + mode
     except Exception, ex:
