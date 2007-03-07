@@ -82,13 +82,10 @@ GENERAL OPTIONS
 
 SERVER OPTIONS
 --------------
--c, --conf=FILE|DIR::
+-c, --conf=FILE::
 	Specifies the configuration file location.
-	This can be a single file (for a single client configuration)
-	or a directory containing several configuration files (one per
-	backup client). Can be specified multiple times.
-        If not specified at all, SafeKeep will default in non-client mode
-        to searching `/etc/safekeep/clients.d/` for configuration files. 
+        If not specified at all, SafeKeep will default to
+	`/etc/safekeep/safekeep.conf` if it exists.
         Simply using this default is the recommended usage. 
 
 KEYS OPTIONS

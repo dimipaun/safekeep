@@ -770,7 +770,7 @@ def usage(exitcode=None):
     print '--keys              launch in keys management mode'
     print
     print 'common options:'
-    print '-c, --conf=FILE|DIR use the given configuration file/directory'
+    print '-c, --conf=FILE     use the FILE configuration file'
     print '-h, --help          show this help message and exit'
     print '-q, --quiet         decreases the verbosity level'
     print '-v, --verbose       increases the verbosity level'
@@ -805,6 +805,7 @@ def main():
     for o, a in opts:
         if o in ('-c', '--conf'):
             if os.path.isdir(a) or a.endswith(config_ext):
+                warn('Adding client config files/dirs via this switch is deprecated')
                 cfglocs.append(a)
             elif cfgfile is None:
                 cfgfile = a
