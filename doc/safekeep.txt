@@ -7,7 +7,7 @@ safekeep - Client/server backup script
 
 SYNOPSIS
 --------
-'safekeep' [--server] [-q] [-v] [-c file] [-e <email>] [-s <smtp>] <clientid>*
+'safekeep' [--server] [-q] [-v] [-c file] <clientid>*
 
 'safekeep' --keys [-q] [-v] [-c file] [--status] [--print] [--deploy] <clientid>*
 
@@ -90,16 +90,6 @@ SERVER OPTIONS
         If not specified at all, SafeKeep will default in non-client mode
         to searching `/etc/safekeep/clients.d/` for configuration files. 
         Simply using this default is the recommended usage. 
-
--e, --email=EMAIL::
-	In addition to writing the session logs
-	on the standard output, this parameter let the user specify
-	the mail address where the logs are to be send. Can be specified
-	more than once to send reports to multiple addresses.
-
--s, --smtp=SMTP::
-	Specifies the SMTP server used for sending mails when `-e` is used. 
-	Defaults to using `/usr/sbin/sendmail`.
 
 KEYS OPTIONS
 ------------

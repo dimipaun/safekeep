@@ -776,10 +776,6 @@ def usage(exitcode=None):
     print '-v, --verbose       increases the verbosity level'
     print '-V, --version       show the version number and exit'
     print
-    print 'server options:'
-    print '-e, --email=EMAIL   send results by email (can appear multiple times)'
-    print '-s, --smtp=SMTP     SMTP server to use when sending mails (default: sendmail)'
-    print
     print 'keys options:'
     print '--status            display the key status for the clients (default)'
     print '--print             display the authorization keys'
@@ -816,10 +812,14 @@ def main():
                 error('A main configuration file can be specified only once!')
                 sys.exit(2)
         elif o in ('-e', '--email'):
+            warn('The -e/--email options are deprecated and will be removed in the future')
+            warn('Please use the /etc/safekeep/safekeep.conf file instead')
             email.append(a)
         elif o in ('-h', '--help'):
             usage(0)
         elif o in ('-s', '--smtp'):
+            warn('The -s/--smtp options are deprecated and will be removed in the future')
+            warn('Please use the /etc/safekeep/safekeep.conf file instead')
             smtp = a
         elif o in ('--server', ):
             if mode: usage(2)
