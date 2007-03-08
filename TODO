@@ -1,18 +1,17 @@
 Next release:
   * Add configure script + an INSTALL file
   * Test the sendmail delivery method
-  * Add a -u/--user parameter
-  * Support more of rdiff-backup special file selectors
   * Add tests db dumps
 
 Future (post 1.0):
+  * Support more of rdiff-backup special file selectors
   * Package it up for Fedora Extras and Ubuntu/Debian
   * Modify the test to not rely on Lattica's servers
   * Find a way to show man page on website with header and footer
   * Decide how big the snapshot size should be automagically
   * Fully automatic shapshotting mode
   * Configuration inheritance
-  * Transactional store of ops on server side, and automagic recovery from errors
+  * Transactional ops on server side, and automagic recovery from errors
   * Windows support for the client
   * Write SE Linux rules to limit access rights (akin to the httpd ones)
   * Run the server in a chroot-jail
