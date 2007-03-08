@@ -799,6 +799,7 @@ def main():
         usage(2)
 
     mode = None
+    user = None
     email = []
     smtp = None
     cfgfile = None
@@ -874,6 +875,8 @@ def main():
             props = parse_prop_file(cfgfile)
         else:
             props = {}
+        if 'user' in props:
+            user = props['user']
         if 'email.smtp.server' in props:
             smtp = props['email.smtp.server']
         if 'email.to' in props:
@@ -894,6 +897,13 @@ def main():
                 error('It appears to be a file, configuration files are passed via the -c/--conf switch.')
             ok = False
         if not ok: sys.exit(2)
+
+    if user and mode is not 'keys':
+        import pwd
+        (name, passwd, uid, gid, gecos, dir, shell) = pwd.getpwnam(user)
+        os.setregid(gid, gid)
+        os.setreuid(uid, uid)
+        os.env['HOME'] = dir
 
     try:
         global is_client, verbosity_level
