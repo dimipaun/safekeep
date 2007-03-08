@@ -119,12 +119,17 @@ def augmentfile(file, user=None, host=None):
 
 def localTest(tmproot):
     params = {'tmproot': tmproot, 'args': safekeep_args}
+    os.mkdir(os.path.join(tmproot, 'clients.d'))
     os.mkdir(os.path.join(tmproot, 'client'))
     os.mkdir(os.path.join(tmproot, 'client', 'data'))
     os.mkdir(os.path.join(tmproot, 'client', 'home'))
     os.mkdir(os.path.join(tmproot, 'client', 'misc'))
     os.mkdir(os.path.join(tmproot, 'server'))
     CONFIG = """
+        # Default values should do for now
+    """
+    writefile(os.path.join(tmproot, 'safekeep.conf'), CONFIG % params)
+    BACKUP = """
        <backup id="%(tmproot)s">
           <repo path="%(tmproot)s/server" />
           <data>
@@ -133,7 +138,7 @@ def localTest(tmproot):
           </data>
         </backup>
     """
-    writefile(os.path.join(tmproot, 'test.backup'), CONFIG % params)
+    writefile(os.path.join(tmproot, 'clients.d', 'test.backup'), BACKUP % params)
     for i in xrange(test_reps):
         FILES = (
             'data/fileA.out', 
@@ -149,7 +154,7 @@ def localTest(tmproot):
         cmd = "cd %(tmproot)s/client; find -type f -a \! -name '*.nobackup' | sort | xargs md5sum > %(tmproot)s/md5sums.client"
         if os.system(cmd % params):
             raise TestFailure("Can't compute the source MD5 sums")
-        cmd = "safekeep %(args)s --conf '%(tmproot)s/test.backup'"
+        cmd = "safekeep %(args)s --conf '%(tmproot)s/safekeep.conf'"
         if os.system(cmd % params):
             raise TestFailure("Can't backup files")
         os.mkdir(os.path.join(tmproot, 'restore'))
