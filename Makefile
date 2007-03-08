@@ -77,6 +77,8 @@ changelog:
 
 install: $(DOC_MAN)
 	install -m 755 safekeep "/usr/bin/"
+	install -d -m 755 "/etc/safekeep/clients.d/"
+	install -m 755 safekeep.conf "/etc/safekeep/"
 	install -m 755 doc/safekeep.1 "/usr/share/man/man1/"
 	install -m 755 doc/safekeep.conf.5 "/usr/share/man/man5/"
 	install -m 755 doc/safekeep.backup.5 "/usr/share/man/man5/"

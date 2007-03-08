@@ -72,6 +72,7 @@ make build
 
 %install
 install -d -m 755 "%{buildroot}%{_sysconfdir}/safekeep/clients.d"
+install -m 755 safekeep.conf "%{buildroot}%{_sysconfdir}/safekeep/"
 install -d -m 755 "%{buildroot}%{_sysconfdir}/cron.daily"
 install -m 755 safekeep.cron "%{buildroot}%{_sysconfdir}/cron.daily/safekeep"
 install -d -m 755 "%{buildroot}%{_bindir}/"
@@ -120,8 +121,9 @@ fi
 %attr(750,%{name},%{name}) %dir %{homedir}
 %attr(700,%{name},%{name}) %dir %{homedir}/.ssh
 %dir %{_sysconfdir}/safekeep
+%config %{_sysconfdir}/safekeep/safekeep.conf
 %config %{_sysconfdir}/cron.daily/safekeep
-%doc safekeep-test sample.conf sample.backup
+%doc safekeep-test sample.backup
 %doc AUTHORS COPYING LICENSE
 
 %changelog
