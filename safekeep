@@ -2,7 +2,7 @@
 
 import getopt, os, os.path, popen2, re, sys
 import commands, tempfile, time, traceback
-import xml.dom.minidom
+import getpass, pwd, xml.dom.minidom
 import socket, smtplib
 
 config_dir = '/etc/safekeep'
@@ -10,6 +10,9 @@ config_ext = '.backup'
 logbuf = []
 is_client = False
 verbosity_level = 1
+work_user = getpass.getuser()
+backup_user = None
+home_dir = None
 
 PROTOCOL = "1.0"
 VERSION = "0.9.1"
@@ -186,11 +189,10 @@ def parse_config(backup_el, dflt_id):
         host = user = key_ctrl = key_data = None
     if host and not user:
         user = 'root'
-    home = os.getenv('HOME', '/root')
     if host and not key_ctrl:
-        key_ctrl = os.path.join(home, '.ssh', 'safekeep-server-ctrl-key')
+        key_ctrl = os.path.join(home_dir, '.ssh', 'safekeep-server-ctrl-key')
     if host and not key_data:
-        key_data = os.path.join(home, '.ssh', 'safekeep-server-data-key')
+        key_data = os.path.join(home_dir, '.ssh', 'safekeep-server-data-key')
 
     repo_el = backup_el.getElementsByTagName('repo')
     dir = None
@@ -648,8 +650,9 @@ def do_keys(cfgs, ids, identity, status, dump, deploy):
                     break
                 if deploy:
                     info('%s: Key do not exist, generating it now: %s' % (id, privatekeyfile))
-                    gencmd = 'ssh-keygen -q -b 1024 -t dsa -N "" -C "SafeKeep auto generated key at %s@%s" -f %s' % \
-                          (os.getenv('LOGNAME', 'root'), os.uname()[1], privatekeyfile)
+                    gencmd = 'ssh-keygen -q -b 1024 -t dsa -N "" -C "SafeKeep auto generated key at %s@%s" -f %s' % (backup_user, os.uname()[1], privatekeyfile)
+                    if backup_user is not work_user:
+                        gencmd = 'su -c %s - %s' % (commands.mkarg(gencmd), backup_user)
                     debug(gencmd)
                     if os.system(gencmd):
                         error('%s: Failed to generate key %s. Skipping client.' % (id, privatekeyfile))
@@ -676,7 +679,6 @@ def do_keys(cfgs, ids, identity, status, dump, deploy):
         if identity: basessh += ' -i %s' % (commands.mkarg(identity))
 
         if status or deploy:
-            if identity: cmd = "ssh -i %s" % (commands.mkarg(identity))
             cmd = '%s %s@%s "if test -f .ssh/authorized_keys; then cat .ssh/authorized_keys; fi"' % (basessh, cfg['user'], cfg['host'])
             debug(cmd)
             out = os.popen(cmd, 'r')
@@ -798,8 +800,8 @@ def main():
     except getopt.GetoptError:
         usage(2)
 
+    global backup_user, home_dir
     mode = None
-    user = None
     email = []
     smtp = None
     cfgfile = None
@@ -875,8 +877,8 @@ def main():
             props = parse_prop_file(cfgfile)
         else:
             props = {}
-        if 'user' in props:
-            user = props['user']
+        if 'backup.user' in props:
+            backup_user = props['backup.user']
         if 'email.smtp.server' in props:
             smtp = props['email.smtp.server']
         if 'email.to' in props:
@@ -884,7 +886,21 @@ def main():
         if len(cfglocs) == 0: 
             locs = os.path.join(config_dir, 'clients.d')
             if os.path.isdir(locs): cfglocs.append(locs)
+
+    if backup_user and backup_user != work_user:
+        (user, pswd, uid, gid, gecos, home_dir, shell) = pwd.getpwnam(backup_user)
+        if mode is not 'keys':
+            os.setregid(gid, gid)
+            os.setreuid(uid, uid)
+            os.env['HOME'] = home_dir
+    else:
+        backup_user = work_user
+        home_dir = os.getenv('HOME', '/')
+
+    if len(cfglocs) > 0:
         cfgs = parse_locs(cfglocs)
+    else:
+        cfgs = {}
 
     if mode is 'client':
         if len(args) > 0: usage(2)
@@ -897,13 +913,6 @@ def main():
                 error('It appears to be a file, configuration files are passed via the -c/--conf switch.')
             ok = False
         if not ok: sys.exit(2)
-
-    if user and mode is not 'keys':
-        import pwd
-        (name, passwd, uid, gid, gecos, dir, shell) = pwd.getpwnam(user)
-        os.setregid(gid, gid)
-        os.setreuid(uid, uid)
-        os.env['HOME'] = dir
 
     try:
         global is_client, verbosity_level

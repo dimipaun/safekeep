@@ -20,6 +20,12 @@ leading and trailing spaces are ignored.
 
 PARAMETERS
 ----------
+
+backup.user::
+	The Unix user under which the server will run.
+	If not specified, `safekeep` will just run under the
+	current user.
+
 email.to::
 	In addition to writing the session logs
 	on the standard output, `safekeep` can also send the
@@ -33,11 +39,6 @@ email.smtp.server::
 	if the `email.to` specifies any recipients.
 	If not specified, `safekeep` will just use
 	`/usr/sbin/sendmail` to deliver the mail.
-
-user::
-	The Unix user under which the server will run.
-	If not specified, `safekeep` will just run under the
-	current user.
 
 FILES
 -----
