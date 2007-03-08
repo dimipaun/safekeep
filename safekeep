@@ -5,7 +5,7 @@ import commands, tempfile, time, traceback
 import getpass, pwd, xml.dom.minidom
 import socket, smtplib
 
-config_dir = '/etc/safekeep'
+config_file = '/etc/safekeep/safekeep.conf'
 config_ext = '.backup'
 logbuf = []
 is_client = False
@@ -872,12 +872,15 @@ def main():
         usage(2)
 
     if mode is not 'client':
-        if cfgfile is None: 
-            propfile = os.path.join(config_dir, 'safekeep.conf')
-            if os.path.isfile(propfile): cfgfile = propfile
-        if cfgfile:
+        if cfgfile is None and os.path.isfile(config_file): 
+            cfgfile = config_file
+        if cfgfile and os.path.isfile(cfgfile):
             props = parse_prop_file(cfgfile)
         else:
+            if cfgfile:
+                warn('Configuration file does not exist, skipping: %s' % cfgfile)
+            else:
+                 cfgfile = config_file
             props = {}
         if 'backup.user' in props:
             backup_user = props['backup.user']
@@ -888,7 +891,7 @@ def main():
         if 'email.to' in props:
             email = props['email.to'].split(',')
         if len(cfglocs) == 0: 
-            locs = os.path.join(config_dir, 'clients.d')
+            locs = os.path.join(os.path.dirname(cfgfile), 'clients.d')
             if os.path.isdir(locs): cfglocs.append(locs)
 
     if backup_user and backup_user != work_user:
