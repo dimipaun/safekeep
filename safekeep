@@ -13,6 +13,7 @@ verbosity_level = 1
 work_user = getpass.getuser()
 backup_user = None
 home_dir = None
+base_dir = None
 
 PROTOCOL = "1.0"
 VERSION = "0.9.1"
@@ -203,6 +204,7 @@ def parse_config(backup_el, dflt_id):
     elif len(repo_el) > 1:
         raise ConfigException('Can not have more than a repo element')
     if not dir: dir = id
+    dir = os.path.join(base_dir, dir)
 
     setup_el = backup_el.getElementsByTagName('setup')
     dumps = []
@@ -800,7 +802,7 @@ def main():
     except getopt.GetoptError:
         usage(2)
 
-    global backup_user, home_dir
+    global backup_user, home_dir, base_dir
     mode = None
     email = []
     smtp = None
@@ -879,6 +881,8 @@ def main():
             props = {}
         if 'backup.user' in props:
             backup_user = props['backup.user']
+        if 'base.dir' in props:
+            base_dir = props['base.dir']
         if 'email.smtp.server' in props:
             smtp = props['email.smtp.server']
         if 'email.to' in props:
@@ -896,6 +900,9 @@ def main():
     else:
         backup_user = work_user
         home_dir = os.getenv('HOME', '/')
+
+    if not base_dir:
+        base_dir = home_dir
 
     if len(cfglocs) > 0:
         cfgs = parse_locs(cfglocs)

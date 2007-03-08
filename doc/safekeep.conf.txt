@@ -26,6 +26,11 @@ backup.user::
 	If not specified, `safekeep` will just run under the
 	current user.
 
+base.dir::
+	The base directory for date repository relative paths.
+	If not specified, it defaults to the home directory
+	of the backup user.
+
 email.to::
 	In addition to writing the session logs
 	on the standard output, `safekeep` can also send the
