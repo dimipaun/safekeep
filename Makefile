@@ -141,3 +141,4 @@ clean:
 	rm -f {.,doc,debian}/*~ *.py[co] 
 	rm -f $(name).spec debian/changelog
 	rm -f doc/*.xml doc/*.html doc/*.[15]
+	rm -f safekeep-*[.]20[01][0-9][01][0-9][0-3][0-9][012][0-9][0-5][0-9]*
