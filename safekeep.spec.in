@@ -121,8 +121,9 @@ fi
 %attr(750,%{name},%{name}) %dir %{homedir}
 %attr(700,%{name},%{name}) %dir %{homedir}/.ssh
 %dir %{_sysconfdir}/safekeep
+%dir %{_sysconfdir}/safekeep/clients.d
 %config %{_sysconfdir}/safekeep/safekeep.conf
-%config %{_sysconfdir}/cron.daily/safekeep
+%{_sysconfdir}/cron.daily/safekeep
 %doc safekeep-test sample.backup
 %doc AUTHORS COPYING LICENSE
 
