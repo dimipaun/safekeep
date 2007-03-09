@@ -111,7 +111,7 @@ KEYS OPTIONS
 CONFIGURATION
 -------------
 
-Normally the configuration files are placed in the `/etc/safekeep/clients.d/` 
+Normally the configuration files are placed in the `/etc/safekeep/backup.d/` 
 directory from where they will get picked up automatically by SafeKeep. 
 Each backup client is described by a configuration file in XML format. 
 The minimum configuration file is:
@@ -198,7 +198,7 @@ this task.
 
 To do so, you just need to know the directory where the data is actually
 stored. In a typical installation, for a box configured via the file
-`/etc/safekeep/clients.d/mybox.backup`, the data will be stored under
+`/etc/safekeep/backup.d/mybox.backup`, the data will be stored under
 `/var/lib/safekeep/mybox/`. Please refer to `safekeep.backup(5)` for more
 information on this matter.
 

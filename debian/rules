@@ -21,7 +21,7 @@ install:
 	install -m 444 doc/safekeep.conf.5 $(CURDIR)/debian/safekeep-common/usr/share/man/man5
 	install -m 444 doc/safekeep.backup.5 $(CURDIR)/debian/safekeep-common/usr/share/man/man5
 
-	install -d -m 755 $(CURDIR)/debian/safekeep-server/etc/safekeep/clients.d
+	install -d -m 755 $(CURDIR)/debian/safekeep-server/etc/safekeep/backup.d
 	install -m 664 safekeep.conf $(CURDIR)/debian/safekeep-server/etc/safekeep
 	install -d -m 755 $(CURDIR)/debian/safekeep-server/etc/cron.daily
 	install -m 755 safekeep.cron $(CURDIR)/debian/safekeep-server/etc/cron.daily/safekeep

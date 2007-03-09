@@ -71,7 +71,7 @@ installed on the server on which the data will be backed-up to.
 make build
 
 %install
-install -d -m 755 "%{buildroot}%{_sysconfdir}/safekeep/clients.d"
+install -d -m 755 "%{buildroot}%{_sysconfdir}/safekeep/backup.d"
 install -m 664 safekeep.conf "%{buildroot}%{_sysconfdir}/safekeep/"
 install -d -m 755 "%{buildroot}%{_sysconfdir}/cron.daily"
 install -m 755 safekeep.cron "%{buildroot}%{_sysconfdir}/cron.daily/safekeep"
@@ -95,7 +95,7 @@ rm -rf "%{buildroot}"
 if test -d /etc/safekeep.d; then
     for file in /etc/safekeep.d/*.conf; do
         if test -f "$file"; then 
-            mv "$file" /etc/safekeep/clients.d/`basename "$file" .conf`.backup
+            mv "$file" /etc/safekeep/backup.d/`basename "$file" .conf`.backup
         fi
     done
     rmdir /etc/safekeep.d 2> /dev/null || :
@@ -121,7 +121,7 @@ fi
 %attr(750,%{name},%{name}) %dir %{homedir}
 %attr(700,%{name},%{name}) %dir %{homedir}/.ssh
 %dir %{_sysconfdir}/safekeep
-%dir %{_sysconfdir}/safekeep/clients.d
+%dir %{_sysconfdir}/safekeep/backup.d
 %config %{_sysconfdir}/safekeep/safekeep.conf
 %{_sysconfdir}/cron.daily/safekeep
 %doc safekeep-test sample.backup

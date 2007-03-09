@@ -77,7 +77,7 @@ changelog:
 
 install: $(DOC_MAN)
 	install -m 755 safekeep "/usr/bin/"
-	install -d -m 755 "/etc/safekeep/clients.d/"
+	install -d -m 755 "/etc/safekeep/backup.d/"
 	install -m 755 safekeep.conf "/etc/safekeep/"
 	install -m 755 doc/safekeep.1 "/usr/share/man/man1/"
 	install -m 755 doc/safekeep.conf.5 "/usr/share/man/man5/"
@@ -85,7 +85,7 @@ install: $(DOC_MAN)
 	if test -d /etc/safekeep.d; then  \
 	    for file in /etc/safekeep.d/*.conf; do  \
 	        if test -f "$$file"; then \
-	            mv "$$file" /etc/safekeep/clients.d/`basename "$$file" .conf`.backup \
+	            mv "$$file" /etc/safekeep/backup.d/`basename "$$file" .conf`.backup \
 	        fi \
 	    done \
 	    rmdir /etc/safekeep.d 2> /dev/null || true \

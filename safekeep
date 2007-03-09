@@ -892,7 +892,7 @@ def main():
         if 'email.to' in props:
             email = props['email.to'].split(',')
         if len(cfglocs) == 0: 
-            locs = os.path.join(os.path.dirname(cfgfile), 'clients.d')
+            locs = os.path.join(os.path.dirname(cfgfile), 'backup.d')
             if os.path.isdir(locs): cfglocs.append(locs)
 
     if backup_user and backup_user != work_user:

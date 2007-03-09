@@ -9,7 +9,7 @@ case "$1" in
 	if test -d /etc/safekeep.d; then
 	    for file in /etc/safekeep.d/*.conf; do
 	        if test -f "$file"; then
-	            mv "$file" /etc/safekeep/clients.d/`basename "$file" .conf`.backup
+	            mv "$file" /etc/safekeep/backup.d/`basename "$file" .conf`.backup
 	        fi
 	    done
 	    rmdir /etc/safekeep.d 2> /dev/null || true

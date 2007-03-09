@@ -119,7 +119,7 @@ def augmentfile(file, user=None, host=None):
 
 def localTest(tmproot):
     params = {'tmproot': tmproot, 'args': safekeep_args}
-    os.mkdir(os.path.join(tmproot, 'clients.d'))
+    os.mkdir(os.path.join(tmproot, 'backup.d'))
     os.mkdir(os.path.join(tmproot, 'client'))
     os.mkdir(os.path.join(tmproot, 'client', 'data'))
     os.mkdir(os.path.join(tmproot, 'client', 'home'))
@@ -138,7 +138,7 @@ def localTest(tmproot):
           </data>
         </backup>
     """
-    writefile(os.path.join(tmproot, 'clients.d', 'test.backup'), BACKUP % params)
+    writefile(os.path.join(tmproot, 'backup.d', 'test.backup'), BACKUP % params)
     for i in xrange(test_reps):
         FILES = (
             'data/fileA.out', 
@@ -355,7 +355,7 @@ def remoteTest(tmproot, client, server):
         </backup>
         """ % (client, key_data, snap_conf)
 
-    writefile('/etc/safekeep/clients.d/test-client.backup', conf, '664', 'w', 'root', server)
+    writefile('/etc/safekeep/backup.d/test-client.backup', conf, '664', 'w', 'root', server)
     cmd = 'rm -rf client; mkdir -p client/data'
     rcmd(cmd, 'safekeep', server, 'create data repo') 
 
