@@ -84,6 +84,7 @@ def spawn(args):
     cout.close()
 
 def send_notification(email, smtp):
+    info('Sending email to %s via %s' % (','.join(email), smtp)
     global logbuf
     hostname = socket.gethostname()
     msg = 'From: SafeKeep@' + hostname + \
