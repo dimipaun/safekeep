@@ -20,15 +20,19 @@ all: help
 help:
 	@echo "Targets:"
 	@echo "    help        Displays this message"
-	@echo "    info        Displays package information (version, tag, etc.)"
+	@echo "    info        Displays package information (version, etc.)"
 	@echo "    install     Installs safekeep and the online documentation"
 	@echo "    docs        Builds all documentation formats"
 	@echo "    build       Builds everything needed for an installation"
+	@echo "    tar         Builds snapshot source distribution"
 	@echo "    deb         Builds snapshot binary and source DEBs"
 	@echo "    rpm         Buidls snapshot binary and source RPMs"
-	@echo "    tar         Builds snapshot source distribution"
-	@echo "    test        Invokes a quick local test for SafeKeep"
-	@echo "    fulltest    Invokes a comprehensive remote test for SafeKeep"
+	@echo "    tag         Tags the source for release"
+	@echo "    dist        Builds release source distribution"
+	@echo "    distdeb     Builds release binary and source DEBs"
+	@echo "    distrpm     Buidls release binary and source RPMs"
+	@echo "    check       Invokes a quick local test for SafeKeep"
+	@echo "    test        Invokes a comprehensive remote test for SafeKeep"
 	@echo "    clean       Cleans up the source tree"
 
 info:
@@ -43,12 +47,12 @@ info:
 
 build: docs
 
-release: check-info commit-release tag-release rpm-release
+release: check-info commit-release dist distrpm
 
 commit-release:
 	svn ci -m "Release $(version) (tagged as $(tagname))"
 
-tag-release:
+tag:
 	svn cp . $(svnroot)/safekeep/tags/$(tagname)
 
 check-info: info
@@ -91,50 +95,40 @@ install: $(DOC_MAN)
 	    rmdir /etc/safekeep.d 2> /dev/null || true \
 	fi
 
-tar: tar-snapshot
-
-tar-snapshot:
+tar:
 	svn export -r {'$(timestamp_svn)'} $(svnroot)/safekeep/trunk $(snapshotname)
 	cat $(snapshotname)/$(name).spec.in | sed 's/^%define version.*/%define version $(version).$(version_ts)/' > $(snapshotname)/$(name).spec
 	cat $(snapshotname)/debian/changelog.in | sed 's/^safekeep.*/safekeep ($(version).$(version_ts)) unstable; urgency=low/' > $(snapshotname)/debian/changelog
 	tar cz -f $(snapshotname).tar.gz $(snapshotname)
 	rm -rf $(snapshotname)
 
-tar-release:
+deb: tar
+	tar xz -C /tmp -f $(snapshotname).tar.gz
+	rm -rf $(snapshotname).tar.gz
+	cd /tmp/$(snapshotname) && debuild --check-dirname-regex 'safekeep(-.*)?'
+
+rpm: tar
+	rpmbuild -ta $(snapshotname).tar.gz
+
+dist:
 	svn export $(svnroot)/safekeep/tags/$(tagname) $(releasename)
 	cat $(releasename)/$(name).spec.in | sed 's/^%define version.*/%define version $(version)/' > $(releasename)/$(name).spec
 	cat $(releasename)/debian/changelog.in | sed 's/^safekeep.*/safekeep ($(version)) unstable; urgency=low/' > $(releasename)/debian/changelog
 	tar cz -f $(releasename).tar.gz $(releasename)
 	rm -rf $(releasename)
 
-deb: deb-snapshot
-
-deb-snapshot: tar-snapshot
-	tar xz -C /tmp -f $(snapshotname).tar.gz
-	rm -rf $(snapshotname).tar.gz
-	cd /tmp/$(snapshotname) && debuild --check-dirname-regex 'safekeep(-.*)?'
-
-deb-release: tar-release
+distdeb: dist
 	tar xz -C /tmp -f $(releasename).tar.gz
 	rm -rf $(releasename).tar.gz
 	cd /tmp/$(releasename) && debuild --check-dirname-regex 'safekeep(-.*)?'
 
-rpm: rpm-snapshot
-
-rpm-snapshot: tar-snapshot
-	rpmbuild -ta $(snapshotname).tar.gz
-
-rpm-release: tar-release
+distrpm: dist
 	rpmbuild -ta $(releasename).tar.gz
 
-test: test-local
-
-fulltest: test-remote
-
-test-local:
+check:
 	safekeep-test --local
 
-test-remote:
+test:
 	safekeep-test --remote
 
 clean:
