@@ -4,6 +4,7 @@ timestamp_svn := $(shell date -u -d '$(timestamp)' '+%Y%m%dT%H%MZ')
 version_num := $(shell grep 'VERSION *=' safekeep | sed s'/[^"]*"\([^"].*\)".*/\1/')
 version_ts  := $(shell date -u -d '$(timestamp)' '+%Y%m%d%H%M')
 version     := $(version_num)
+release     := 1
 releasename := $(name)-$(version)
 snapshotname:= $(name)-$(version).$(version_ts)
 tagname     := $(shell echo Release-$(releasename) | tr . _)
@@ -109,6 +110,8 @@ deb: tar
 
 rpm: tar
 	rpmbuild -ta $(snapshotname).tar.gz
+	mv $(rpmroot)/SRPMS/$(snapshotname)-$(release).src.rpm .
+	mv $(rpmroot)/RPMS/noarch/$(name)-*-$(version).$(version_ts)-$(release).noarch.rpm .
 
 dist:
 	svn export $(svnroot)/safekeep/tags/$(tagname) $(releasename)
@@ -124,6 +127,9 @@ distdeb: dist
 
 distrpm: dist
 	rpmbuild -ta $(releasename).tar.gz
+	mv $(rpmroot)/SRPMS/$(releasename)-$(release).src.rpm .
+	mv $(rpmroot)/RPMS/noarch/$(name)-*-$(version)-$(release).noarch.rpm .
+	rpm --addsign $(releasename)-$(release).src.rpm $(name)-*-$(version)-$(release).noarch.rpm
 
 check:
 	safekeep-test --local
