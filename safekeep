@@ -899,7 +899,7 @@ def main():
         if mode is not 'keys':
             os.setregid(gid, gid)
             os.setreuid(uid, uid)
-            os.env['HOME'] = home_dir
+            os.environ['HOME'] = home_dir
     else:
         backup_user = work_user
         home_dir = os.getenv('HOME', '/')
