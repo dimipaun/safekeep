@@ -185,9 +185,9 @@ When deploying keys using the built-in key management functionality,
 `safekeep(1)` needs to be invoked as the user under which it will function
 as a server. By default, that user is 'safekeep'. For extra security,
 you can not login into that account, so you have to invoke `safekeep(1)`
-as follows:
+as 'root':
 ------------------------------------------------------------------------
-	# sudo -H -u safekeep safekeep --keys --deploy
+	[root@yourbox ~] # safekeep --keys --deploy
 ------------------------------------------------------------------------
 
 RESTORING
