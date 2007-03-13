@@ -1,3 +1,249 @@
+2007-03-13 18:51 +0000 [r468]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Bump the version to 0.9.2
+
+2007-03-13 18:41 +0000 [r467]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Make paths absolute only if they exist
+
+2007-03-13 18:36 +0000 [r466]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in, safekeep/trunk/ANNOUNCE: Update
+	  ANNOUNCE and release changelog
+
+2007-03-13 17:35 +0000 [r465]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in: Update RPM changelog
+
+2007-03-13 06:25 +0000 [r464]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Use the safekeep user for key
+	  deployment for now, it is messy otherwise
+
+2007-03-13 05:52 +0000 [r463]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Make sure the paths to the SSH keys are
+	  absolute
+
+2007-03-13 05:25 +0000 [r462]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Bind / in /mnt/ instead of /tmp/ to
+	  avoid unpleasant situations with cleanup scripts.
+
+2007-03-13 05:22 +0000 [r461]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Run the --server and --key mode as
+	  root to test the new user-changing functionality
+
+2007-03-13 05:20 +0000 [r460]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Fix typo
+
+2007-03-09 17:48 +0000 [r459]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/Makefile: Cleanup snapshots as well
+
+2007-03-09 17:40 +0000 [r458]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/Makefile: Fetch the RPMs from the build dirs.
+
+2007-03-09 16:02 +0000 [r457]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/Makefile: Streamline the make targets to be closer
+	  to the standard ones.
+
+2007-03-09 15:28 +0000 [r456]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.backup.txt,
+	  safekeep/trunk/debian/safekeep-server.postinst,
+	  safekeep/trunk/debian/rules, safekeep/trunk/Makefile,
+	  safekeep/trunk/safekeep-test, safekeep/trunk/safekeep.spec.in,
+	  safekeep/trunk/safekeep, safekeep/trunk/doc/safekeep.txt,
+	  safekeep/trunk/debian/safekeep-server.dirs: Rename
+	  /etc/safekeep/clients.d to /etc/safekeep/backup.d
+
+2007-03-09 02:35 +0000 [r455]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: More tracing
+
+2007-03-09 02:21 +0000 [r454]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/debian/rules, safekeep/trunk/safekeep.spec.in: Fix
+	  permissions
+
+2007-03-09 01:04 +0000 [r453]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Fix typo
+
+2007-03-09 01:03 +0000 [r452]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in,
+	  safekeep/trunk/debian/safekeep-server.dirs: Fix the packages to
+	  include the clients.d dir as well
+
+2007-03-09 00:33 +0000 [r451]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.txt: Fix docs
+
+2007-03-08 22:44 +0000 [r450]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/TODO: Update TODO
+
+2007-03-08 22:43 +0000 [r449]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/debian/rules, safekeep/trunk/Makefile,
+	  safekeep/trunk/debian/safekeep-server.docs,
+	  safekeep/trunk/safekeep.spec.in, safekeep/trunk/safekeep.cron,
+	  safekeep/trunk/sample.conf (removed),
+	  safekeep/trunk/safekeep.conf (added): Install a default
+	  safekeep.conf in /etc/safekeep
+
+2007-03-08 21:46 +0000 [r448]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Make use of the new config files to
+	  avoid the deprecation warning in tests
+
+2007-03-08 20:56 +0000 [r447]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.backup.txt: Update docs
+
+2007-03-08 20:53 +0000 [r446]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Look for the client .backup files in the
+	  clients.d directory that is present in the same directory as the
+	  safekeep.conf file.
+
+2007-03-08 20:35 +0000 [r445]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.conf.txt, safekeep/trunk/safekeep,
+	  safekeep/trunk/sample.conf: Add property that controls the data
+	  repo base dir
+
+2007-03-08 20:27 +0000 [r444]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.conf.txt, safekeep/trunk/safekeep,
+	  safekeep/trunk/sample.conf: Instrument the --keys mode to work
+	  with a different backup user. Rename the property to
+	  'backup.user' instead of just 'user'.
+
+2007-03-08 03:44 +0000 [r443]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.conf.txt, safekeep/trunk/safekeep,
+	  safekeep/trunk/sample.conf: Teach safekeep to switch to a given
+	  user in server mode. Controlled via the 'user' property in
+	  /etc/safekeep/safekeep.conf
+
+2007-03-07 22:40 +0000 [r442]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep, safekeep/trunk/doc/safekeep.txt: Allow
+	  for the explicit spcification of an identity file during key
+	  management
+
+2007-03-07 21:28 +0000 [r441]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep, safekeep/trunk/doc/safekeep.txt:
+	  Deprecate the ability to specify client config files on the
+	  command line
+
+2007-03-07 19:13 +0000 [r440]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Fix the local test
+
+2007-03-07 19:13 +0000 [r439]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: We always need a props dict
+
+2007-03-07 19:07 +0000 [r438]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Look at the default configuration files
+	  only if they exist
+
+2007-03-07 16:54 +0000 [r437]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.txt: Mention the new conf file
+
+2007-03-07 16:52 +0000 [r436]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep, safekeep/trunk/doc/safekeep.txt:
+	  Deprecate the email options
+
+2007-03-07 16:28 +0000 [r435]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.conf.txt (added),
+	  safekeep/trunk/debian/rules, safekeep/trunk/Makefile,
+	  safekeep/trunk/debian/safekeep-server.docs,
+	  safekeep/trunk/safekeep.spec.in, safekeep/trunk/sample.conf
+	  (added): Add man page for safekeep.conf
+
+2007-03-07 15:23 +0000 [r434]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.backup.txt,
+	  safekeep/trunk/debian/rules, safekeep/trunk/Makefile,
+	  safekeep/trunk/debian/safekeep-server.docs,
+	  safekeep/trunk/safekeep.spec.in, safekeep/trunk/sample.backup
+	  (added), safekeep/trunk/sample.conf (removed): Complete the
+	  renaming of safekeep.conf.txt into safekeep.backup.txt
+
+2007-03-06 21:15 +0000 [r433]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.backup.txt (added),
+	  safekeep/trunk/doc/safekeep.conf.txt (removed),
+	  safekeep/trunk/doc/safekeep.txt: Rename the man page
+	  safekeep.conf to safekeep.backup to match the new naming
+	  convention. Adjust the docs to the new directory structure.
+
+2007-03-06 21:07 +0000 [r432]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Read the email properties from the
+	  global config file
+
+2007-03-06 04:52 +0000 [r431]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Add simple Java-like properties parser
+
+2007-03-06 04:11 +0000 [r430]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Add (partial) support for a global
+	  configuration file: /etc/safekeep/safekeep.conf Allow the
+	  -c/--conf switch to take both global conf file and client conf
+	  files as parameters.
+
+2007-03-04 20:15 +0000 [r429]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/Makefile: Add migration code to source install as
+	  well
+
+2007-03-04 20:13 +0000 [r428]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/debian/safekeep-server.postinst,
+	  safekeep/trunk/debian/rules, safekeep/trunk/safekeep.spec.in,
+	  safekeep/trunk/safekeep,
+	  safekeep/trunk/debian/safekeep-server.dirs: Move the client
+	  configuration files in /etc/safekeep/clients.d Change the
+	  extension of client config files to .backup from .client. Provide
+	  automatic migration code for DEB and RPM packages.
+
+2007-03-04 17:52 +0000 [r427]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.txt: Fix restore docs.
+
+2007-03-04 17:52 +0000 [r426]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/TODO: Update TODO
+
+2007-02-23 22:23 +0000 [r425]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/safekeep: Do not stop if a single client fails.
+	  Separate the client outputs to ease log reading.
+
+2007-02-12 06:29 +0000 [r424]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/ANNOUNCE: Small wording fix
+
+2007-02-12 05:29 +0000 [r420]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/ChangeLog: Update ChangeLog
+
 2007-02-12 05:28 +0000 [r419]  Dimi Paun <dimi@lattica.com>
 
 	* safekeep/trunk/safekeep: Up the version to 0.9.1
