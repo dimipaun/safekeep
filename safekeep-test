@@ -367,7 +367,7 @@ def remoteTest(tmproot, client, server):
         writefile('.ssh/authorized_keys', key_id_enc, None, 'a', 'root', client)
 
     cmd = 'safekeep %s --keys --deploy' % safekeep_args
-    rcmd(cmd, 'root', server, 'deploy keys to client')
+    rcmd(cmd, 'safekeep', server, 'deploy keys to client')
 
     # run the test
     for i in range(test_reps):
