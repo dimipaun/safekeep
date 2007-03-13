@@ -367,7 +367,7 @@ def remoteTest(tmproot, client, server):
         writefile('.ssh/authorized_keys', key_id_enc, None, 'a', 'root', client)
 
     cmd = 'safekeep %s --keys --deploy' % safekeep_args
-    rcmd(cmd, 'safekeep', server, 'deploy keys to client')
+    rcmd(cmd, 'root', server, 'deploy keys to client')
 
     # run the test
     for i in range(test_reps):
@@ -387,8 +387,8 @@ def remoteTest(tmproot, client, server):
                "sort | sed s/.// | xargs md5sum"
         cmd2 = "cat > /var/lib/safekeep/md5sum.client"
         rpipe(cmd1, 'root', client, 'do MD5 sums on client', cmd2, 'safekeep', server)
-        cmd = 'safekeep %s' % safekeep_args
-        rcmd(cmd, 'safekeep', server, 'backup data')
+        cmd = 'safekeep --server %s' % safekeep_args
+        rcmd(cmd, 'root', server, 'backup data')
         cmd = 'cd /var/lib/safekeep/client/data; find -type f | grep -v rdiff-backup-data/ | sort | sed s/..// | xargs md5sum > /var/lib/safekeep/md5sum.server'
         rcmd(cmd, 'safekeep', server, 'do MD5 sums on server')
         cmd = 'diff -q /var/lib/safekeep/md5sum.client /var/lib/safekeep/md5sum.server'
