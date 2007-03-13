@@ -195,9 +195,9 @@ def parse_config(backup_el, dflt_id):
         key_ctrl = os.path.join('.ssh', 'safekeep-server-ctrl-key')
     if host and not key_data:
         key_data = os.path.join('.ssh', 'safekeep-server-data-key')
-    if not os.path.isabs(key_ctrl):
+    if key_ctrl and not os.path.isabs(key_ctrl):
         key_ctrl = os.path.join(home_dir, key_ctrl)
-    if not os.path.isabs(key_data):
+    if key_data and not os.path.isabs(key_data):
         key_data = os.path.join(home_dir, key_data)
 
     repo_el = backup_el.getElementsByTagName('repo')
