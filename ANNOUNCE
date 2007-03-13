@@ -1,30 +1,39 @@
-This is release 0.9.1 of SafeKeep, a centralized and easy to use 
+This is release 0.9.2 of SafeKeep, a centralized and easy to use 
 backup application that combines the best features of a mirror 
 and an incremental backup.
 
 What's new in this release:
-  - Lots of documentation improvements;
-  - Prepare the RPMs for Fedora acceptance;
-  - Automatic creation of data store directory;
-  - A few bug fixes.
+  - Client configuration files have been moved to 
+    /etc/safekeep/backup.d, and have the extension '.backup';
+  - A new global configuration file has been added in 
+    /etc/safekeep/safekeep.conf;
+  - A number of command line options have been deprecated;
+    (-e/--email, -s/--smtp), and moved to the global configuration.
+  - SafeKeep now knows of the user under which the backup will execute,
+    making it possible to better deploy keys, avoid the need to invoke
+    safekeep(1) via sudo(8), and execute the backup as root if need be;
+  - Relative paths now have more intuitive behaviour;
+  - Some documentation improvements;
+  - Automatic migration of old configuration to the new format;
+  - A CRITICAL (e.g. data loss) race has been fixed.
 
 Because of lags created by using mirrors, this message may reach you before 
 the release is available at the public sites. Sources and binaries will be 
 available from the following locations:
 
   - RedHat EL 3,4, CentOS 3,4, Fedora 4,5,6:
-  http://prdownloads.sourceforge.net/safekeep/safekeep-common-0.9.1-1.noarch.rpm
-  http://prdownloads.sourceforge.net/safekeep/safekeep-client-0.9.1-1.noarch.rpm
-  http://prdownloads.sourceforge.net/safekeep/safekeep-server-0.9.1-1.noarch.rpm
-  http://prdownloads.sourceforge.net/safekeep/safekeep-0.9.1-1.src.rpm
+  http://prdownloads.sourceforge.net/safekeep/safekeep-common-0.9.2-1.noarch.rpm
+  http://prdownloads.sourceforge.net/safekeep/safekeep-client-0.9.2-1.noarch.rpm
+  http://prdownloads.sourceforge.net/safekeep/safekeep-server-0.9.2-1.noarch.rpm
+  http://prdownloads.sourceforge.net/safekeep/safekeep-0.9.2-1.src.rpm
  
   - Ubuntu Edgy, Dapper, and Breezy:
-  http://prdownloads.sourceforge.net/safekeep/safekeep-common_0.9.1_all.deb
-  http://prdownloads.sourceforge.net/safekeep/safekeep-client_0.9.1_all.deb
-  http://prdownloads.sourceforge.net/safekeep/safekeep-server_0.9.1_all.deb
+  http://prdownloads.sourceforge.net/safekeep/safekeep-common_0.9.2_all.deb
+  http://prdownloads.sourceforge.net/safekeep/safekeep-client_0.9.2_all.deb
+  http://prdownloads.sourceforge.net/safekeep/safekeep-server_0.9.2_all.deb
 
   - Source:
-  http://prdownloads.sourceforge.net/safekeep/safekeep-0.9.1.tar.gz
+  http://prdownloads.sourceforge.net/safekeep/safekeep-0.9.2.tar.gz
 
 To find out more about the project visit on our website:
   http://safekeep.sourceforge.net
