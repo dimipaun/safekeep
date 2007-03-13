@@ -16,7 +16,7 @@ home_dir = None
 base_dir = None
 
 PROTOCOL = "1.0"
-VERSION = "0.9.1"
+VERSION = "0.9.2"
 VEBOSITY_BY_CLASS = {'DBG': 3, 'INFO': 2, 'WARN': 1, 'ERR': 0}
 
 ######################################################################
