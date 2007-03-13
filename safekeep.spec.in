@@ -128,5 +128,11 @@ fi
 %doc AUTHORS COPYING LICENSE
 
 %changelog
-* Sun Feb 11 2007 Jef Spaleta <jspaleta@gmail.com> 0.9.0-1
-- Initial build meant for Fedora package submission
+* Mon Feb 12 2007 Dimi Paun <dimi@lattica.com> 0.9.1-1
+  - Lots of documentation improvements;
+  - Prepare the RPMs for Fedora acceptance (Jef Spaleta);
+  - Automatic creation of data store directory;
+  - A few bug fixes.
+
+* Thu Feb  1 2007 Dimi Paun <dimi@lattica.com> 0.9.0-1
+  - Initial release
