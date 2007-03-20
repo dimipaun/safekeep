@@ -534,7 +534,7 @@ def do_server_rdiff(cfg, bdir):
         raise Exception('rdiff-backup returned %d' % ret)
 
 def do_server_data_cleanup(cfg):
-    args = ['rdiff-backup', '--remove-older-than', cfg['retention'], cfg['dir']]
+    args = ['rdiff-backup', '--force', '--remove-older-than', cfg['retention'], cfg['dir']]
     ret = spawn(args)
     if ret:
         warn('Failed to cleanup old data, please fix the problem manually')
