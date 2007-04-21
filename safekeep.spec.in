@@ -52,7 +52,7 @@ installed on all hosts that need to be backed-up.
 %package server
 Summary:        The SafeKeep backup system (server component)
 Group:          Applications/System
-Requires(pre):  /usr/sbin/useradd
+Requires(pre):  /usr/sbin/useradd, /usr/bin/chsh
 Requires(unpre):/usr/sbin/userdel
 Requires:       openssh, openssh-clients
 Requires:       safekeep-common = %{PACKAGE_VERSION}
@@ -89,7 +89,8 @@ install -d -m 700 "%{buildroot}%{homedir}/.ssh"
 rm -rf "%{buildroot}"
 
 %pre server
-%{_sbindir}/useradd -r -d %{homedir} -s /sbin/nologin -u 186 %{name} 2> /dev/null || :
+%{_sbindir}/useradd -r -d %{homedir} -s /bin/bash -u 186 %{name} 2> /dev/null || :
+%{_bindir}/chsh -s /bin/bash %{name} > /dev/null || :
 
 %post server
 if test -d /etc/safekeep.d; then

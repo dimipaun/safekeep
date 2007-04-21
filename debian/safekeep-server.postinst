@@ -5,6 +5,7 @@ set -e
 case "$1" in
     configure)
     	adduser --quiet --system --home /var/lib/safekeep safekeep
+	chsh -s /bin/bash safekeep > /dev/null
 	install -d -m 700 -o safekeep -g nogroup /var/lib/safekeep/.ssh
 	if test -d /etc/safekeep.d; then
 	    for file in /etc/safekeep.d/*.conf; do
