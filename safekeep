@@ -43,7 +43,7 @@ def log(msg, cls=None):
     cutoff = VEBOSITY_BY_CLASS.get(cls.upper())
     if cutoff is None: cutoff = 3
     if is_client or verbosity_level >= cutoff:
-        logbuf += msg
+        logbuf.append(msg)
         if is_client:
             print msg
             sys.stdout.flush()
