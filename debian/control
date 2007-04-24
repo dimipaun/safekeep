@@ -7,7 +7,7 @@ Standards-Version: 3.6.2
 
 Package: safekeep-server
 Architecture: all
-Depends: safekeep-common, rdiff-backup, adduser, chsh, ssh-client
+Depends: safekeep-common, rdiff-backup, adduser, passwd, ssh-client
 Replaces: safekeep
 Description: The server component of the SafeKeep backup system.
  SafeKeep is a client/server backup system which enhances the
