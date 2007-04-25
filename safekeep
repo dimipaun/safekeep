@@ -76,7 +76,10 @@ def error(msg):
     log(msg, 'ERR')
 
 def spawn(args):
-    debug('Run [' + ' '.join(args) + ']')
+    if isinstance(args, str) or isinstance(args, unicode):
+        debug('Run [' + args + ']')
+    else:
+        debug('Run [' + ' '.join(args) + ']')
     (cout, cin) = popen2.popen4(args)
     cin.close()
     for line in cout:
