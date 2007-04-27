@@ -1,3 +1,68 @@
+2007-04-27 05:05 +0000 [r489]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Release 0.9.3 is almost ready...
+
+2007-04-27 05:04 +0000 [r488]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in: Update the RPM changelog for
+	  release 0.9.3.
+
+2007-04-27 05:01 +0000 [r487]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/ANNOUNCE: Prepare the ANNOUNCE file for the
+	  release.
+
+2007-04-27 04:48 +0000 [r486]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.backup.txt,
+	  safekeep/trunk/doc/safekeep.txt: A few more doc tweaks
+
+2007-04-27 04:44 +0000 [r485]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.backup.txt,
+	  safekeep/trunk/doc/safekeep.txt: Eduard Malinschi
+	  <ed@lattica.com> Clarify the docs for database dumps.
+
+2007-04-25 07:51 +0000 [r484]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/safekeep: F i x d e b u g p r i n t o u t l i k e
+	  t h i s .
+
+2007-04-24 13:27 +0000 [r483]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/debian/control: Ubuntu's chsh is part of 'passwd'
+	  package.
+
+2007-04-23 21:01 +0000 [r482]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/safekeep: Fix the 'one letter per line' email
+	  problem.
+
+2007-04-21 15:19 +0000 [r481]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/debian/safekeep-server.postinst,
+	  safekeep/trunk/safekeep.spec.in, safekeep/trunk/debian/control:
+	  Switch the default shell for the 'safekeep' account to /bin/bash.
+	  We need it to be able to execute commands as 'safekeep' via
+	  su(1). Also, to help people upgrading, force the shell of already
+	  existing 'safekeep' users to /bin/bash. We can remove this in the
+	  future once we know all old users have upgraded to 0.9.3 or
+	  later.
+
+2007-03-20 20:40 +0000 [r479]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Force data cleanup in case there have
+	  been multiple backups since the last invocation
+
+2007-03-16 11:55 +0000 [r478]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/debian/rules: Shell expansion doesn't seem to
+	  happen here for whatever reason, do it manually.
+
+2007-03-13 18:52 +0000 [r469]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/ChangeLog: Update ChangeLog
+
 2007-03-13 18:51 +0000 [r468]  Dimi Paun <dimi@lattica.com>
 
 	* safekeep/trunk/safekeep: Bump the version to 0.9.2
