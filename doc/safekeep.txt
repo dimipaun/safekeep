@@ -129,8 +129,8 @@ A more realistic example:
   <host name="my_workstation" />
   <repo retention="10D" />
   <setup>
-      <dump type="postgres" user="postgres" file="/var/lib/pgsql/backups/all_dbs" />
-      <dump type="mysql" user="mysql" dbuser="dbbackup" db="adatabase" file="/var/backups/dumps/adatabase_dbs" cleanup="true" />
+      <dump type="postgres" dbuser="postgres" file="/var/lib/pgsql/backups/all_dbs" />
+      <dump type="mysql" user="mysql" dbuser="dbbackup" db="adatabase" file="/var/backups/dumps/adatabase_dbs" />
       <dump type="mysql" user="mysql" dbuser="dbbackup" db="mysql" file="/var/backups/dumps/mysql_dbs" cleanup="true" />
       <snapshot device="/dev/mapper/VolGroup00-LogVol00" size="500M" />
   </setup>

@@ -36,14 +36,14 @@ The full set of supported elements and attributes looks as follows:
 
   <!-- settings for database dump and for volume snapshot -->
   <setup>
-    <!-- database type ("postgres" or "mysql"), user with backup rights, 
-         dbuser with backup rights, location of the dump file on the client 
+    <!-- database type ("postgres" or "mysql"), and database name,
+         DB user with backup rights, location of the dump file on the client 
          host, and flag to remove or not the dump file after the backup is done.
          Databases can be dumped individualy using a dump clause for each database. -->
     <dump
       type="postgres"
       db="dbname"
-      user="foobar"
+      dbuser="foobar"
       file="/var/backup/dumps/mydata"
       cleanup="true"
     />
