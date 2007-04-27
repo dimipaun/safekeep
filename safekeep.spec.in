@@ -129,6 +129,12 @@ fi
 %doc AUTHORS COPYING LICENSE
 
 %changelog
+* Fri Apr 27 2007 Dimi Paun <dimi@lattica.com> 0.9.3-1
+  - Use /bin/bash as the shell for the safekeep system account;
+  - Invoke rdiff-backup with --force when trimming histroy;
+  - A few small logging bugs got fixed;
+  - Small documentation tweaks.
+
 * Tue Mar 13 2007 Dimi Paun <dimi@lattica.com> 0.9.2-1
   - Client configuration files have been moved to 
     /etc/safekeep/backup.d, and have the extension '.backup';
