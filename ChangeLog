@@ -1,3 +1,30 @@
+2007-05-16 14:09 +0000 [r498]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Now we're 1.0
+
+2007-05-16 14:07 +0000 [r497]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in: Update .spec changelog
+
+2007-05-16 14:06 +0000 [r496]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/ANNOUNCE: Prepare the 1.0 release
+
+2007-05-16 13:55 +0000 [r495]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.backup.txt: Add warning about sharing
+	  repository paths, hopefully this will help people avoid some
+	  nasty situations.
+
+2007-05-16 13:48 +0000 [r494]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.backup.txt: Fix reference to .backup
+	  files
+
+2007-04-27 05:05 +0000 [r490]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/ChangeLog: Update ChangeLog
+
 2007-04-27 05:05 +0000 [r489]  Dimi Paun <dimi@lattica.com>
 
 	* safekeep/trunk/safekeep: Release 0.9.3 is almost ready...
