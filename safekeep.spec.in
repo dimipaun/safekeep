@@ -129,6 +129,9 @@ fi
 %doc AUTHORS COPYING LICENSE
 
 %changelog
+* Wed May 16 2007 Dimi Paun <dimi@lattica.com> 1.0.0-1
+  - Small documentation inprovements.
+
 * Fri Apr 27 2007 Dimi Paun <dimi@lattica.com> 0.9.3-1
   - Use /bin/bash as the shell for the safekeep system account;
   - Invoke rdiff-backup with --force when trimming histroy;
