@@ -86,7 +86,7 @@ are separated by '/', attributes are introduced by '@':
 	This is the ID by which `safekeep(1)` will address this host.
 	If specified it overrides the default value derived from the
 	filename. Use of the default value is recommended. 
-	Optional, defaults to the filename without the `.conf` extension.
+	Optional, defaults to the filename without the `.backup` extension.
           
 /backup/host/@name::
 	The name or IP address of the client. If you need to backup the
