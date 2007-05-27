@@ -53,6 +53,7 @@ installed on all hosts that need to be backed-up.
 Summary:        The SafeKeep backup system (server component)
 Group:          Applications/System
 Requires(pre):  %{_sbindir}/useradd
+Requires(pre):  %{_sbindir}/groupadd
 Requires(pre):  %{_bindir}/chsh
 Requires:       openssh, openssh-clients
 Requires:       safekeep-common = %{PACKAGE_VERSION}
@@ -89,6 +90,7 @@ install -d -m 700 "%{buildroot}%{homedir}/.ssh"
 rm -rf "%{buildroot}"
 
 %pre server
+%{_sbindir}/groupadd -f -r %{name}
 %{_sbindir}/useradd -r -d %{homedir} -s /bin/bash -u 186 %{name} 2> /dev/null || :
 %{_bindir}/chsh -s /bin/bash %{name} > /dev/null || :
 
