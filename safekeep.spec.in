@@ -91,7 +91,9 @@ rm -rf "%{buildroot}"
 
 %pre server
 %{_sbindir}/groupadd -f -r %{name}
-%{_sbindir}/useradd -r -d %{homedir} -s /bin/bash -u 186 %{name} 2> /dev/null || :
+id %{name} >/dev/null 2>&1 || \
+%{_sbindir}/useradd -r -g %{name} -d %{homedir} -s /bin/bash \
+  -c "Used by safekeep to run backups." %{name}
 %{_bindir}/chsh -s /bin/bash %{name} > /dev/null || :
 
 %post server
