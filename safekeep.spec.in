@@ -52,7 +52,8 @@ installed on all hosts that need to be backed-up.
 %package server
 Summary:        The SafeKeep backup system (server component)
 Group:          Applications/System
-Requires(pre):  /usr/sbin/useradd, /usr/bin/chsh
+Requires(pre):  %{_sbindir}/useradd
+Requires(pre):  %{_bindir}/chsh
 Requires:       openssh, openssh-clients
 Requires:       safekeep-common = %{PACKAGE_VERSION}
 
