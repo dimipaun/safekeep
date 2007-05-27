@@ -53,7 +53,6 @@ installed on all hosts that need to be backed-up.
 Summary:        The SafeKeep backup system (server component)
 Group:          Applications/System
 Requires(pre):  /usr/sbin/useradd, /usr/bin/chsh
-Requires(unpre):/usr/sbin/userdel
 Requires:       openssh, openssh-clients
 Requires:       safekeep-common = %{PACKAGE_VERSION}
 
@@ -100,11 +99,6 @@ if test -d /etc/safekeep.d; then
         fi
     done
     rmdir /etc/safekeep.d 2> /dev/null || :
-fi
-
-%preun server
-if [ "$1" = "0" ]; then
-    %{_sbindir}/userdel %{name} >> /dev/null 2>&1 || :
 fi
 
 %files common
