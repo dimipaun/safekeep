@@ -54,7 +54,6 @@ Summary:        The SafeKeep backup system (server component)
 Group:          Applications/System
 Requires(pre):  %{_sbindir}/useradd
 Requires(pre):  %{_sbindir}/groupadd
-Requires(pre):  %{_bindir}/chsh
 Requires:       openssh, openssh-clients
 Requires:       safekeep-common = %{PACKAGE_VERSION}
 
