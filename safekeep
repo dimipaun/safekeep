@@ -662,7 +662,7 @@ def do_keys(cfgs, ids, identity, status, dump, deploy):
                     info('%s: Key do not exist, generating it now: %s' % (id, privatekeyfile))
                     gencmd = 'ssh-keygen -q -b 1024 -t dsa -N "" -C "SafeKeep auto generated key at %s@%s" -f %s' % (backup_user, os.uname()[1], privatekeyfile)
                     if backup_user is not work_user:
-                        gencmd = 'su -c %s - %s' % (commands.mkarg(gencmd), backup_user)
+                        gencmd = 'su -s /bin/sh -c %s - %s' % (commands.mkarg(gencmd), backup_user)
                     debug(gencmd)
                     if os.system(gencmd):
                         error('%s: Failed to generate key %s. Skipping client.' % (id, privatekeyfile))
