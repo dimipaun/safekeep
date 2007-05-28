@@ -92,9 +92,8 @@ rm -rf "%{buildroot}"
 %pre server
 %{_sbindir}/groupadd -f -r %{name}
 id %{name} >/dev/null 2>&1 || \
-%{_sbindir}/useradd -r -g %{name} -d %{homedir} -s /bin/bash \
+%{_sbindir}/useradd -r -g %{name} -d %{homedir} -s /sbin/nologin \
   -c "Used by safekeep to run backups." %{name}
-%{_bindir}/chsh -s /bin/bash %{name} > /dev/null || :
 
 %post server
 if test -d /etc/safekeep.d; then
