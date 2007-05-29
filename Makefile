@@ -10,7 +10,7 @@ snapshotname:= $(name)-$(version).$(version_ts)
 tagname     := $(shell echo Release-$(releasename) | tr . _)
 dirname     := $(shell basename $(PWD))
 rpmroot     := $(shell grep '%_topdir' ~/.rpmmacros 2>/dev/null | sed 's/^[^ \t]*[ \t]*//')
-svnroot     := $(shell LANG=C svn info | grep Root | cut -c 18-)
+svnroot     := $(shell LANG=C svn info 2>/dev/null | grep Root | cut -c 18-)
 MAN_TXT     := doc/safekeep.txt doc/safekeep.conf.txt doc/safekeep.backup.txt
 DOC_MAN     := doc/safekeep.1 doc/safekeep.conf.5 doc/safekeep.backup.5
 DOC_HTML    := $(patsubst %.txt,%.html,$(MAN_TXT))
