@@ -92,7 +92,7 @@ rm -rf "%{buildroot}"
 %{_sbindir}/groupadd -f -r %{name}
 id %{name} >/dev/null 2>&1 || \
 %{_sbindir}/useradd -r -g %{name} -d %{homedir} -s /sbin/nologin \
-  -c "Used by safekeep to run backups." %{name}
+  -c "Used by safekeep to run and store backups." %{name}
 
 %files common
 %defattr(-,root,root,-)
