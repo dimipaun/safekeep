@@ -122,7 +122,7 @@ fi
 %dir %{_sysconfdir}/safekeep/backup.d
 %config %{_sysconfdir}/safekeep/safekeep.conf
 %{_sysconfdir}/cron.daily/safekeep
-%doc safekeep-test sample.backup
+%doc sample.backup
 %doc AUTHORS COPYING LICENSE
 
 %changelog
