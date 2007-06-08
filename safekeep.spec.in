@@ -98,8 +98,6 @@ id %{name} >/dev/null 2>&1 || \
 %defattr(-,root,root,-)
 %{_bindir}/safekeep
 %{_mandir}/man1/safekeep.1*
-%{_mandir}/man5/safekeep.conf.5*
-%{_mandir}/man5/safekeep.backup.5*
 %doc AUTHORS COPYING LICENSE README TODO
 
 %files client
@@ -112,6 +110,8 @@ id %{name} >/dev/null 2>&1 || \
 %dir %{_sysconfdir}/safekeep/backup.d
 %config %{_sysconfdir}/safekeep/safekeep.conf
 %{_sysconfdir}/cron.daily/safekeep
+%{_mandir}/man5/safekeep.conf.5*
+%{_mandir}/man5/safekeep.backup.5*
 %doc sample.backup
 %doc AUTHORS COPYING LICENSE
 
