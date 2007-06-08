@@ -94,16 +94,6 @@ id %{name} >/dev/null 2>&1 || \
 %{_sbindir}/useradd -r -g %{name} -d %{homedir} -s /sbin/nologin \
   -c "Used by safekeep to run backups." %{name}
 
-%post server
-if test -d /etc/safekeep.d; then
-    for file in /etc/safekeep.d/*.conf; do
-        if test -f "$file"; then 
-            mv "$file" /etc/safekeep/backup.d/`basename "$file" .conf`.backup
-        fi
-    done
-    rmdir /etc/safekeep.d 2> /dev/null || :
-fi
-
 %files common
 %defattr(-,root,root,-)
 %{_bindir}/safekeep
