@@ -102,8 +102,8 @@ deb: tar
 
 rpm: tar
 	rpmbuild -ta $(snapshotname).tar.gz
-	mv $(rpmroot)/SRPMS/$(snapshotname)-$(release).src.rpm .
-	mv $(rpmroot)/RPMS/noarch/$(name)-*-$(version).$(version_ts)-$(release).noarch.rpm .
+	mv $(rpmroot)/SRPMS/$(snapshotname)-$(release)*.src.rpm .
+	mv $(rpmroot)/RPMS/noarch/$(name)-*-$(version).$(version_ts)-$(release)*.noarch.rpm .
 
 dist:
 	svn export $(svnroot)/safekeep/tags/$(tagname) $(releasename)
@@ -119,9 +119,9 @@ distdeb: dist
 
 distrpm: dist
 	rpmbuild -ta $(releasename).tar.gz
-	mv $(rpmroot)/SRPMS/$(releasename)-$(release).src.rpm .
-	mv $(rpmroot)/RPMS/noarch/$(name)-*-$(version)-$(release).noarch.rpm .
-	rpm --addsign $(releasename)-$(release).src.rpm $(name)-*-$(version)-$(release).noarch.rpm
+	mv $(rpmroot)/SRPMS/$(releasename)-$(release)*.src.rpm .
+	mv $(rpmroot)/RPMS/noarch/$(name)-*-$(version)-$(release)*.noarch.rpm .
+	rpm --addsign $(releasename)-$(release).src.rpm $(name)-*-$(version)-$(release)*.noarch.rpm
 
 check:
 	safekeep-test --local
