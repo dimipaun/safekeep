@@ -11,6 +11,7 @@ tagname     := $(shell echo Release-$(releasename) | tr . _)
 dirname     := $(shell basename $(PWD))
 rpmroot     := $(shell grep '%_topdir' ~/.rpmmacros 2>/dev/null | sed 's/^[^ \t]*[ \t]*//')
 svnroot     := $(shell LANG=C svn info 2>/dev/null | grep Root | cut -c 18-)
+releasedir  := releases
 MAN_TXT     := doc/safekeep.txt doc/safekeep.conf.txt doc/safekeep.backup.txt
 DOC_MAN     := doc/safekeep.1 doc/safekeep.conf.5 doc/safekeep.backup.5
 DOC_HTML    := $(patsubst %.txt,%.html,$(MAN_TXT))
@@ -109,19 +110,20 @@ dist:
 	svn export $(svnroot)/safekeep/tags/$(tagname) $(releasename)
 	cat $(releasename)/$(name).spec.in | sed 's/^%define version.*/%define version $(version)/' > $(releasename)/$(name).spec
 	cat $(releasename)/debian/changelog.in | sed 's/^safekeep.*/safekeep ($(version)) unstable; urgency=low/' > $(releasename)/debian/changelog
-	tar cz -f $(releasename).tar.gz $(releasename)
+	mkdir -p ${releasedir}; tar cz -f ${releasedir}/$(releasename).tar.gz $(releasename)
 	rm -rf $(releasename)
 
 distdeb: dist
-	tar xz -C /tmp -f $(releasename).tar.gz
-	rm -rf $(releasename).tar.gz
+	tar xz -C /tmp -f ${releasedir}/$(releasename).tar.gz
+	rm -rf ${releasedir}/$(releasename).tar.gz
 	cd /tmp/$(releasename) && debuild --check-dirname-regex 'safekeep(-.*)?'
+	mv /tmp/$(releasename)/safekeep*deb ${releasedir}
 
 distrpm: dist
-	rpmbuild -ta $(releasename).tar.gz
-	mv $(rpmroot)/SRPMS/$(releasename)-$(release)*.src.rpm .
-	mv $(rpmroot)/RPMS/noarch/$(name)-*-$(version)-$(release)*.noarch.rpm .
-	rpm --addsign $(releasename)-$(release).src.rpm $(name)-*-$(version)-$(release)*.noarch.rpm
+	rpmbuild -ta ${releasedir}/$(releasename).tar.gz
+	mv $(rpmroot)/SRPMS/$(releasename)-$(release)*.src.rpm ${releasedir}
+	mv $(rpmroot)/RPMS/noarch/$(name)-*-$(version)-$(release)*.noarch.rpm ${releasedir}
+	rpm --addsign ${releasedir}/$(releasename)-$(release).src.rpm ${releasedir}/$(name)-*-$(version)-$(release)*.noarch.rpm
 
 check:
 	safekeep-test --local
