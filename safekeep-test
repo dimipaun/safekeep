@@ -265,7 +265,11 @@ def packageAndUpload(pkgroot, keyname, repodirs, user, host):
         raise TestFailure('Failed to nuke the tar')
 
     ver = mytar[len('safekeep-'):-len('.tar.gz')]
-    binrpm_list = glob.glob(os.path.join(pkgroot, 'RPMS/noarch', 'safekeep-*-' + ver + '-1*.noarch.rpm'))
+    binrpm_list = glob.glob(os.path.join(pkgroot, 'RPMS/noarch', 'safekeep-*-' + ver + '-*.noarch.rpm'))
+
+    rel = binrpm_list[0]
+    rel = rel[rel.rindex('-')+1:rel.rindex('.')]
+    rel = rel[:rel.rindex('.')]
 
     for binrpm in binrpm_list:
         if not os.path.isfile(binrpm):
@@ -283,12 +287,12 @@ def packageAndUpload(pkgroot, keyname, repodirs, user, host):
               (mkssh('scp'), ' '.join(binrpm_list), user, host, repodir)
         print cmd
         if os.system(cmd):
-            raise TestFailure('Failed to copy safekee-*-%s-1.noarch.rpm to the repository' % ver) 
+            raise TestFailure('Failed to copy safekee-*-%s-%s.noarch.rpm to the repository' % (ver, rel)) 
     
         cmd = 'createrepo %s' % mkarg(repodir)
         rcmd(cmd, user, host, 'update repo metadata')
 
-    return ver + '-1'
+    return ver + '-' + rel
 
 def remoteTest(tmproot, client, server):
     # build, sign and upload the .rpm
