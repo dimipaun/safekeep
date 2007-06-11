@@ -293,9 +293,10 @@ def packageAndUpload(pkgroot, keyname, repodirs, user, host):
 def remoteTest(tmproot, client, server):
     # build, sign and upload the .rpm
     repodirs = [
-        '/var/www/repos/lattica/devel/fedora/5',
         '/var/www/repos/lattica/devel/fedora/6',
+        '/var/www/repos/lattica/devel/fedora/7',
         '/var/www/repos/lattica/devel/centos/4',
+        '/var/www/repos/lattica/devel/centos/5',
     ]
     verrel = packageAndUpload(tmproot, 'Lattica, Inc. (Devel Key) <devel@lattica.com>', repodirs, 'root', 'ulysses')
 
