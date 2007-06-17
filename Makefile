@@ -123,7 +123,7 @@ distrpm: dist
 	rpmbuild -ta ${releasedir}/$(releasename).tar.gz
 	mv $(rpmroot)/SRPMS/$(releasename)-$(release)*.src.rpm ${releasedir}
 	mv $(rpmroot)/RPMS/noarch/$(name)-*-$(version)-$(release)*.noarch.rpm ${releasedir}
-	rpm --addsign ${releasedir}/$(releasename)-$(release).src.rpm ${releasedir}/$(name)-*-$(version)-$(release)*.noarch.rpm
+	rpm --addsign ${releasedir}/$(releasename)-$(release)*.src.rpm ${releasedir}/$(name)-*-$(version)-$(release)*.noarch.rpm
 
 check:
 	safekeep-test --local
