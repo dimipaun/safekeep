@@ -116,6 +116,13 @@ id %{name} >/dev/null 2>&1 || \
 %doc AUTHORS COPYING LICENSE
 
 %changelog
+* Sun Jun 17 2007 Dimi Paun <dimi@lattica.com> 1.0.1-1
+  - The safekeep user no longer requires a working shell
+  - Add support for Fedora 7 to the testing script
+  - Packaging improvements for integration into Fedora
+  - Remove the old configuration migration scripts
+  - Do not package the testing script, it's used only during development
+
 * Wed May 16 2007 Dimi Paun <dimi@lattica.com> 1.0.0-1
   - Small documentation inprovements.
 

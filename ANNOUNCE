@@ -1,28 +1,31 @@
-This is release 1.0.0 of SafeKeep, a centralized and easy to use 
+This is release 1.0.1 of SafeKeep, a centralized and easy to use 
 backup application that combines the best features of a mirror 
 and an incremental backup.
 
 What's new in this release:
-  - Tested support for database (MySQL and PostgreSQL) dumps
-  - Small documentation improvements.
+  - The safekeep user no longer requires a working shell
+  - Add support for Fedora 7 to the testing script
+  - Packaging improvements for integration into Fedora
+  - Remove the old configuration migration scripts
+  - Do not package the testing script, it's used only during development
 
 Because of lags created by using mirrors, this message may reach you before 
 the release is available at the public sites. Sources and binaries will be 
 available from the following locations:
 
   - RedHat EL 3,4,5, CentOS 3,4,5, Fedora 4,5,6:
-  http://prdownloads.sourceforge.net/safekeep/safekeep-common-1.0.0-1.noarch.rpm
-  http://prdownloads.sourceforge.net/safekeep/safekeep-client-1.0.0-1.noarch.rpm
-  http://prdownloads.sourceforge.net/safekeep/safekeep-server-1.0.0-1.noarch.rpm
-  http://prdownloads.sourceforge.net/safekeep/safekeep-1.0.0-1.src.rpm
+  http://prdownloads.sourceforge.net/safekeep/safekeep-common-1.0.1-1.noarch.rpm
+  http://prdownloads.sourceforge.net/safekeep/safekeep-client-1.0.1-1.noarch.rpm
+  http://prdownloads.sourceforge.net/safekeep/safekeep-server-1.0.1-1.noarch.rpm
+  http://prdownloads.sourceforge.net/safekeep/safekeep-1.0.1-1.src.rpm
  
   - Ubuntu Edgy, Dapper, and Breezy:
-  http://prdownloads.sourceforge.net/safekeep/safekeep-common_1.0.0_all.deb
-  http://prdownloads.sourceforge.net/safekeep/safekeep-client_1.0.0_all.deb
-  http://prdownloads.sourceforge.net/safekeep/safekeep-server_1.0.0_all.deb
+  http://prdownloads.sourceforge.net/safekeep/safekeep-common_1.0.1_all.deb
+  http://prdownloads.sourceforge.net/safekeep/safekeep-client_1.0.1_all.deb
+  http://prdownloads.sourceforge.net/safekeep/safekeep-server_1.0.1_all.deb
 
   - Source:
-  http://prdownloads.sourceforge.net/safekeep/safekeep-1.0.0.tar.gz
+  http://prdownloads.sourceforge.net/safekeep/safekeep-1.0.1.tar.gz
 
 To find out more about the project visit on our website:
   http://safekeep.sourceforge.net
