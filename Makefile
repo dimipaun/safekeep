@@ -55,7 +55,7 @@ commit-release:
 	svn ci -m "Release $(version) (tagged as $(tagname))"
 
 tag:
-	svn cp . $(svnroot)/safekeep/tags/$(tagname)
+	svn cp -m "Tag safekeep $(version)" . $(svnroot)/safekeep/tags/$(tagname)
 
 check-info: info
 	@echo -n 'Is this information correct? (yes/No) '
