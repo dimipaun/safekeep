@@ -1,3 +1,135 @@
+2007-06-17 22:37 +0000 [r528]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Update version to 1.0.1
+
+2007-06-17 22:36 +0000 [r527]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in, safekeep/trunk/ANNOUNCE: Prepare
+	  announcement for version 1.0.1.
+
+2007-06-11 04:00 +0000 [r526]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Add automatic release detection,
+	  for proper Fedora 7 support.
+
+2007-06-11 00:41 +0000 [r525]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Remove support for Fedora Core 5,
+	  add support for Fedora 7 and CentOS 5
+
+2007-06-10 23:02 +0000 [r524]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk, safekeep/trunk/safekeep-test: Adjust the test to
+	  support also Fedora 7, which includes the distro id automatically
+	  in the generated rpm names.
+
+2007-06-08 22:11 +0000 [r523]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/Makefile: Collect releases in the releases/ dir.
+
+2007-06-08 22:02 +0000 [r522]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/Makefile: Account for FC7 adding the distro id
+	  (.f7) to the RPM name.
+
+2007-06-08 21:58 +0000 [r521]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in: Make sure we don't override
+	  user's configuration
+
+2007-06-08 21:55 +0000 [r520]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/debian/rules, safekeep/trunk/safekeep.spec.in:
+	  Move the man pages for .backup and .conf to the server package.
+
+2007-06-08 21:49 +0000 [r519]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in: Bit nicer gecos field.
+
+2007-06-08 20:38 +0000 [r518]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/debian/safekeep-server.postinst,
+	  safekeep/trunk/Makefile, safekeep/trunk/safekeep.spec.in: Remove
+	  configuration migration code, it shouldn't be necessary anymore
+	  now that we reached 1.0. Besides it triggers rpm-lint errors.
+
+2007-06-08 19:46 +0000 [r517]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/debian/safekeep-server.docs,
+	  safekeep/trunk/safekeep.spec.in: Do not package safekeep-test,
+	  it's useful only during development, and creates all sort of
+	  rpm-lint errors.
+
+2007-05-29 04:30 +0000 [r516]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/Makefile: Do not complain if we can't figure out
+	  the SVN root
+
+2007-05-29 04:24 +0000 [r515]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/Makefile: Do not complain if .rpmmacros doesn't
+	  exist.
+
+2007-05-28 23:58 +0000 [r514]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in: We no longer need chsh(1).
+
+2007-05-28 15:46 +0000 [r513]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/debian/safekeep-server.postinst,
+	  safekeep/trunk/safekeep.spec.in: We no longer need to have a
+	  working shell for the safekeep user. Better from a security
+	  perspective.
+
+2007-05-28 15:39 +0000 [r512]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Explicitely specify the shell to be used
+	  for running the command, in case the default shell is not usable.
+	  Suggested by Jeff Spaleta in order to avoid having a valid shell
+	  for the safekeep account.
+
+2007-05-27 14:53 +0000 [r511]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in: Create the safekeep user
+	  following the Fedora policy:
+	  http://fedoraproject.org/wiki/PackagingDrafts/UsersAndGroups
+
+2007-05-27 14:48 +0000 [r510]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in: Explicitely add the group, as
+	  per the Fedora policy:
+	  http://fedoraproject.org/wiki/PackagingDrafts/UsersAndGroups The
+	  rationale is: We want to invoke groupadd explicitly instead of
+	  relying on useradd to create the group for us. This is because
+	  useradd alone would fail if the group it tries to create already
+	  existed.
+
+2007-05-27 14:45 +0000 [r509]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in: Use abstract paths
+
+2007-05-27 14:42 +0000 [r508]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/debian/safekeep-server.prerm,
+	  safekeep/trunk/safekeep.spec.in: The Fedora policy states that we
+	  shouldn't delete our user:
+	  http://fedoraproject.org/wiki/PackagingDrafts/UsersAndGroups Here
+	  is the rationale: We never remove users or groups created by
+	  packages. There's no sane way to check if files owned by those
+	  users/groups are left behind (and even if there would, what would
+	  we do to them?), and leaving those behind with ownerships
+	  pointing to now nonexistent users/groups may result in security
+	  issues when a semantically unrelated user/group is created later
+	  and reuses the UID/GID. Also, in some setups deleting the
+	  user/group might not be possible or/nor desirable (eg. when using
+	  a shared remote user/group database). Cleanup of unused
+	  users/groups is left to the system administrators to take care of
+	  if they so desire.
+
+2007-05-16 14:09 +0000 [r499]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/ChangeLog: Update ChangeLog
+
 2007-05-16 14:09 +0000 [r498]  Dimi Paun <dimi@lattica.com>
 
 	* safekeep/trunk/safekeep: Now we're 1.0
