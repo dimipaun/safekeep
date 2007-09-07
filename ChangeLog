@@ -1,3 +1,49 @@
+2007-09-07 16:40 +0000 [r543]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in, safekeep/trunk/safekeep,
+	  safekeep/trunk/ANNOUNCE: Prepare for 1.0.2.
+
+2007-09-07 03:15 +0000 [r542]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in: Remove references to
+	  %{PACKAGE_VERSION}, follow the Fedora guidelines closer.
+
+2007-09-07 03:12 +0000 [r541]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in: Provide default attr for all
+	  packages.
+
+2007-09-07 03:11 +0000 [r540]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in: Clarify the licensing in .rpm
+	  package
+
+2007-09-07 03:09 +0000 [r539]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in: We don't need to include AUTHORS
+	  COPYING LICENSE multiple times, keeping them in -common is
+	  enough.
+
+2007-09-07 03:08 +0000 [r538]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in: More acceptable SF link
+
+2007-06-17 23:26 +0000 [r533]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/ANNOUNCE: We now support Fedora 7 too.
+
+2007-06-17 22:47 +0000 [r532]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/Makefile: Tiny fix for Fedora 7
+
+2007-06-17 22:45 +0000 [r531]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/Makefile: Make the tag fully automatic
+
+2007-06-17 22:38 +0000 [r529]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/ChangeLog: Update ChangeLog
+
 2007-06-17 22:37 +0000 [r528]  Dimi Paun <dimi@lattica.com>
 
 	* safekeep/trunk/safekeep: Update version to 1.0.1
