@@ -15,7 +15,7 @@ Source0:        http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildArch:      noarch
-BuildRequires:	xmlto, asciidoc > 6.0.3
+BuildRequires:  xmlto, asciidoc > 6.0.3
 
 %description
 SafeKeep is a client/server backup system which enhances the
@@ -71,6 +71,7 @@ installed on the server on which the data will be backed-up to.
 make build
 
 %install
+rm -rf %{buildroot}
 install -d -m 755 "%{buildroot}%{_sysconfdir}/safekeep/backup.d"
 install -m 664 safekeep.conf "%{buildroot}%{_sysconfdir}/safekeep/"
 install -d -m 755 "%{buildroot}%{_sysconfdir}/cron.daily"
@@ -116,6 +117,16 @@ id %{name} >/dev/null 2>&1 || \
 %doc sample.backup
 
 %changelog
+* Fri Sep 7 2007 Dimi Paun <dimi@lattica.com> 1.0.2-1
+  - Add missing buildroot removal in install section (Jeff Spaleta)
+  - Remove references to %{PACKAGE_VERSION}, follow the Fedora 
+    guidelines closer.
+  - Provide default attr for all packages.
+  - Clarify the licensing in .rpm package.
+  - We don't need to include AUTHORS COPYING LICENSE multiple times, 
+    keeping them in -common is enough.
+  - More acceptable SF link.
+
 * Sun Jun 17 2007 Dimi Paun <dimi@lattica.com> 1.0.1-1
   - The safekeep user no longer requires a working shell
   - Add support for Fedora 7 to the testing script
