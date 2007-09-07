@@ -40,7 +40,7 @@ Group:          Applications/System
 Requires:       openssh-server
 Requires:       coreutils
 Requires:       util-linux
-Requires:       safekeep-common = %{PACKAGE_VERSION}
+Requires:       safekeep-common = %{version}-%{release}
 
 %description client
 SafeKeep is a client/server backup system which enhances the
@@ -55,7 +55,7 @@ Group:          Applications/System
 Requires(pre):  %{_sbindir}/useradd
 Requires(pre):  %{_sbindir}/groupadd
 Requires:       openssh, openssh-clients
-Requires:       safekeep-common = %{PACKAGE_VERSION}
+Requires:       safekeep-common = %{version}-%{release}
 
 %description server
 SafeKeep is a client/server backup system which enhances the
