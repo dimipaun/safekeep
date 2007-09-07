@@ -101,8 +101,10 @@ id %{name} >/dev/null 2>&1 || \
 %doc AUTHORS COPYING LICENSE README TODO
 
 %files client
+%defattr(-,root,root,-)
 
 %files server
+%defattr(-,root,root,-)
 %attr(750,%{name},%{name}) %dir %{homedir}
 %attr(700,%{name},%{name}) %dir %{homedir}/.ssh
 %dir %{_sysconfdir}/safekeep
