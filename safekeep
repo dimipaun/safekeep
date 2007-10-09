@@ -78,13 +78,30 @@ def error(msg):
 def spawn(args):
     if isinstance(args, str) or isinstance(args, unicode):
         debug('Run [' + args + ']')
+        cmd = args.split(' ')[0]
     else:
         debug('Run [' + ' '.join(args) + ']')
-    (cout, cin) = popen2.popen4(args)
-    cin.close()
-    for line in cout:
+        cmd = args[0]
+    proc = popen2.Popen4(args)
+    proc.tochild.close()
+    for line in proc.fromchild:
         info(line.rstrip())
-    cout.close()
+    proc.fromchild.close()
+    rc = proc.wait()
+    if os.WIFEXITED(rc):
+        if os.WEXITSTATUS(rc) == 0:
+            ret = None
+        else:
+            ret = 'exited with non zero status: %d' % os.WEXITSTATUS(rc)
+    elif os.WIFSIGNALED(rc):
+        ret = 'killed by signal: %d' % os.WTERMSIG(rc)
+    elif os.WCOREDUMP(rc):
+        ret = 'coredumped'
+    else:
+        ret = 'unknown exit status: %d' + rc
+    if ret:
+        error('%s failed: %s' % (cmd, ret));
+    return ret
 
 def send_notification(email, smtp):
     info('Sending email to %s via %s' % (','.join(email), smtp))
@@ -394,7 +411,7 @@ def do_client_snap_teardown(cfg, bdir):
             continue
         ret = spawn(['umount', snapmnt])
         if ret:
-            warn('umount %s returned %s' % (snapmnt, ret))
+            warn('Can not umount the snapshot: %s' % snapmnt)
         ret = spawn(['lvremove', '--force', snapdev])
         if ret:
             warn('Can not tear down snapshot: ' + device)
@@ -427,7 +444,7 @@ def do_client_setup(cfg):
         bdir = tempfile.mkdtemp("-rbind", "safekeep-", "/mnt")
         ret = spawn(['mount', '--rbind', '/', bdir])
         if ret:
-            warn('mount --rbind failed with %d, snapshotting will be disabled' % ret)
+            warn('mount --rbind failed, snapshotting will be disabled')
             try:
                 os.rmdir(bdir)
             except Exception, e:
@@ -537,7 +554,7 @@ def do_server_rdiff(cfg, bdir, force):
     args.extend([userhost + '::' + bdir, cfg['dir']])
     ret = spawn(args)
     if ret:
-        raise Exception('rdiff-backup returned %d' % ret)
+        raise Exception('Failed to run rdiff-backup')
 
 def do_server_data_cleanup(cfg):
     args = ['rdiff-backup', '--force', '--remove-older-than', cfg['retention'], cfg['dir']]
