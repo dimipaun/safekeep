@@ -7,7 +7,7 @@ safekeep - Client/server backup script
 
 SYNOPSIS
 --------
-'safekeep' [--server] [-q] [-v] [-c file] <clientid>*
+'safekeep' [--server] [-q] [-v] [--force] [-c file] <clientid>*
 
 'safekeep' --keys [-q] [-v] [-c file] [-i file] [--status] [--print] [--deploy] <clientid>*
 
@@ -64,6 +64,12 @@ OPERATION MODE
 
 GENERAL OPTIONS
 ---------------
+-c, --conf=FILE::
+	Specifies the configuration file location.
+        If not specified at all, SafeKeep will default to
+	`/etc/safekeep/safekeep.conf` if it exists.
+        Simply using this default is the recommended usage.
+
 -h, --help::
 	Selects the help mode, in which safekeep prints out the
 	online help and exits.
@@ -82,11 +88,12 @@ GENERAL OPTIONS
 
 SERVER OPTIONS
 --------------
--c, --conf=FILE::
-	Specifies the configuration file location.
-        If not specified at all, SafeKeep will default to
-	`/etc/safekeep/safekeep.conf` if it exists.
-        Simply using this default is the recommended usage. 
+--force::
+	Pass the `--force` option to `rdiff-backup`, allowing it
+	to overwrite the backup directory metadata. This option
+	is potentially dangerous, and should only be used if the
+	backup directory becomes corrupt, and `rdiff-backup` error
+	logs tells you to use this option.
 
 KEYS OPTIONS
 ------------

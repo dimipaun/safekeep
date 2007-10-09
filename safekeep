@@ -511,12 +511,15 @@ def do_server_getanswer(cout):
         else:
             log(line[:-1])
 
-def do_server_rdiff(cfg, bdir):
+def do_server_rdiff(cfg, bdir, force):
     args = ['rdiff-backup']
 
     if cfg['host']:
         schema = 'ssh -C -i %s %%s rdiff-backup --server' % (cfg['key_data'])
         args.extend(['--remote-schema', schema])
+
+    if force:
+        args.extend(['--force'])
 
     #args.extend([ '-v', '6'])
     for clude in cfg['cludes']:
@@ -549,7 +552,7 @@ def do_server_compat(client_versions):
     if server_major != client_major:
         raise Exception('Incompatible protocols: %s <> %s' % (PROTOCOL, client_protocol))
 
-def do_server(cfgs, ids):
+def do_server(cfgs, ids, force):
     debug("Do server main loop")
     for cfg in cfgs.itervalues():
         id = cfg['id']
@@ -610,7 +613,7 @@ def do_server(cfgs, ids):
             else:
                 backup_marker = None
 
-            do_server_rdiff(cfg, bdir)
+            do_server_rdiff(cfg, bdir, force)
 
             if os.path.isdir(rdiff_logdir):
                 info_file(backup_log, backup_marker)
@@ -793,6 +796,9 @@ def usage(exitcode=None):
     print '-v, --verbose       increases the verbosity level'
     print '-V, --version       show the version number and exit'
     print
+    print 'server options:'
+    print '--force             force backup destination overwriting, dangerous!'
+    print
     print 'keys options:'
     print '-i FILE             use FILE as identity for RSA/DSA authentication'
     print '--status            display the key status for the clients (default)'
@@ -804,9 +810,9 @@ def main():
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'c:e:i:hs:qvV',
                                    [ 'conf=', 'client', 'clientid=', 'deploy',
-                                     'email=', 'help', 'keys', 'print',
-                                     'quiet', 'server', 'smtp=', 'status',
-                                     'verbose', 'version'])
+                                     'email=', 'force', 'help', 'keys',
+                                     'print', 'quiet', 'server', 'smtp=',
+                                     'status', 'verbose', 'version'])
     except getopt.GetoptError:
         usage(2)
 
@@ -818,6 +824,7 @@ def main():
     cfglocs = []
     verbosity = 0
     clientid = None
+    force = 0
     identity = None
     keys_status = None
     keys_print = None
@@ -851,6 +858,8 @@ def main():
         elif o in ('--keys', ):
             if mode: usage(2)
             mode = 'keys'
+        elif o in ('--force', ):
+            force = 1
         elif o in ('-i', ):
             identity = a
         elif o in ('--status', ):
@@ -937,7 +946,7 @@ def main():
         if mode is 'server':
             is_client = False
             verbosity_level = 1 + verbosity
-            do_server(cfgs, args)
+            do_server(cfgs, args, force)
         elif mode is 'client':
             is_client = True
             verbosity_level = 3 + verbosity
