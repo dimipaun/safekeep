@@ -52,6 +52,7 @@ def log(msg, cls=None):
 
 def info_file(file, marker=None):
     info('## File: ' + file)
+    errs = 0;
     fin = open(file, 'r')
     try:
         for line in fin.readlines():
@@ -59,9 +60,12 @@ def info_file(file, marker=None):
                 if line.startswith(marker):
                     marker = None
                 continue
+            if (line.startswith("Errors ")):
+                errs = int(line[6:])
             info(line.rstrip())
     finally:
         fin.close()
+    return errs
 
 def debug(msg):
     log(msg, 'DBG')
@@ -575,7 +579,7 @@ def do_server(cfgs, ids, force):
         id = cfg['id']
         if ids and id not in ids: continue
         info('------------------------------------------------------------------')
-        info('Server backup starting for client: %s' % id)
+        info('Server backup starting for client %s' % id)
 
         try:
             if cfg['host']:
@@ -632,12 +636,13 @@ def do_server(cfgs, ids, force):
 
             do_server_rdiff(cfg, bdir, force)
 
+            errs = 0
             if os.path.isdir(rdiff_logdir):
                 info_file(backup_log, backup_marker)
                 rdiff_logpost = os.listdir(rdiff_logdir)
                 for lfn in rdiff_logpost:
                     if lfn.startswith('session_statistics.') and lfn.endswith('.data') and lfn not in rdiff_logpre:
-                        info_file(os.path.join(rdiff_logdir, lfn))
+                        errs += info_file(os.path.join(rdiff_logdir, lfn))
             else:
                 warn('Log dir does not exist.')
 
@@ -645,11 +650,14 @@ def do_server(cfgs, ids, force):
             cin.flush()
             do_server_getanswer(cout)
 
-            debug('Server backup done for client: %s' % id)
+            if errs == 0:
+                info('Server backup for client %s: OK' % id)
+            else:
+                info('Server backup for client %s: OK (%d WARNINGS)' % (id, errs))
 
         except Exception, e:
             error(e)
-            error('Skipping backup for client: %s' % id)
+            error('Server backup for client %s: FAILED' % id)
 
     info('------------------------------------------------------------------')
     debug('Server backup done')
