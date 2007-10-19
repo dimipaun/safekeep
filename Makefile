@@ -12,6 +12,8 @@ dirname     := $(shell basename $(PWD))
 rpmroot     := $(shell grep '%_topdir' ~/.rpmmacros 2>/dev/null | sed 's/^[^ \t]*[ \t]*//')
 svnroot     := $(shell LANG=C svn info 2>/dev/null | grep Root | cut -c 18-)
 releasedir  := releases
+repo_srv    := root@ulysses
+repo_dir    := /var/www/repos/lattica
 webroot     := ../website/WebContent/
 MAN_TXT     := doc/safekeep.txt doc/safekeep.conf.txt doc/safekeep.backup.txt
 DOC_MAN     := doc/safekeep.1 doc/safekeep.conf.5 doc/safekeep.backup.5
@@ -35,6 +37,7 @@ help:
 	@echo "    dist        Builds release source distribution"
 	@echo "    distdeb     Builds release binary and source DEBs"
 	@echo "    distrpm     Buidls release binary and source RPMs"
+	@echo "    deploy      Deployes the release RPMs to Lattica's repos"
 	@echo "    check       Invokes a quick local test for SafeKeep"
 	@echo "    test        Invokes a comprehensive remote test for SafeKeep"
 	@echo "    clean       Cleans up the source tree"
@@ -130,6 +133,10 @@ distrpm: dist
 	mv $(rpmroot)/SRPMS/$(releasename)-$(release)*.src.rpm ${releasedir}
 	mv $(rpmroot)/RPMS/noarch/$(name)-*-$(version)-$(release)*.noarch.rpm ${releasedir}
 	rpm --addsign ${releasedir}/$(releasename)-$(release)*.src.rpm ${releasedir}/$(name)-*-$(version)-$(release)*.noarch.rpm
+
+deploy:
+	scp ${releasedir}/${name}{,-common,-client,-server}-${version}-*.rpm ${repo_srv}:${repo_dir}/upload
+	ssh ${repo_srv} "cd ${repo_dir}; ./deploy-rpms.sh upload/${name}-*${version}-*.rpm"
 
 check:
 	safekeep-test --local
