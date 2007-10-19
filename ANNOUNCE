@@ -1,27 +1,31 @@
-This is release 1.0.2 of SafeKeep, a centralized and easy to use 
+This is release 1.0.3 of SafeKeep, a centralized and easy to use 
 backup application that combines the best features of a mirror 
 and an incremental backup.
 
 What's new in this release:
-  - Yet more packaging improvements for integration into Fedora
+  - Clarify licensing in lite of the new GPLv3 license;
+  - New --force option to handle unexpected problems with the data repository;
+  - Better logging and status handling when we invoke external commands
+  - Clearer backup status on job end.
+  - A small packaging bug got fixes.
 
 Because of lags created by using mirrors, this message may reach you before 
 the release is available at the public sites. Sources and binaries will be 
 available from the following locations:
 
   - RedHat EL 3,4,5, CentOS 3,4,5, Fedora 4,5,6,7:
-  http://prdownloads.sourceforge.net/safekeep/safekeep-common-1.0.2-1.noarch.rpm
-  http://prdownloads.sourceforge.net/safekeep/safekeep-client-1.0.2-1.noarch.rpm
-  http://prdownloads.sourceforge.net/safekeep/safekeep-server-1.0.2-1.noarch.rpm
-  http://prdownloads.sourceforge.net/safekeep/safekeep-1.0.2-1.src.rpm
+  http://prdownloads.sourceforge.net/safekeep/safekeep-common-1.0.3-1.noarch.rpm
+  http://prdownloads.sourceforge.net/safekeep/safekeep-client-1.0.3-1.noarch.rpm
+  http://prdownloads.sourceforge.net/safekeep/safekeep-server-1.0.3-1.noarch.rpm
+  http://prdownloads.sourceforge.net/safekeep/safekeep-1.0.3-1.src.rpm
  
   - Ubuntu Edgy, Dapper, and Breezy:
-  http://prdownloads.sourceforge.net/safekeep/safekeep-common_1.0.2_all.deb
-  http://prdownloads.sourceforge.net/safekeep/safekeep-client_1.0.2_all.deb
-  http://prdownloads.sourceforge.net/safekeep/safekeep-server_1.0.2_all.deb
+  http://prdownloads.sourceforge.net/safekeep/safekeep-common_1.0.3_all.deb
+  http://prdownloads.sourceforge.net/safekeep/safekeep-client_1.0.3_all.deb
+  http://prdownloads.sourceforge.net/safekeep/safekeep-server_1.0.3_all.deb
 
   - Source:
-  http://prdownloads.sourceforge.net/safekeep/safekeep-1.0.2.tar.gz
+  http://prdownloads.sourceforge.net/safekeep/safekeep-1.0.3.tar.gz
 
 To find out more about the project visit on our website:
   http://safekeep.sourceforge.net
