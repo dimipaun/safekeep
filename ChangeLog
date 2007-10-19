@@ -1,3 +1,41 @@
+2007-10-19 16:47 +0000 [r553]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep, safekeep/trunk/ANNOUNCE: Prepare for
+	  release 1.0.3.
+
+2007-10-19 16:38 +0000 [r552]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/Makefile: Add target to deploy latest docs to
+	  website
+
+2007-10-12 21:17 +0000 [r550]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/LICENSE, safekeep/trunk/safekeep: Fix the
+	  copyright notices.
+
+2007-10-09 11:44 +0000 [r549]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/safekeep: Give a clear backup status on job end
+
+2007-10-09 11:44 +0000 [r548]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/safekeep: Better error handling and logging in
+	  spawn()
+
+2007-10-09 11:43 +0000 [r547]  Stelian Pop <stelian@lattica.com>
+
+	* safekeep/trunk/safekeep, safekeep/trunk/doc/safekeep.txt:
+	  Implement --force to handle the unexpected.
+
+2007-09-08 06:06 +0000 [r546]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in: Remove macro from comments, it
+	  gets expanded in there otherwise.
+
+2007-09-07 16:45 +0000 [r544]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/ChangeLog: Update ChangeLog
+
 2007-09-07 16:40 +0000 [r543]  Dimi Paun <dimi@lattica.com>
 
 	* safekeep/trunk/safekeep.spec.in, safekeep/trunk/safekeep,

@@ -117,6 +117,13 @@ id %{name} >/dev/null 2>&1 || \
 %doc sample.backup
 
 %changelog
+* Fri Oct 19 2007 Dimi Paun <dimi@lattica.com> 1.0.3-1
+  - Clarify licensing in lite of the new GPLv3 license;
+  - New --force option to handle unexpected problems with the data repository;
+  - Better logging and status handling when we invoke external commands
+  - Clearer backup status on job end.
+  - A small packaging bug got fixes.
+
 * Fri Sep 7 2007 Dimi Paun <dimi@lattica.com> 1.0.2-1
   - Add missing buildroot removal in install section (Jeff Spaleta)
   - Remove references to PACKAGE_VERSION, follow the Fedora 
