@@ -141,7 +141,7 @@ deploy-lattica:
 	ssh ${repo_srv} "cd ${repo_dir}; ./deploy-rpms.sh upload/${name}-*${version}-*.rpm"
 
 deploy-sf:
-	lftp -e "mput $(shell ls releases/${name}{,-common,-client,-server}-${version}-*.rpm); quit" upload.sourceforge.net/incoming
+	lftp -e "mput $(shell ls releases/${name}{-${version}.tar.gz,{,-common,-client,-server}-${version}-*.rpm}); quit" upload.sourceforge.net/incoming
 
 check:
 	safekeep-test --local
