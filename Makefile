@@ -12,6 +12,7 @@ dirname     := $(shell basename $(PWD))
 rpmroot     := $(shell grep '%_topdir' ~/.rpmmacros 2>/dev/null | sed 's/^[^ \t]*[ \t]*//')
 svnroot     := $(shell LANG=C svn info 2>/dev/null | grep Root | cut -c 18-)
 releasedir  := releases
+webroot     := ../website/WebContent/
 MAN_TXT     := doc/safekeep.txt doc/safekeep.conf.txt doc/safekeep.backup.txt
 DOC_MAN     := doc/safekeep.1 doc/safekeep.conf.5 doc/safekeep.backup.5
 DOC_HTML    := $(patsubst %.txt,%.html,$(MAN_TXT))
@@ -25,6 +26,7 @@ help:
 	@echo "    info        Displays package information (version, etc.)"
 	@echo "    install     Installs safekeep and the online documentation"
 	@echo "    docs        Builds all documentation formats"
+	@echo "    web         Updates the website to the latest documentation"
 	@echo "    build       Builds everything needed for an installation"
 	@echo "    tar         Builds snapshot source distribution"
 	@echo "    deb         Builds snapshot binary and source DEBs"
@@ -60,6 +62,10 @@ tag:
 check-info: info
 	@echo -n 'Is this information correct? (yes/No) '
 	@read x; if [ "$$x" != "yes" ]; then exit 1; fi
+
+web: html
+	cp doc/*.html $(webroot)
+	cd  $(webroot); svn ci -m "Update man pages on website to latest as of $(timestamp)"
 
 docs: html man
 
