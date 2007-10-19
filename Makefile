@@ -56,6 +56,8 @@ build: docs
 
 release: check-info commit-release dist distrpm
 
+deploy: deploy-lattica deploy-sf
+
 commit-release:
 	svn ci -m "Release $(version) (tagged as $(tagname))"
 
@@ -134,9 +136,12 @@ distrpm: dist
 	mv $(rpmroot)/RPMS/noarch/$(name)-*-$(version)-$(release)*.noarch.rpm ${releasedir}
 	rpm --addsign ${releasedir}/$(releasename)-$(release)*.src.rpm ${releasedir}/$(name)-*-$(version)-$(release)*.noarch.rpm
 
-deploy:
+deploy-lattica:
 	scp ${releasedir}/${name}{,-common,-client,-server}-${version}-*.rpm ${repo_srv}:${repo_dir}/upload
 	ssh ${repo_srv} "cd ${repo_dir}; ./deploy-rpms.sh upload/${name}-*${version}-*.rpm"
+
+deploy-sf:
+	lftp -e "mput $(shell ls releases/${name}{,-common,-client,-server}-${version}-*.rpm); quit" upload.sourceforge.net/incoming
 
 check:
 	safekeep-test --local
