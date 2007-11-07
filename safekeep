@@ -402,21 +402,22 @@ def gather_lvm_information(device):
     cout.close()
     cin.close()
     for line in lines:
+        (device, blah1, mountpoint, blah2, mounttype) = line.split(' ')
         if line.startswith('/dev/mapper/' + group + '-' + volume + ' '):
-            return (group, volume, line.split(' ')[2], line.split(' ')[4])
+            return (group, volume, mountpoint, mounttype)
         elif line.startswith('/dev/' + group + '/' + volume + ' '):
-            return (group, volume, line.split(' ')[2], line.split(' ')[4])
+            return (group, volume, mountpoint, mounttype)
     return (None, None, None, None)
 
 def gather_snap_information(device, bdir):
-    (group, volume, mp, mt) = gather_lvm_information(device)
-    if not mp: return (None, None, None, None)
+    (group, volume, mountpoint, mounttype) = gather_lvm_information(device)
+    if not mountpoint: return (None, None, None, None)
     lvmdev =  os.path.join('/dev', group, volume)
     if bdir[-1] == '/': bdir = bdir[:-1]
     snapname = '%s_snap_%s' % (volume, os.path.basename(bdir))
     snapdev = os.path.join('/dev', group, snapname)
-    if os.path.isabs(mp[0]): mp = mp[1:]
-    return (lvmdev, snapdev, os.path.join(bdir, mp), mt)
+    if os.path.isabs(mountpoint[0]): mountpoint = mountpoint[1:]
+    return (lvmdev, snapdev, os.path.join(bdir, mountpoint), mounttype)
 
 def do_client_snap(cfg, bdir):
     assert is_temp_root(bdir)
