@@ -121,23 +121,23 @@ dist:
 	svn export $(svnroot)/safekeep/tags/$(tagname) $(releasename)
 	cat $(releasename)/$(name).spec.in | sed 's/^%define version.*/%define version $(version)/' > $(releasename)/$(name).spec
 	cat $(releasename)/debian/changelog.in | sed 's/^safekeep.*/safekeep ($(version)) unstable; urgency=low/' > $(releasename)/debian/changelog
-	mkdir -p ${releasedir}; tar cz -f ${releasedir}/$(releasename).tar.gz $(releasename)
+	mkdir -p $(releasedir); tar cz -f $(releasedir)/$(releasename).tar.gz $(releasename)
 	rm -rf $(releasename)
 
 distdeb: dist
-	tar xz -C /tmp -f ${releasedir}/$(releasename).tar.gz
-	rm -rf ${releasedir}/$(releasename).tar.gz
+	tar xz -C /tmp -f $(releasedir)/$(releasename).tar.gz
+	rm -rf $(releasedir)/$(releasename).tar.gz
 	cd /tmp/$(releasename) && debuild --check-dirname-regex 'safekeep(-.*)?'
-	mv /tmp/$(releasename)/safekeep*deb ${releasedir}
+	mv /tmp/$(releasename)/safekeep*deb $(releasedir)
 
 distrpm: dist
-	rpmbuild -ta ${releasedir}/$(releasename).tar.gz
-	mv $(rpmroot)/SRPMS/$(releasename)-$(release)*.src.rpm ${releasedir}
-	mv $(rpmroot)/RPMS/noarch/$(name)-*-$(version)-$(release)*.noarch.rpm ${releasedir}
-	rpm --addsign ${releasedir}/$(releasename)-$(release)*.src.rpm ${releasedir}/$(name)-*-$(version)-$(release)*.noarch.rpm
+	rpmbuild -ta $(releasedir)/$(releasename).tar.gz
+	mv $(rpmroot)/SRPMS/$(releasename)-$(release)*.src.rpm $(releasedir)
+	mv $(rpmroot)/RPMS/noarch/$(name)-*-$(version)-$(release)*.noarch.rpm $(releasedir)
+	rpm --addsign $(releasedir)/$(releasename)-$(release)*.src.rpm $(releasedir)/$(name)-*-$(version)-$(release)*.noarch.rpm
 
 deploy-lattica:
-	scp ${releasedir}/${name}{,-common,-client,-server}-${version}-*.rpm ${repo_srv}:${repo_dir}/upload
+	scp $(releasedir)/${name}{,-common,-client,-server}-${version}-*.rpm ${repo_srv}:${repo_dir}/upload
 	ssh ${repo_srv} "cd ${repo_dir}; ./deploy-rpms.sh upload/${name}-*${version}-*.rpm"
 
 deploy-sf:
