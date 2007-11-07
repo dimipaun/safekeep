@@ -11,6 +11,8 @@ Feedback from users:
     Would it be possible to recreate the manpages and other asciidoc documents
     before distributing the tar-files ? That way there is no dependency on
     asciidoc > 6 (and as a result, no dependency on python 2.3).
+  * Dag Wieers <dag@wieers.com>: disaster recovery
+    http://dag.wieers.com/blog/content/call-for-participation-on-mksysb
 
 Future (post 1.0):
   * Support more of rdiff-backup special file selectors
