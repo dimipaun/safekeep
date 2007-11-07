@@ -154,7 +154,7 @@ def localTest(tmproot):
         cmd = "cd %(tmproot)s/client; find -type f -a \! -name '*.nobackup' | sort | xargs md5sum > %(tmproot)s/md5sums.client"
         if os.system(cmd % params):
             raise TestFailure("Can't compute the source MD5 sums")
-        cmd = "safekeep %(args)s --conf '%(tmproot)s/safekeep.conf'"
+        cmd = "safekeep --server %(args)s --conf '%(tmproot)s/safekeep.conf'"
         if os.system(cmd % params):
             raise TestFailure("Can't backup files")
         os.mkdir(os.path.join(tmproot, 'restore'))
@@ -308,7 +308,7 @@ def remoteTest(tmproot, client, server):
     takeOver(server, 'server', verrel)
 
     # setup the server
-    cmd = 'chsh -s /bin/bash safekeep'
+    cmd = 'chsh -s /bin/bash safekeep --server'
     rcmd(cmd, 'root', server, 'Allow access to the safekeep account')
     client_addr = socket.gethostbyname(client)
     if client_addr != client:
