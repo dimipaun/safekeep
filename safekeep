@@ -15,11 +15,11 @@
 # You should have received a copy of the GNU General Public License
 # along with Safekeep.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import generators
 import getopt, os, os.path, popen2, re, sys
 import commands, tempfile, time, traceback
 import getpass, pwd, xml.dom.minidom
 import socket, smtplib
-from __future__ import generators
 
 ######################################################################
 # Python 2.2 compatibility
