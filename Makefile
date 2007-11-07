@@ -52,7 +52,7 @@ info:
 	@echo "SVN Root       = $(svnroot)"
 
 
-build: docs
+build:
 
 release: check-info commit-release dist distrpm
 
@@ -122,6 +122,7 @@ dist:
 	cat $(releasename)/$(name).spec.in | sed 's/^%define version.*/%define version $(version)/' > $(releasename)/$(name).spec
 	cat $(releasename)/debian/changelog.in | sed 's/^safekeep.*/safekeep ($(version)) unstable; urgency=low/' > $(releasename)/debian/changelog
 	mkdir -p $(releasedir); tar cz -f $(releasedir)/$(releasename).tar.gz $(releasename)
+	cd $(releasename); make docs
 	rm -rf $(releasename)
 
 distdeb: dist

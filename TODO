@@ -7,10 +7,6 @@ Feedback from users:
   * Øyvind Skaar <os@opoint.no>: FreeBSD have snapshot capabilities
     - http://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/snapshots.html
     - http://www.freebsd.org/cgi/man.cgi?query=snapshot&sektion=0&manpath=FreeBSD+6.2-RELEASE&apropos=1&format=html
-  * Dag Wieers <dag@wieers.com>: avoid asciidoc build requirements
-    Would it be possible to recreate the manpages and other asciidoc documents
-    before distributing the tar-files ? That way there is no dependency on
-    asciidoc > 6 (and as a result, no dependency on python 2.3).
   * Dag Wieers <dag@wieers.com>: disaster recovery
     http://dag.wieers.com/blog/content/call-for-participation-on-mksysb
 
