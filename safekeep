@@ -19,6 +19,29 @@ import getopt, os, os.path, popen2, re, sys
 import commands, tempfile, time, traceback
 import getpass, pwd, xml.dom.minidom
 import socket, smtplib
+from __future__ import generators
+
+######################################################################
+# Python 2.2 compatibility
+######################################################################
+# There is no guarantee that we'll continue supporting Python 2.2
+# indefinitely, but we make a reasonable effor to do so as long as
+# it doesn't result in major complication/ugliness.
+
+try:
+    True, False
+except NameError:
+    True, False = 1, 0
+
+def enumerate(obj):
+    i = -1
+    for item in obj:
+        i += 1
+        yield i, item
+
+######################################################################
+# Global settings
+######################################################################
 
 config_file = '/etc/safekeep/safekeep.conf'
 config_ext = '.backup'
