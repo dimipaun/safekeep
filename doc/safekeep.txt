@@ -7,7 +7,7 @@ safekeep - Client/server backup script
 
 SYNOPSIS
 --------
-'safekeep' [--server] [-q] [-v] [--force] [-c file] <clientid>*
+'safekeep' --server [-q] [-v] [--force] [-c file] <clientid>*
 
 'safekeep' --keys [-q] [-v] [-c file] [-i file] [--status] [--print] [--deploy] <clientid>*
 
@@ -51,7 +51,7 @@ Each mode accepts a few options as described below.
 OPERATION MODE
 --------------
 --server::
-	Selects the server mode (default)
+	Selects the server mode 
 
 --client::
 	Selects the client mode. This should never be invoked manually, the
@@ -61,6 +61,9 @@ OPERATION MODE
 --keys::
 	Selects the SSH key management mode
 
+Please note that you must always specify an operation mode. Earlier 
+versions used do default to `--server` mode, but that proved to work 
+out poorly in practice.
 
 GENERAL OPTIONS
 ---------------

@@ -7,11 +7,6 @@ Feedback from users:
   * Øyvind Skaar <os@opoint.no>: FreeBSD have snapshot capabilities
     - http://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/snapshots.html
     - http://www.freebsd.org/cgi/man.cgi?query=snapshot&sektion=0&manpath=FreeBSD+6.2-RELEASE&apropos=1&format=html
-  * Gert <gert.vrebos@tactics.be>: change default mode from --server
-    A small, but annoying issue (to me) it the fact that the default 
-    action for /usr/bin/safekeep is to run the server.  This means that 
-    making a typo (eg /usr/bin/safekeep -help) or not knowing the 
-    parameters always triggers the server and starts the full backup process.
   * Dag Wieers <dag@wieers.com>: avoid asciidoc build requirements
     Would it be possible to recreate the manpages and other asciidoc documents
     before distributing the tar-files ? That way there is no dependency on

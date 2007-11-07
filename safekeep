@@ -845,11 +845,11 @@ def parse_authorized_keys(keystext):
 ######################################################################
 
 def usage(exitcode=None):
-    print 'usage: %s [--server] [common options] [server options] <client-id>*' % (sys.argv[0])
+    print 'usage: %s --server [common options] [server options] <client-id>*' % (sys.argv[0])
     print '       %s --keys [common options] [keys options] <client-id>*' % (sys.argv[0])
     print
-    print 'mode selection (pick one):'
-    print '--server            launch in server mode (default)'
+    print 'mode selection (you must pick one):'
+    print '--server            launch in server mode'
     print '--keys              launch in keys management mode'
     print
     print 'common options:'
@@ -940,7 +940,7 @@ def main():
             return
 
     if mode is None:
-        mode = 'server'
+        usage(2)
 
     if mode is not 'keys' and (identity or keys_status or keys_print or keys_deploy):
         usage(2)
