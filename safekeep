@@ -706,6 +706,38 @@ def do_server(cfgs, ids, force):
     info('------------------------------------------------------------------')
     debug('Server backup done')
 
+def do_list(cfgs, ids, list_type, list_date, list_parsable):
+    debug("Do server listing main loop")
+    for cfg in cfgs.itervalues():
+        id = cfg['id']
+        if ids and id not in ids: continue
+        info('------------------------------------------------------------------')
+        info('Server listing for client %s' % id)
+
+        args = ['rdiff-backup']
+
+        if list_type is 'increments':
+            args.extend(['--list-increments'])
+        elif list_type is 'sizes':
+            args.extend(['--list-increment-sizes'])
+        elif list_type is 'changed':
+            args.extend(['--list-changed-since', list_date])
+        elif list_type is 'attime':
+            args.extend(['--list-at-time', list_date])
+        else:
+            assert False, 'Unknown list type: ' + list_type
+
+        if list_parsable:
+            args.extend(['--parsable-output'])
+
+        args.extend([cfg['dir']])
+        ret = spawn(args)
+        if ret:
+            raise Exception('Failed to run rdiff-backup')
+
+    info('------------------------------------------------------------------')
+    debug('Server listing done')
+
 def do_keys(cfgs, ids, identity, status, dump, deploy):
     for cfg in cfgs.itervalues():
         id = cfg['id']
@@ -853,10 +885,12 @@ def parse_authorized_keys(keystext):
 def usage(exitcode=None):
     print 'usage: %s --server [common options] [server options] <client-id>*' % (sys.argv[0])
     print '       %s --keys [common options] [keys options] <client-id>*' % (sys.argv[0])
+    print '       %s --list [common options] [list options] <client-id>*' % (sys.argv[0])
     print
     print 'mode selection (you must pick one):'
     print '--server            launch in server mode'
     print '--keys              launch in keys management mode'
+    print '--list              list previous backup status'
     print
     print 'common options:'
     print '-c, --conf=FILE     use the FILE configuration file'
@@ -864,6 +898,7 @@ def usage(exitcode=None):
     print '-q, --quiet         decreases the verbosity level'
     print '-v, --verbose       increases the verbosity level'
     print '-V, --version       show the version number and exit'
+    print '--noemail           disables the sending of email'
     print
     print 'server options:'
     print '--force             force backup destination overwriting, dangerous!'
@@ -873,6 +908,13 @@ def usage(exitcode=None):
     print '--status            display the key status for the clients (default)'
     print '--print             display the authorization keys'
     print '--deploy            deploy the authorization keys'
+    print
+    print 'list options:'
+    print '--increments        list number and dates of increments'
+    print '--parsable-output   tailor output for parsing by other programs'
+    print '--sizes             list sizes of all the increments'
+    print '--changed=time      list files that have changed since time'
+    print '--at-time=time      list files in the archive at given time'
     if exitcode is not None: sys.exit(exitcode)
 
 def main():
@@ -880,6 +922,9 @@ def main():
         opts, args = getopt.getopt(sys.argv[1:], 'c:e:i:hs:qvV',
                                    [ 'conf=', 'client', 'clientid=', 'deploy',
                                      'email=', 'force', 'help', 'keys',
+                                     'list', 'increments', 'sizes',
+                                     'parsable-output', 'changed=', 'at-time=',
+                                     'noemail',
                                      'print', 'quiet', 'server', 'smtp=',
                                      'status', 'verbose', 'version'])
     except getopt.GetoptError:
@@ -894,6 +939,10 @@ def main():
     verbosity = 0
     clientid = None
     force = 0
+    noemail = 0
+    list_type = None
+    list_parsable = 0
+    list_date = None
     identity = None
     keys_status = None
     keys_print = None
@@ -921,6 +970,9 @@ def main():
         elif o in ('--server', ):
             if mode: usage(2)
             mode = 'server'
+        elif o in ('--list', ):
+            if mode: usage(2)
+            mode = 'list'
         elif o in ('--client', ):
             if mode: usage(2)
             mode = 'client'
@@ -929,6 +981,24 @@ def main():
             mode = 'keys'
         elif o in ('--force', ):
             force = 1
+        elif o in ('--noemail', ):
+            noemail = 1
+        elif o in ('--increments', ):
+            if list_type: usage(2)
+            list_type = 'increments'
+        elif o in ('--sizes', ):
+            if list_type: usage(2)
+            list_type = 'sizes'
+        elif o in ('--parsable-output', ):
+            list_parsable = 1
+        elif o in ('--changed', ):
+            if list_type: usage(2)
+            list_type = 'changed'
+            list_date = a
+        elif o in ('--at-time', ):
+            if list_type: usage(2)
+            list_type = 'attime'
+            list_date = a
         elif o in ('-i', ):
             identity = a
         elif o in ('--status', ):
@@ -949,6 +1019,9 @@ def main():
         usage(2)
 
     if mode is not 'keys' and (identity or keys_status or keys_print or keys_deploy):
+        usage(2)
+
+    if mode is not 'list' and (list_type or list_date or list_parsable):
         usage(2)
 
     if mode is not 'server' and (email or smtp):
@@ -1016,6 +1089,12 @@ def main():
             is_client = False
             verbosity_level = 1 + verbosity
             do_server(cfgs, args, force)
+        elif mode is 'list':
+            if list_type is None:
+                list_type = 'increments'
+            is_client = False
+            verbosity_level = 2 + verbosity
+            do_list(cfgs, args, list_type, list_date, list_parsable)
         elif mode is 'client':
             is_client = True
             verbosity_level = 3 + verbosity
@@ -1032,7 +1111,7 @@ def main():
         traceback.print_exc(file=sys.stdout)
         error('ERROR: %s' % ex)
 
-    if email:
+    if email and not noemail:
         send_notification(email, smtp)
 
 if __name__ == '__main__':

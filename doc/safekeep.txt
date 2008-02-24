@@ -7,9 +7,11 @@ safekeep - Client/server backup script
 
 SYNOPSIS
 --------
-'safekeep' --server [-q] [-v] [--force] [-c file] <clientid>*
+'safekeep' --server [-q] [-v] [--noemail] [--force] [-c file] <clientid>*
 
-'safekeep' --keys [-q] [-v] [-c file] [-i file] [--status] [--print] [--deploy] <clientid>*
+'safekeep' --keys [-q] [-v] [--noemail] [-c file] [-i file] [--status] [--print] [--deploy] <clientid>*
+
+'safekeep' --list [-q] [-v] [--noemail] [-c file] [--increments] [--parsable-output] [--sizes] [--changed=<time>] [--at-time=<time>] <clientid>*
 
 'safekeep' --client
 
@@ -20,7 +22,8 @@ DESCRIPTION
 SafeKeep is a client/server backup script which enhances the
 power of rdiff-backup with simple configuration and use.
 
-SafeKeep can work in server mode, client mode or SSH key management mode.
+SafeKeep can work in server mode, client mode, SSH key management mode
+or list mode.
 
 In server mode, SafeKeep parses a set of configurations files which
 defines a set of backup clients. For each backup client, SafeKeep
@@ -41,7 +44,10 @@ this mode is meant to be used only by the server mode of SafeKeep.
 The SSH key management mode is a helper mode for deploying or verifying
 the setup of the SSH authentification keys.
 
-In both server and keys management mode, you can restrict the operation
+In list mode, SafeKeep lists the details of existing archives.  This is
+basically an interface to the relevant options for `rdiff-backup`.
+
+In server, keys management and list mode, you can restrict the operation
 to a specific set of clients by listing the desired client IDs as
 arguments. If no client ID is given, SafeKeep will operate over all known
 clients.
@@ -60,6 +66,9 @@ OPERATION MODE
 
 --keys::
 	Selects the SSH key management mode
+
+--list::
+	Selects the list mode
 
 Please note that you must always specify an operation mode. Earlier 
 versions used do default to `--server` mode, but that proved to work 
@@ -89,6 +98,10 @@ GENERAL OPTIONS
 	Increases the verbosity level. Can be specified more than
 	once.
 
+--noemail::
+	Disables the sending of email, no matter what the settings
+	within the configuration file.
+
 SERVER OPTIONS
 --------------
 --force::
@@ -117,6 +130,37 @@ KEYS OPTIONS
 
 --deploy::
 	Deploy the authorization keys on the clients.
+
+LIST OPTIONS
+------------
+--increments::
+	Pass the `--list-increments` option to `rdiff-backup`, to
+	list the number and date of partial incremental backups for
+	the given or all clients.  This is the default list option.
+
+--parseable-output::
+	Pass the `--parsable-output` option to `rdiff-backup` to
+	generate output in a format that is easily parsed by other
+	programs.  This currently only works with the `--increments`.
+
+--sizes::
+	Pass the `--list-increment-sizes` option to `rdiff-backup`,
+	to list the total size of all increment and mirror files by
+	time for the given or all clients.  Note, this may take some time.
+
+--changed=TIME::
+	Pass the `--list-changed-since` option for TIME to `rdiff-backup`,
+	to list the files changed since TIME for the given clients.
+	TIME is passed directly to `rdiff-backup`.  Note, this may take
+	some time and generate considerable output.  Also, unlike
+	`rdiff-backup` the is no option to select sub-directories.
+
+--at-time=TIME::
+	Pass the `--list-at-time` option for TIME to `rdiff-backup`,
+	to list the files in the archive that were present at the
+	given time for the given clients.  Note, this may take some
+	time and generate considerable output.  Also, unlike
+	`rdiff-backup` the is no option to select sub-directories.
 
 CONFIGURATION
 -------------
