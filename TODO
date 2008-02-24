@@ -4,6 +4,20 @@ Next release:
   * Add tests db dumps
   * Avoid snapshotting snapshots
   * Don't snapshot a device if a snapshot is already present
+  * Clarify snapshot usage in docs
+  * local backup to bypass ssh
+
+When I tried to run safekeep under FreeBSD I got an error: "bad interpreter". 
+It was because the safekeep magic line is
+#!/usr/bin/python
+and in FreeBSD the python is located in the /usr/local/bin directory. 
+
+When I chaged this line to (see python tutorial, 2.2.2):
+#!/usr/bin/env python
+the safekeep began to run w/o errors.
+
+More thanks,
+Igor Klingen
 
 Feedback from users:
   * Øyvind Skaar <os@opoint.no>: FreeBSD have snapshot capabilities
