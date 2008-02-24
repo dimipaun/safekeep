@@ -402,7 +402,7 @@ def gather_lvm_information(device):
     cout.close()
     cin.close()
     for line in lines:
-        (device, blah1, mountpoint, blah2, mounttype) = line.split(' ')
+        (device, blah1, mountpoint, blah2, mounttype, blah3) = line.split(' ', 5)
         if line.startswith('/dev/mapper/' + group + '-' + volume + ' '):
             return (group, volume, mountpoint, mounttype)
         elif line.startswith('/dev/' + group + '/' + volume + ' '):
@@ -446,7 +446,9 @@ def do_client_snap(cfg, bdir):
 def do_client_snap_teardown(cfg, bdir):
     assert is_temp_root(bdir)
     debug('Tear down FS snapshots dumps')
-    for snap in cfg['snaps']:
+    snaps = list(cfg['snaps'])
+    snaps.reverse()
+    for snap in snaps:
         device = snap['device']
         (lvmdev, snapdev, snapmnt, snaptyp) = gather_snap_information(device, bdir)
         if not snapmnt:
@@ -484,6 +486,9 @@ def do_client_setup(cfg):
     do_client_dbdump(cfg)
 
     if len(cfg['snaps']) > 0:
+        ret = spawn(['modprobe', 'dm-snapshot'])
+        if ret:
+            warn('modprobe dm-snapshot failed, continuing')
         bdir = tempfile.mkdtemp("-rbind", "safekeep-", "/mnt")
         ret = spawn(['mount', '--rbind', '/', bdir])
         if ret:
@@ -1022,7 +1027,7 @@ def main():
                 keys_status = True
             do_keys(cfgs, args, identity, keys_status, keys_print, keys_deploy)
         else:
-            assert False, 'Unkown mode: ' + mode
+            assert False, 'Unknown mode: ' + mode
     except Exception, ex:
         traceback.print_exc(file=sys.stdout)
         error('ERROR: %s' % ex)
