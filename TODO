@@ -4,7 +4,6 @@ Next release:
   * Add tests db dumps
   * Avoid snapshotting snapshots
   * Don't snapshot a device if a snapshot is already present
-  * Clarify snapshot usage in docs
   * local backup to bypass ssh
 
 Feedback from users:

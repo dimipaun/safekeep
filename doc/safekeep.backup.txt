@@ -179,9 +179,11 @@ are separated by '/', attributes are introduced by '@':
 	Optional, defaults to "false". 
 
 /backup/setup/snapshot/@device::
-	The path (device location) to the LVM volume to snapshot
-	before the backup commences. It is recommended.
-	Multiple snapshots may be specified, in which case the
+	The path (device location) to the client LVM volume to snapshot
+	before the backup commences. Note that the snapshot happens
+	on the client machines, and it ensures that the data that is
+	being backed-up is in a consistent state throughout the backup
+	process. Multiple snapshots may be specified, in which case the
 	order is important, the associated filesystems are mounted
 	in the order given.
 	Please note that using this feature requires that `safekeep(1)`
