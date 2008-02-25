@@ -52,7 +52,7 @@ info:
 	@echo "SVN Root       = $(svnroot)"
 
 
-build:
+build: docs
 
 release: check-info commit-release dist distrpm
 
