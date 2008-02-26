@@ -116,6 +116,14 @@ id %{name} >/dev/null 2>&1 || \
 %doc sample.backup
 
 %changelog
+* Tue Feb 26 2008 Dimi Paun <dimi@lattica.com> 1.0.4-1
+  - Add options to allow the query of the backup repository
+  - Important fixes when dealing with snapshots
+  - Make it more compatible with Python 2.2 (more work remains)
+  - Avoid build-time dependency on asciidoc which depends on Python 2.3
+  - Add some clarifications to the documentation
+  - Add support for FreeBSD
+
 * Fri Oct 19 2007 Dimi Paun <dimi@lattica.com> 1.0.3-1
   - Clarify licensing in lite of the new GPLv3 license;
   - New --force option to handle unexpected problems with the data repository;
