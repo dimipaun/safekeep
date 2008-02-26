@@ -1,3 +1,129 @@
+2008-02-26 20:46 +0000 [r580]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in: Update .spec file.
+
+2008-02-26 18:18 +0000 [r579]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/ANNOUNCE: Prepare the ANNOUNCE file for the
+	  release.
+
+2008-02-25 01:03 +0000 [r578]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/Makefile: Build docs for build.
+
+2008-02-25 00:57 +0000 [r577]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.backup.txt, safekeep/trunk/TODO:
+	  Clarify snapshot usage.
+
+2008-02-24 16:53 +0000 [r576]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep, safekeep/trunk/TODO: More portable way
+	  of invoking python, as suggested by Igor Klingen. This fixes it
+	  for FreeBSD.
+
+2008-02-24 16:49 +0000 [r575]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.backup.txt, safekeep/trunk/safekeep,
+	  safekeep/trunk/doc/safekeep.txt: Frank Crawford
+	  <frank@crawford.emu.id.au> This adds the mode --list, and options
+	  which correspond with rdiff-backup options, i.e. --increments
+	  (equiv --list-increments) - the default, --sizes (equiv
+	  --list-increment-sizes), --changed=DATE (equiv
+	  --list-changed-since), and --at-time=DATE (equiv --list-at-time).
+	  It also adds an option which disables email (--noemail) as when
+	  used interactively it isn't worth generating email messages.
+
+2008-02-24 16:42 +0000 [r574]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/TODO: Update TODO
+
+2008-02-24 16:42 +0000 [r573]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Frank Crawford
+	  <frank@crawford.emu.id.au> * Fixed failure when mount table has
+	  extra options. * Tear down FS snapshots in reverse order to the
+	  setup order. * Load the LVM snapshot module, in case it is not
+	  already loaded. * Fixed a minor spelling mistake in an assert
+	  message.
+
+2007-11-07 15:35 +0000 [r572]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/TODO: Update TODO.
+
+2007-11-07 15:16 +0000 [r571]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Bit clearer snapshot handling.
+
+2007-11-07 15:03 +0000 [r570]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/TODO: Update TODO.
+
+2007-11-07 15:01 +0000 [r569]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/Makefile, safekeep/trunk/safekeep.spec.in,
+	  safekeep/trunk/debian/control, safekeep/trunk/TODO: Build docs at
+	  distribution time to remove build-time dependency on asciidoc 6,
+	  which requires python 2.3. These components are not readily
+	  available on older system, making it impossible for packagers to
+	  provide ready-make packages for distros such as RHEL3. Based on a
+	  suggestion from Dag Wieers <dag@wieers.com>.
+
+2007-11-07 14:54 +0000 [r568]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/Makefile: Make uses $() not ${}
+
+2007-11-07 14:52 +0000 [r567]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/TODO: More stuff on the wish list
+
+2007-11-07 14:39 +0000 [r566]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Update test to be explicit with the
+	  mode
+
+2007-11-07 14:39 +0000 [r565]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Change version to a devel number
+
+2007-11-07 14:36 +0000 [r564]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep, safekeep/trunk/TODO,
+	  safekeep/trunk/doc/safekeep.txt: Always require specification of
+	  the operation mode, based on suggestion from Gert
+	  <gert.vrebos@tactics.be>.
+
+2007-11-07 14:21 +0000 [r563]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/TODO: Update TODO with feedback from users.
+
+2007-11-07 14:17 +0000 [r562]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Future import must come first.
+
+2007-11-07 14:15 +0000 [r561]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Provide Python 2.2 compatibility based
+	  on a suggestion from Gert <gert.vrebos@tactics.be>.
+
+2007-10-19 17:24 +0000 [r558]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/Makefile: We have to upload the tarball too to SF.
+
+2007-10-19 17:17 +0000 [r557]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/Makefile: Automate SF uploading too.
+
+2007-10-19 17:10 +0000 [r556]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/Makefile: Add simple deploy target to deploy RPMs
+	  to YUM repo
+
+2007-10-19 16:50 +0000 [r554]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in, safekeep/trunk/ChangeLog: Update
+	  ChangeLog
+
 2007-10-19 16:47 +0000 [r553]  Dimi Paun <dimi@lattica.com>
 
 	* safekeep/trunk/safekeep, safekeep/trunk/ANNOUNCE: Prepare for
