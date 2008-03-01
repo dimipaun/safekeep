@@ -92,7 +92,7 @@ $(DOC_HTML) $(DOC_MAN): doc/asciidoc.conf
 changelog:
 	svn log -v --xml | svn2log.py -D 0 -u doc/users
 
-install: $(DOC_MAN)
+install:
 	install -m 755 safekeep "/usr/bin/"
 	install -d -m 755 "/etc/safekeep/backup.d/"
 	install -m 755 safekeep.conf "/etc/safekeep/"
