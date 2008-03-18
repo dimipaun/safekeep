@@ -7,13 +7,13 @@ safekeep - Client/server backup script
 
 SYNOPSIS
 --------
-'safekeep' --server [-q] [-v] [--noemail] [--force] [-c file] <clientid>*
+'safekeep' --server [-q] [-v] [--noemail] [--force] [-c file] [--cleanup] <clientid>*
 
 'safekeep' --keys [-q] [-v] [--noemail] [-c file] [-i file] [--status] [--print] [--deploy] <clientid>*
 
 'safekeep' --list [-q] [-v] [--noemail] [-c file] [--increments] [--parsable-output] [--sizes] [--changed=<time>] [--at-time=<time>] <clientid>*
 
-'safekeep' --client
+'safekeep' --client [--cleanup]
 
 'safekeep' -h | -V
 
@@ -40,6 +40,11 @@ the client data using `rdiff-backup`, and then cleanups the state
 
 Note that the client mode of SafeKeep should never be invoked manually,
 this mode is meant to be used only by the server mode of SafeKeep.
+The only exception to this is if run with the `--cleanup` option, which
+is used to remove LVM snapshots and mounts created by Safekeep, after a
+crash or some other failure, without a connection to the server.
+Normally this cleanup would be performed through the server command
+`safekeep --server --cleanup`.
 
 The SSH key management mode is a helper mode for deploying or verifying
 the setup of the SSH authentification keys.
@@ -110,6 +115,25 @@ SERVER OPTIONS
 	is potentially dangerous, and should only be used if the
 	backup directory becomes corrupt, and `rdiff-backup` error
 	logs tells you to use this option.
+
+--cleanup::
+	Remove LVM snapshots and mounts left by Safekeep after a
+	crash or other failure.  This will run also run the standard
+	cleanup processes, such as the removal of an DB dumps, and
+	forces a consistency check of the `rdiff-backup` destination
+	directory.  This is the prefered cleanup procedure and can
+	be run with no danger of corrupting the system if there is
+	nothing to cleanup.
+
+CLIENT OPTIONS
+--------------
+--cleanup::
+	Remove LVM snapshots and mounts left after a crash or other
+	failure from the local system.  Unlike the equivalent `--server`
+	option, it does not do any other of the standard cleanups.
+	This option should only be used when it is not possible to
+	refer to the server, for example, when the network connection
+	to the server is no longer available.
 
 KEYS OPTIONS
 ------------

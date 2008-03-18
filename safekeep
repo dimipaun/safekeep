@@ -16,7 +16,7 @@
 # along with Safekeep.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import generators
-import getopt, os, os.path, popen2, re, sys
+import getopt, os, os.path, popen2, re, sys, fnmatch
 import commands, tempfile, time, traceback
 import getpass, pwd, xml.dom.minidom
 import socket, smtplib
@@ -53,7 +53,7 @@ backup_user = None
 home_dir = None
 base_dir = None
 
-PROTOCOL = "1.0"
+PROTOCOL = "1.1"
 VERSION = "1.0.4"
 VEBOSITY_BY_CLASS = {'DBG': 3, 'INFO': 2, 'WARN': 1, 'ERR': 0}
 
@@ -394,18 +394,47 @@ def do_client_dbdump_teardown(cfg):
             warn('Unable to remove dump file: %s for database %s because: %s' %
                  (dump['file'], dump['db'], e))
 
-def gather_lvm_information(device):
-    device = device.replace('/mapper','').replace('-','/')
-    (group, volume) = device.split('/')[-2:]
+def lvm_snap_information():
+    (cin, cout) = os.popen4(['lvs', '--separator', ':', '--noheadings'])
+    lines = cout.readlines()
+    cout.close()
+    cin.close()
+    lvms = []
+    for line in lines:
+        if line.count(':') > 3:
+            (volume, group, attr, blah1) = line.lstrip().split(':', 3)
+            if fnmatch.fnmatch(volume, '*_snap_safekeep-*') and attr[0].lower() == 's':
+                lvms.append([volume, group])
+    return lvms
+
+def mount_information(reverse = False):
     (cin, cout) = os.popen4('mount')
     lines = cout.readlines()
     cout.close()
     cin.close()
+    mounts = []
+    if reverse:
+        lines.reverse()
     for line in lines:
-        (device, blah1, mountpoint, blah2, mounttype, blah3) = line.split(' ', 5)
-        if line.startswith('/dev/mapper/' + group + '-' + volume + ' '):
-            return (group, volume, mountpoint, mounttype)
-        elif line.startswith('/dev/' + group + '/' + volume + ' '):
+        (device, blah1, mountpoint, blah2, mounttype, mountoptions) = line.split()
+        mounts.append([device, mountpoint, mounttype, mountoptions[1:-1]])
+    return mounts
+
+def map_lvm_device(device):
+    device = device.replace('/mapper','').replace('-','/')
+    return device.split('/')[-2:]
+
+def check_lvm_information(device):
+    (group, volume) = map_lvm_device(device)
+    for (lvm_volume, lvm_group) in lvm_snap_information():
+        if lvm_group == group and lvm_volume.startswith(volume):
+            return True
+    return False
+
+def gather_lvm_information(device):
+    (group, volume) = map_lvm_device(device)
+    for (device, mountpoint, mounttype, mountoptions) in mount_information(False):
+        if [group, volume] == map_lvm_device(device):
             return (group, volume, mountpoint, mounttype)
     return (None, None, None, None)
 
@@ -486,6 +515,12 @@ def do_client_setup(cfg):
     do_client_dbdump(cfg)
 
     if len(cfg['snaps']) > 0:
+        debug('Checking FS snapshots')
+        for snap in cfg['snaps']:
+            device = snap['device']
+            if check_lvm_information(device):
+                raise Exception("Previous snapshots found for %s: run 'safekeep --server --cleanup' to correct" % device)
+
         ret = spawn(['modprobe', 'dm-snapshot'])
         if ret:
             warn('modprobe dm-snapshot failed, continuing')
@@ -525,6 +560,76 @@ def do_client_cleanup(cfg, bdir):
 def do_client_compat(server_versions):
     debug('Server versions: %s' % server_versions)
 
+def do_client_scrub():
+    debug("Do client scrub loop")
+
+    if os.getuid():
+        if is_client:
+            raise Exception('client not running as root')
+        else:
+            error("--cleanup must be run as root")
+            sys.exit(2)
+
+    scrubbed = False
+    if os.environ['PATH'][-1] == ':':
+        os.environ['PATH'] += '/sbin:/usr/sbin:/usr/local/sbin:'
+    else:
+        os.environ['PATH'] += ':/sbin:/usr/sbin:/usr/local/sbin'
+
+    # Go through and unmount anythings that are still hanging around
+
+    debug("Cleaning up existing mounts")
+    for (device, mountpoint, mounttype, mountoptions) in mount_information(True):
+        if mountpoint.startswith('/mnt/safekeep-'):
+            info("Removing mount %s" % mountpoint)
+            if device == '/' and 'bind' in mountoptions.split(','):
+                info("Removing rbind directory %s" % mountpoint)
+                ret = spawn(['umount', '-l', mountpoint])
+                if ret:
+                    warn('Failed to unmount: ' + mountpoint)
+                else:
+                    try:
+                        os.rmdir(mountpoint)
+                    except Exception, e:
+                        warn('Failed to remove: ' + mountpoint)
+            else:
+                ret = spawn(['umount', mountpoint])
+                if ret:
+                    warn('Can not unmount the snapshot: %s' % mountpoint)
+            if fnmatch.fnmatch(device, '*_snap_safekeep-*'):
+                info("Removing snapshot %s" % device)
+                ret = spawn(['lvremove', '--force', device])
+                if ret:
+                    warn('Can not tear down snapshot: ' + device)
+            scrubbed = True
+
+    # Now cleanup any snapshots still hanging around
+
+    debug("Cleaning up remaining snapshots")
+    for (volume, group) in lvm_snap_information():
+        device = os.path.join('/dev', group, volume)
+        info("Removing snapshot %s" % device)
+        ret = spawn(['lvremove', '--force', device])
+        if ret:
+            warn('Can not tear down snapshot: ' + device)
+        scrubbed = True
+
+    # Now cleanup any safekeep directories still hanging around
+
+    debug("Cleaning up remaining safekeep directories")
+    if os.path.isdir('/mnt'):
+        for ent in os.listdir('/mnt'):
+            mountpoint = os.path.join('/mnt', ent)
+            if ent.startswith('safekeep-') and os.path.isdir(mountpoint):
+                info("Removing rbind directory %s" % mountpoint)
+                try:
+                    os.rmdir(mountpoint)
+                except Exception, e:
+                    warn('Failed to remove: ' + mountpoint)
+
+    if not scrubbed:
+        info('No cleanup required')
+
 def do_client():
     debug("Do client main loop")
     should_cleanup = True
@@ -547,6 +652,9 @@ def do_client():
                     if dir == bdir: should_cleanup = False
                     do_client_cleanup(cfg, dir)
                     send('OK')
+                elif line.startswith('SCRUB'):
+                    do_client_scrub()
+                    send('OK')
                 elif not line:
                     break
                 else:
@@ -554,7 +662,7 @@ def do_client():
                     break
             except Exception, e:
                 traceback.print_exc(file=sys.stdout)
-                send('ERROR ' + e)
+                send('ERROR %s' % e)
     finally:
         if should_cleanup:
             do_client_cleanup(cfg, bdir)
@@ -570,7 +678,7 @@ def do_server_getanswer(cout):
         if line.startswith('OK'):
             return line[2:-1].strip()
         elif line.startswith('ERROR'):
-            raise Exception(line[5:])
+            raise Exception(line[5:].strip())
         elif not line:
             raise Exception('client died unexpectedly')
         else:
@@ -604,6 +712,12 @@ def do_server_rdiff(cfg, bdir, force):
     if ret:
         raise Exception('Failed to run rdiff-backup')
 
+def do_server_rdiff_cleanup(cfg):
+    args = ['rdiff-backup', '--check-destination-dir', cfg['dir']]
+    ret = spawn(args)
+    if ret:
+        warn('Failed to cleanup old data, please fix the problem manually')
+
 def do_server_data_cleanup(cfg):
     args = ['rdiff-backup', '--force', '--remove-older-than', cfg['retention'], cfg['dir']]
     ret = spawn(args)
@@ -616,8 +730,10 @@ def do_server_compat(client_versions):
     (server_major, server_minor) = PROTOCOL.split('.')
     if server_major != client_major:
         raise Exception('Incompatible protocols: %s <> %s' % (PROTOCOL, client_protocol))
+    elif server_minor > client_minor:
+        warn('Protocol mismatch: %s <> %s' % (PROTOCOL, client_protocol))
 
-def do_server(cfgs, ids, force):
+def do_server(cfgs, ids, force, cleanup):
     debug("Do server main loop")
     for cfg in cfgs.itervalues():
         id = cfg['id']
@@ -640,7 +756,7 @@ def do_server(cfgs, ids, force):
                     raise Exception('Can not create data store dir: %s' % datadir)
 
             rdiff_logdir = os.path.join(datadir, 'rdiff-backup-data')
-            if cfg['retention'] and os.path.isdir(rdiff_logdir):
+            if cfg['retention'] and os.path.isdir(rdiff_logdir) and not cleanup:
                 do_server_data_cleanup(cfg)
 
             if cfg['host']:
@@ -660,35 +776,43 @@ def do_server(cfgs, ids, force):
             cin.flush()
             do_server_getanswer(cout)
 
-            cin.write('SETUP\n')
-            cin.flush()
-            bdir = do_server_getanswer(cout)
-
-            if os.path.isdir(rdiff_logdir):
-                rdiff_logpre = os.listdir(rdiff_logdir)
+            if cleanup:
+                cin.write('SCRUB\n')
+                cin.flush()
+                do_server_getanswer(cout)
+                bdir = '/'  # Fake directory for the rest of the cleanup
+                do_server_rdiff_cleanup(cfg)
+                errs = 0
             else:
-                rdiff_logpre = []
+                cin.write('SETUP\n')
+                cin.flush()
+                bdir = do_server_getanswer(cout)
 
-            backup_log = os.path.join(rdiff_logdir, 'backup.log')
-            if os.path.isfile(backup_log):
-                backup_marker = '=== Backup session on %s ===' % time.asctime()
-                fbm = open(backup_log, 'a')
-                fbm.write(backup_marker + '\n')
-                fbm.close()
-            else:
-                backup_marker = None
+                if os.path.isdir(rdiff_logdir):
+                    rdiff_logpre = os.listdir(rdiff_logdir)
+                else:
+                    rdiff_logpre = []
 
-            do_server_rdiff(cfg, bdir, force)
+                backup_log = os.path.join(rdiff_logdir, 'backup.log')
+                if os.path.isfile(backup_log):
+                    backup_marker = '=== Backup session on %s ===' % time.asctime()
+                    fbm = open(backup_log, 'a')
+                    fbm.write(backup_marker + '\n')
+                    fbm.close()
+                else:
+                    backup_marker = None
 
-            errs = 0
-            if os.path.isdir(rdiff_logdir):
-                info_file(backup_log, backup_marker)
-                rdiff_logpost = os.listdir(rdiff_logdir)
-                for lfn in rdiff_logpost:
-                    if lfn.startswith('session_statistics.') and lfn.endswith('.data') and lfn not in rdiff_logpre:
-                        errs += info_file(os.path.join(rdiff_logdir, lfn))
-            else:
-                warn('Log dir does not exist.')
+                do_server_rdiff(cfg, bdir, force)
+
+                errs = 0
+                if os.path.isdir(rdiff_logdir):
+                    info_file(backup_log, backup_marker)
+                    rdiff_logpost = os.listdir(rdiff_logdir)
+                    for lfn in rdiff_logpost:
+                        if lfn.startswith('session_statistics.') and lfn.endswith('.data') and lfn not in rdiff_logpre:
+                            errs += info_file(os.path.join(rdiff_logdir, lfn))
+                else:
+                    warn('Log dir does not exist.')
 
             cin.write('CLEANUP %s\n' % bdir)
             cin.flush()
@@ -902,6 +1026,7 @@ def usage(exitcode=None):
     print
     print 'server options:'
     print '--force             force backup destination overwriting, dangerous!'
+    print '--cleanup           perform cleanup actions after a failure'
     print
     print 'keys options:'
     print '-i FILE             use FILE as identity for RSA/DSA authentication'
@@ -924,7 +1049,7 @@ def main():
                                      'email=', 'force', 'help', 'keys',
                                      'list', 'increments', 'sizes',
                                      'parsable-output', 'changed=', 'at-time=',
-                                     'noemail',
+                                     'noemail', 'cleanup',
                                      'print', 'quiet', 'server', 'smtp=',
                                      'status', 'verbose', 'version'])
     except getopt.GetoptError:
@@ -939,6 +1064,7 @@ def main():
     verbosity = 0
     clientid = None
     force = 0
+    cleanup = 0
     noemail = 0
     list_type = None
     list_parsable = 0
@@ -981,6 +1107,8 @@ def main():
             mode = 'keys'
         elif o in ('--force', ):
             force = 1
+        elif o in ('--cleanup', ):
+            cleanup = 1
         elif o in ('--noemail', ):
             noemail = 1
         elif o in ('--increments', ):
@@ -1025,6 +1153,9 @@ def main():
         usage(2)
 
     if mode is not 'server' and (email or smtp):
+        usage(2)
+
+    if not mode in ['server', 'client'] and cleanup:
         usage(2)
 
     if mode is 'client' and cfglocs:
@@ -1088,7 +1219,7 @@ def main():
         if mode is 'server':
             is_client = False
             verbosity_level = 1 + verbosity
-            do_server(cfgs, args, force)
+            do_server(cfgs, args, force, cleanup)
         elif mode is 'list':
             if list_type is None:
                 list_type = 'increments'
@@ -1096,9 +1227,14 @@ def main():
             verbosity_level = 2 + verbosity
             do_list(cfgs, args, list_type, list_date, list_parsable)
         elif mode is 'client':
-            is_client = True
-            verbosity_level = 3 + verbosity
-            do_client()
+            if cleanup:
+                is_client = False
+                verbosity_level = 1 + verbosity
+                do_client_scrub()
+            else:
+                is_client = True
+                verbosity_level = 3 + verbosity
+                do_client()
         elif mode is 'keys':
             is_client = False
             verbosity_level = 1 + verbosity
