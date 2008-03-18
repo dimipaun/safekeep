@@ -835,8 +835,12 @@ def do_list(cfgs, ids, list_type, list_date, list_parsable):
     for cfg in cfgs.itervalues():
         id = cfg['id']
         if ids and id not in ids: continue
-        info('------------------------------------------------------------------')
-        info('Server listing for client %s' % id)
+        if list_parsable:
+            info('Client: %s' % id)
+        else:
+            info('------------------------------------------------------------------')
+            info('Server listing for client %s' % id)
+            
 
         args = ['rdiff-backup']
 
@@ -859,7 +863,8 @@ def do_list(cfgs, ids, list_type, list_date, list_parsable):
         if ret:
             raise Exception('Failed to run rdiff-backup')
 
-    info('------------------------------------------------------------------')
+    if not list_parsable:
+        info('------------------------------------------------------------------')
     debug('Server listing done')
 
 def do_keys(cfgs, ids, identity, status, dump, deploy):
