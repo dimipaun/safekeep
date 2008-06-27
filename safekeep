@@ -567,68 +567,69 @@ def do_client_scrub():
         if is_client:
             raise Exception('client not running as root')
         else:
-            error("--cleanup must be run as root")
-            sys.exit(2)
-
-    scrubbed = False
-    if os.environ['PATH'][-1] == ':':
-        os.environ['PATH'] += '/sbin:/usr/sbin:/usr/local/sbin:'
+            warn('--cleanup should be run as root on client')
+            info('No cleanup performed')
     else:
-        os.environ['PATH'] += ':/sbin:/usr/sbin:/usr/local/sbin'
+        scrubbed = False
 
-    # Go through and unmount anythings that are still hanging around
+        if os.environ['PATH'][-1] == ':':
+            os.environ['PATH'] += '/sbin:/usr/sbin:/usr/local/sbin:'
+        else:
+            os.environ['PATH'] += ':/sbin:/usr/sbin:/usr/local/sbin'
 
-    debug("Cleaning up existing mounts")
-    for (device, mountpoint, mounttype, mountoptions) in mount_information(True):
-        if mountpoint.startswith('/mnt/safekeep-'):
-            info("Removing mount %s" % mountpoint)
-            if device == '/' and 'bind' in mountoptions.split(','):
-                info("Removing rbind directory %s" % mountpoint)
-                ret = spawn(['umount', '-l', mountpoint])
-                if ret:
-                    warn('Failed to unmount: ' + mountpoint)
+        # Go through and unmount anythings that are still hanging around
+
+        debug("Cleaning up existing mounts")
+        for (device, mountpoint, mounttype, mountoptions) in mount_information(True):
+            if mountpoint.startswith('/mnt/safekeep-'):
+                info("Removing mount %s" % mountpoint)
+                if device == '/' and 'bind' in mountoptions.split(','):
+                    info("Removing rbind directory %s" % mountpoint)
+                    ret = spawn(['umount', '-l', mountpoint])
+                    if ret:
+                        warn('Failed to unmount: ' + mountpoint)
+                    else:
+                        try:
+                            os.rmdir(mountpoint)
+                        except Exception, e:
+                            warn('Failed to remove: ' + mountpoint)
                 else:
+                    ret = spawn(['umount', mountpoint])
+                    if ret:
+                        warn('Can not unmount the snapshot: %s' % mountpoint)
+                if fnmatch.fnmatch(device, '*_snap_safekeep-*'):
+                    info("Removing snapshot %s" % device)
+                    ret = spawn(['lvremove', '--force', device])
+                    if ret:
+                        warn('Can not tear down snapshot: ' + device)
+                scrubbed = True
+
+        # Now cleanup any snapshots still hanging around
+
+        debug("Cleaning up remaining snapshots")
+        for (volume, group) in lvm_snap_information():
+            device = os.path.join('/dev', group, volume)
+            info("Removing snapshot %s" % device)
+            ret = spawn(['lvremove', '--force', device])
+            if ret:
+                warn('Can not tear down snapshot: ' + device)
+            scrubbed = True
+
+        # Now cleanup any safekeep directories still hanging around
+
+        debug("Cleaning up remaining safekeep directories")
+        if os.path.isdir('/mnt'):
+            for ent in os.listdir('/mnt'):
+                mountpoint = os.path.join('/mnt', ent)
+                if ent.startswith('safekeep-') and os.path.isdir(mountpoint):
+                    info("Removing rbind directory %s" % mountpoint)
                     try:
                         os.rmdir(mountpoint)
                     except Exception, e:
                         warn('Failed to remove: ' + mountpoint)
-            else:
-                ret = spawn(['umount', mountpoint])
-                if ret:
-                    warn('Can not unmount the snapshot: %s' % mountpoint)
-            if fnmatch.fnmatch(device, '*_snap_safekeep-*'):
-                info("Removing snapshot %s" % device)
-                ret = spawn(['lvremove', '--force', device])
-                if ret:
-                    warn('Can not tear down snapshot: ' + device)
-            scrubbed = True
 
-    # Now cleanup any snapshots still hanging around
-
-    debug("Cleaning up remaining snapshots")
-    for (volume, group) in lvm_snap_information():
-        device = os.path.join('/dev', group, volume)
-        info("Removing snapshot %s" % device)
-        ret = spawn(['lvremove', '--force', device])
-        if ret:
-            warn('Can not tear down snapshot: ' + device)
-        scrubbed = True
-
-    # Now cleanup any safekeep directories still hanging around
-
-    debug("Cleaning up remaining safekeep directories")
-    if os.path.isdir('/mnt'):
-        for ent in os.listdir('/mnt'):
-            mountpoint = os.path.join('/mnt', ent)
-            if ent.startswith('safekeep-') and os.path.isdir(mountpoint):
-                info("Removing rbind directory %s" % mountpoint)
-                try:
-                    os.rmdir(mountpoint)
-                except Exception, e:
-                    warn('Failed to remove: ' + mountpoint)
-
-    if not scrubbed:
-        info('No cleanup required')
+        if not scrubbed:
+            info('No cleanup required')
 
 def do_client():
     debug("Do client main loop")
@@ -741,6 +742,7 @@ def do_server(cfgs, ids, force, cleanup):
         info('------------------------------------------------------------------')
         info('Server backup starting for client %s' % id)
 
+        cleaned_up = 0
         try:
             if cfg['host']:
                 if not os.path.isfile(cfg['key_ctrl']):
@@ -775,13 +777,13 @@ def do_server(cfgs, ids, force, cleanup):
             cin.write(cfg['text'] + '\n')
             cin.flush()
             do_server_getanswer(cout)
-
             if cleanup:
                 cin.write('SCRUB\n')
                 cin.flush()
                 do_server_getanswer(cout)
                 bdir = '/'  # Fake directory for the rest of the cleanup
                 do_server_rdiff_cleanup(cfg)
+                cleaned_up = 1
                 errs = 0
             else:
                 cin.write('SETUP\n')
@@ -824,8 +826,12 @@ def do_server(cfgs, ids, force, cleanup):
                 info('Server backup for client %s: OK (%d WARNINGS)' % (id, errs))
 
         except Exception, e:
-            error(e)
-            error('Server backup for client %s: FAILED' % id)
+            if cleanup and not cleaned_up:
+                info('Client-side cleanup for client %s: FAILED' % id)
+                do_server_rdiff_cleanup(cfg)
+            else:
+                error(e)
+                error('Server backup for client %s: FAILED' % id)
 
     info('------------------------------------------------------------------')
     debug('Server backup done')
