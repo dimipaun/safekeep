@@ -712,13 +712,12 @@ def do_server_rdiff(cfg, bdir, force):
         args.extend(['--force'])
 
     options_append = []
+    special_files = ['--exclude-special-files', '--include-symbolic-links']
     for option in cfg['options']:
         if 'special-files' in option:
             if 'include' in option['special-files']:
-                if 'true'.startswith(option['special-files']['include'].lower()):
-                    options_append.extend(['--include-special-files'])
-                else:
-                    options_append.extend(['--exclude-special-files', '--include-symbolic-links'])
+                if 'true' == option['special-files']['include'].lower():
+                    special_files = ['--include-special-files']
 
         # Note if we ever add other backends this section should only be run
         # when rback-diff is the current option.
@@ -727,12 +726,9 @@ def do_server_rdiff(cfg, bdir, force):
             if 'append' in option['rdiff-backup']:
                 options_append.extend(option['rdiff-backup']['append'].split(None))
 
-    if options_append:
-        args.extend(options_append)
-    else:
-        args.extend(['--exclude-special-files', '--include-symbolic-links'])
+    args.extend(special_files)
+    args.extend(options_append)
 
-    #args.extend([ '-v', '6'])
     for clude in cfg['cludes']:
         opt = '--' + clude['type']
         if clude['path']:
