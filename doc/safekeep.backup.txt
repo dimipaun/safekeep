@@ -35,7 +35,7 @@ The full set of supported elements and attributes looks as follows:
   <repo path="./data" retention="10D"/>
 
   <options>
-    <special-files include="true"/>
+    <special-files include="false" />
   </options>
 
   <!-- settings for database dump and for volume snapshot -->
