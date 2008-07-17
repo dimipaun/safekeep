@@ -273,6 +273,22 @@ def parse_config(backup_el, dflt_id):
     if not dir: dir = id
     dir = os.path.join(base_dir, dir)
 
+    options_els = backup_el.getElementsByTagName('options')
+    options = []
+    if len(options_els) > 0:
+        for options_el in options_els[0].childNodes:
+            if options_el.nodeType != options_el.ELEMENT_NODE:
+                continue
+            option = options_el.nodeName
+            if option in ('special-files', 'rdiff-backup'):
+                if options_el.hasAttributes():
+                    for key, value in options_el.attributes.items():
+                        options.append({ option : { key : value } })
+                else:
+                    raise ConfigException('Option "%s" has no value' % option)
+            else:
+                raise ConfigException('Unknown option "%s"' % option)
+
     setup_el = backup_el.getElementsByTagName('setup')
     dumps = []
     snaps = []
@@ -305,7 +321,7 @@ def parse_config(backup_el, dflt_id):
 
     return { 'id': id, 'host' : host, 'user' : user, 'key_ctrl' : key_ctrl, 'key_data' : key_data,
              'dir' : dir, 'retention' : retention, 'dumps' : dumps, 'snaps' : snaps,
-             'cludes' : cludes}
+             'cludes' : cludes, 'options' : options}
 
 def parse_locs(cfglocs):
     cfgfiles = []
@@ -694,6 +710,27 @@ def do_server_rdiff(cfg, bdir, force):
 
     if force:
         args.extend(['--force'])
+
+    options_append = []
+    for option in cfg['options']:
+        if 'special-files' in option:
+            if 'include' in option['special-files']:
+                if 'true'.startswith(option['special-files']['include'].lower()):
+                    options_append.extend(['--include-special-files'])
+                else:
+                    options_append.extend(['--exclude-special-files', '--include-symbolic-links'])
+
+        # Note if we ever add other backends this section should only be run
+        # when rback-diff is the current option.
+
+        if 'rdiff-backup' in option:
+            if 'append' in option['rdiff-backup']:
+                options_append.extend(option['rdiff-backup']['append'].split(None))
+
+    if options_append:
+        args.extend(options_append)
+    else:
+        args.extend(['--exclude-special-files', '--include-symbolic-links'])
 
     #args.extend([ '-v', '6'])
     for clude in cfg['cludes']:

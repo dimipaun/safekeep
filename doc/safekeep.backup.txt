@@ -34,6 +34,10 @@ The full set of supported elements and attributes looks as follows:
        and for how long (D=days, W=weeks, M=months, or Y=years) -->
   <repo path="./data" retention="10D"/>
 
+  <options>
+    <special-files include="true"/>
+  </options>
+
   <!-- settings for database dump and for volume snapshot -->
   <setup>
     <!-- database type ("postgres" or "mysql"), and database name,
@@ -144,6 +148,20 @@ are separated by '/', attributes are introduced by '@':
 	today, no trace of that file would remain. Finally, file selection 
 	options don't affect removal of incremental data.
 	Optional, defaults to empty (unlimited retention).
+
+/backup/options/special-files/@include::
+       One of "true" or "false". If "true", the dump file will
+       include all special files, including device files, fifo files and
+       socket files.
+       Optional, defaults to "false". 
+       *NOTE*: specification of no options is equalent to false, but the
+       inclusion of other options may cause the underlying backup defaults
+       to be use.
+
+/backup/options/rdiff-backup/@append::
+       Append the specified options to the current rdiff-backup run.
+       This is planned to be specific to the current rdiff-backup, and
+       different options will be made available for other backends.
 
 /backup/setup/dump/@type::
 	One of "postgres" or "mysql".
