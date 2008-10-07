@@ -17,7 +17,7 @@ Because of lags created by using mirrors, this message may reach you before
 the release is available at the public sites. Sources and binaries will be 
 available from the following locations:
 
-  - RedHat EL 3,4,5, CentOS 3,4,5, Fedora 4,5,6,7:
+  - RedHat EL 3,4,5, CentOS 3,4,5, Fedora 4,5,6,7,8,9,10:
   http://prdownloads.sourceforge.net/safekeep/safekeep-common-1.0.5-1.fc8.noarch.rpm
   http://prdownloads.sourceforge.net/safekeep/safekeep-client-1.0.5-1.fc8.noarch.rpm
   http://prdownloads.sourceforge.net/safekeep/safekeep-server-1.0.5-1.fc8.noarch.rpm
