@@ -715,7 +715,7 @@ def do_server_rdiff(cfg, bdir, force):
         args.extend(['--force'])
 
     options_append = []
-    special_files = ['--exclude-special-files', '--include-symbolic-links']
+    special_files = ['--exclude-device-files', '--exclude-sockets', '--exclude-fifos']
     for option in cfg['options']:
         if 'special-files' in option:
             if 'include' in option['special-files']:
