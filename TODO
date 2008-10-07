@@ -4,8 +4,8 @@ Next release:
   * Add tests db dumps
   * Avoid snapshotting snapshots
   * Don't snapshot a device if a snapshot is already present
-  * local backup to bypass ssh
-  * add --exclude-sockets option
+  * Local backup to bypass ssh
+  * Protect against multiple safekeep instance running at once
 
 Feedback from users:
   * Øyvind Skaar <os@opoint.no>: FreeBSD have snapshot capabilities
