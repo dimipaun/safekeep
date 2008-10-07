@@ -1,3 +1,102 @@
+2008-10-07 19:57 +0000 [r604]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in: Update RPM changelog
+
+2008-10-07 19:55 +0000 [r603]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: New release.
+
+2008-10-07 19:54 +0000 [r602]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/ANNOUNCE: Prepare the ANNOUNCE file for the
+	  release
+
+2008-10-07 19:51 +0000 [r601]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/TODO: Update TODO.
+
+2008-10-07 04:41 +0000 [r600]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Frank Crawford
+	  <frank@crawford.emu.id.au> Modified default options for
+	  special-file exclusions.
+
+2008-10-07 04:40 +0000 [r599]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.backup.txt, safekeep/trunk/safekeep:
+	  Add support for providing the password for the DB user used for
+	  the dump.
+
+2008-07-17 23:56 +0000 [r598]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.backup.txt: Use the default version
+	  to avoid copy&paste problems.
+
+2008-07-17 19:00 +0000 [r597]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Rework a bit the options processing such
+	  that generic rdiff-backup options don't affect the behaviour of
+	  the 'special-files' option.
+
+2008-07-17 18:52 +0000 [r596]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.backup.txt, safekeep/trunk/safekeep:
+	  Frank Crawford <frank@crawford.emu.id.au> * Added options block
+	  in backup configuration file. * Added option to include
+	  special-files, i.e. device files, fifos and sockets. Default is
+	  to exclude these files. * Added option to allow inclusion of
+	  arbitrary rdiff-backup command. * Updated relevant documentation.
+
+2008-06-27 12:55 +0000 [r595]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/TODO: Update TODO
+
+2008-06-27 12:54 +0000 [r594]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Frank Crawford
+	  <frank@crawford.emu.id.au> * Loosen restrictions on running
+	  --server --cleanup so no root parts will still execute. * Allow
+	  local rdiff-backup data cleanup to occur even if client is not
+	  accessible.
+
+2008-03-18 15:51 +0000 [r593]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Frank Crawford
+	  <frank@crawford.emu.id.au> * Patch client name output for --list
+	  --parsable-output option.
+
+2008-03-18 15:47 +0000 [r592]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep, safekeep/trunk/doc/safekeep.txt: Frank
+	  Crawford <frank@crawford.emu.id.au> * Added a cleanup option to
+	  client and server modes to remove safekeep LVM snapshots and
+	  mounts after a crash or problem. * Added new communications tag
+	  "SCRUB" to do a full remote cleanup. * Added a warning if there
+	  is a mismatch in the communications protocol minor level. *
+	  Append specific paths (/sbin, /usr/sbin and /usr/local/sbin) to
+	  the client path when run in cleanup mode, to cover any path
+	  issues. * Fixed a couple of issues with pass client exceptions
+	  back to the server, and strip off excess newlines. * Add test and
+	  abort run on client if there are any existing safekeep LVM
+	  snapshots.
+
+2008-03-01 22:34 +0000 [r591]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/Makefile: We don't need to rebuild docs at install
+	  time, we do that at release time now.
+
+2008-02-26 21:07 +0000 [r584]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/ANNOUNCE: Fix URLs
+
+2008-02-26 20:48 +0000 [r582]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/ChangeLog: Update ChangeLog
+
+2008-02-26 20:48 +0000 [r581]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Update version.
+
 2008-02-26 20:46 +0000 [r580]  Dimi Paun <dimi@lattica.com>
 
 	* safekeep/trunk/safekeep.spec.in: Update .spec file.
