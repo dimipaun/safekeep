@@ -116,6 +116,14 @@ id %{name} >/dev/null 2>&1 || \
 %doc sample.backup
 
 %changelog
+* Tue Oct 7 2008 Dimi Paun <dimi@lattica.com> 1.0.5-1
+  - Allow providing the password for the DB user used for the DB dump
+  - Add config option for passing additional flags to rdiff-backup
+  - Avoid backing up special files by default
+  - Avoid creating multiple LVM snapshots (avoids some LVM bugs)
+  - Add new --cleanup option to help recovery from crashes
+  - Make it easier to package on platforms that don't have asciidoc
+
 * Tue Feb 26 2008 Dimi Paun <dimi@lattica.com> 1.0.4-1
   - Add options to allow the query of the backup repository
   - Important fixes when dealing with snapshots
