@@ -383,9 +383,9 @@ def do_client_dbdump(cfg):
         elif type in ('mysql'):
             args = ['mysqldump']
             if dump['dbuser']:
-                args.extend(['-u', dump['dbuser']])
+                args.extend(['-u' + dump['dbuser']])
             if dump['dbpasswd']:
-                args.extend(['-p', dump['dbpasswd']])
+                args.extend(['-p' + dump['dbpasswd']])
             if dump['db']:
                 args.append(dump['db'])
             else:
