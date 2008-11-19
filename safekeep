@@ -710,7 +710,7 @@ def do_server_rdiff(cfg, bdir, force):
     args = ['rdiff-backup']
 
     if cfg['host']:
-        schema = 'ssh %s -C -i %s %%s rdiff-backup --server' % (verbosity_ssh, cfg['key_data'])
+        schema = 'ssh %s -i %s %%s rdiff-backup --server' % (verbosity_ssh, cfg['key_data'])
         args.extend(['--remote-schema', schema])
 
     if force:
