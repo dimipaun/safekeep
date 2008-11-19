@@ -116,6 +116,7 @@ id %{name} >/dev/null 2>&1 || \
 %doc sample.backup
 
 %changelog
+  - Allow passing the pgpasswd to PostgreSQL as well
   - Add pass-through options for the DB dump command
   - Implement bandwidth limiting, based on trickle
   - By default, run safekeep with nice +10 on the server side

@@ -403,6 +403,7 @@ def do_client_dbdump(cfg):
     for dump in cfg['dumps']:
         type = dump['type']
         opts = dump['opts']
+        passwdfile = None
         if type in ('postgres', 'postgresql', 'pgsql'):
             if dump['db']:
                 args = ['pg_dump']
@@ -414,6 +415,12 @@ def do_client_dbdump(cfg):
             args.extend(opts)
             if dump['db']:
                 args.append(dump['db'])
+            if dump['dbpasswd']:
+                (fd, passwdfile) = tempfile.mkstemp()
+                f = file(fd)
+                f.write(dump['dbpasswd'])
+                f.close()                
+
         elif type in ('mysql'):
             args = ['mysqldump']
             if dump['dbuser']:
@@ -425,15 +432,26 @@ def do_client_dbdump(cfg):
             args.extend(opts)
             if dump['db']:
                 args.append(dump['db'])
+
         else:
             warn('Invalid database type: ' + type)
             continue
+
         if dump['user']:
             cmd = ' '.join([commands.mkarg(arg) for arg in args])
             args = [ 'su', '-c', cmd, '-', dump['user'] ]
         cmd = ' '.join([commands.mkarg(arg) for arg in args])
         cmd = '%s > %s' % (cmd, commands.mkarg(dump['file']))
-        ec = spawn(cmd)
+
+
+        if passwdfile:
+           environ['PGPASSFILE'] = passwdfile
+        try:
+            ec = spawn(cmd)
+        finally:
+            if passwdfile:
+                del os.environ['PGPASSFILE']
+                os.remove(passwdfile)
         if ec:
             warn('Can not dump the database: ' + dump['db'])
 

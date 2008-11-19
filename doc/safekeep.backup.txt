@@ -179,8 +179,10 @@ are separated by '/', attributes are introduced by '@':
 	based on the system user. 
 
 /backup/setup/dump/@dbpasswd::
-	Password of the database user to use while doing the dump. 
-	This is currently supported only for MySQL databases.
+	Password of the database user to use while doing the dump.
+	NB: this makes the DB password available in a plain text file.
+	Make sure you use appropriate read permissions on the backup
+	configuration file to prevent unauthorized access to the password.
 	Optional, it has no default value.
 
 /backup/setup/dump/@options::
