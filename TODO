@@ -5,7 +5,6 @@ Next release:
   * Avoid snapshotting snapshots
   * Don't snapshot a device if a snapshot is already present
   * Protect against multiple safekeep instance running at once
-  * Use -l with ssh to limit the bandwidth used during the backup
 
 Feedback from users:
   * Øyvind Skaar <os@opoint.no>: FreeBSD have snapshot capabilities
