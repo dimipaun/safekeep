@@ -48,6 +48,7 @@ config_ext = '.backup'
 logbuf = []
 is_client = False
 verbosity_level = 1
+verbosity_ssh = ''
 work_user = getpass.getuser()
 backup_user = None
 home_dir = None
@@ -709,7 +710,7 @@ def do_server_rdiff(cfg, bdir, force):
     args = ['rdiff-backup']
 
     if cfg['host']:
-        schema = 'ssh -C -i %s %%s rdiff-backup --server' % (cfg['key_data'])
+        schema = 'ssh %s -C -i %s %%s rdiff-backup --server' % (verbosity_ssh, cfg['key_data'])
         args.extend(['--remote-schema', schema])
 
     if force:
@@ -799,7 +800,7 @@ def do_server(cfgs, ids, force, cleanup):
                 do_server_data_cleanup(cfg)
 
             if cfg['host']:
-                cmd = 'ssh -T -i %(key_ctrl)s -l %(user)s %(host)s safekeep --client' % cfg
+                cmd = 'ssh %s -T -i %s -l %s %s safekeep --client' % (verbosity_ssh, cfg['key_ctrl'], cfg['user'], cfg['host'])
             else:
                 cmd = 'safekeep --client'
             debug('Run [' + cmd + ']')
@@ -1263,7 +1264,10 @@ def main():
         if not ok: sys.exit(2)
 
     try:
-        global is_client, verbosity_level
+        global is_client, verbosity_level, verbosity_ssh
+
+        if verbosity > 0:
+            verbosity_ssh = '-' + verbosity * 'v'
         if mode is 'server':
             is_client = False
             verbosity_level = 1 + verbosity
