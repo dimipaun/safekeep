@@ -46,8 +46,9 @@ The full set of supported elements and attributes looks as follows:
          Databases can be dumped individualy using a dump clause for each database. -->
     <dump
       type="postgres"
-      db="dbname"
+      db="my_db"
       dbuser="foobar"
+      options="--schema=public"
       file="/var/backup/dumps/mydata"
       cleanup="true"
     />
@@ -180,6 +181,13 @@ are separated by '/', attributes are introduced by '@':
 /backup/setup/dump/@dbpasswd::
 	Password of the database user to use while doing the dump. 
 	This is currently supported only for MySQL databases.
+	Optional, it has no default value.
+
+/backup/setup/dump/@options::
+	Extra options to be passed along to the dump command.
+	This is database specific, and it is passed along as-is.
+	Please refer to your database documentation for possible
+	values that you can pass along.
 	Optional, it has no default value.
 
 /backup/setup/dump/@user::
