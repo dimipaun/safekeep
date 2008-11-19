@@ -374,6 +374,7 @@ def do_client_dbdump(cfg):
         if type in ('postgres', 'postgresql', 'pgsql'):
             if dump['db']:
                 args = ['pg_dump']
+                args.extend('-C')
             else:
                 args = ['pg_dumpall']
             if dump['dbuser']:
