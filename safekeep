@@ -493,7 +493,7 @@ def mount_information(reverse = False):
     return mounts
 
 def map_lvm_device(device):
-    device = device.replace('/mapper','').replace('-','/')
+    device = device.replace('/mapper','').replace('-','/').replace('//', '-')
     return device.split('/')[-2:]
 
 def check_lvm_information(device):
