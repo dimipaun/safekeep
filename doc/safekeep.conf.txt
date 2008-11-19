@@ -45,6 +45,14 @@ email.smtp.server::
 	If not specified, `safekeep` will just use
 	`/usr/sbin/sendmail` to deliver the mail.
 
+nice.adjustment::
+	The nice level adjustment for safekeep, for the time
+	being used only on the server side.
+	It specifies an integer to be added to the current nice 
+	level. Nicenesses range from -20 (most favorable scheduling) 
+	to 19 (least favorable).
+	If no nice level is specified, safekeep is not niced.
+
 FILES
 -----
     /etc/safekeep/safekeep.conf

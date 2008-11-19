@@ -706,8 +706,13 @@ def do_server_getanswer(cout):
         else:
             log(line[:-1])
 
-def do_server_rdiff(cfg, bdir, force):
-    args = ['rdiff-backup']
+def do_server_rdiff(cfg, bdir, nice, force):
+    args = []
+
+    if (nice)
+        args.extend(['nice', '-n' + nice])
+
+    args.extend(['rdiff-backup'])
 
     if cfg['host']:
         schema = 'ssh %s -i %s %%s rdiff-backup --server' % (verbosity_ssh, cfg['key_data'])
@@ -772,7 +777,7 @@ def do_server_compat(client_versions):
     elif server_minor > client_minor:
         warn('Protocol mismatch: %s <> %s' % (PROTOCOL, client_protocol))
 
-def do_server(cfgs, ids, force, cleanup):
+def do_server(cfgs, ids, nice, force, cleanup):
     debug("Do server main loop")
     for cfg in cfgs.itervalues():
         id = cfg['id']
@@ -842,7 +847,7 @@ def do_server(cfgs, ids, force, cleanup):
                 else:
                     backup_marker = None
 
-                do_server_rdiff(cfg, bdir, force)
+                do_server_rdiff(cfg, bdir, nice, force)
 
                 errs = 0
                 if os.path.isdir(rdiff_logdir):
@@ -1122,6 +1127,7 @@ def main():
     keys_status = None
     keys_print = None
     keys_deploy = None
+    nice_srv = None
     for o, a in opts:
         if o in ('-c', '--conf'):
             if os.path.isdir(a) or a.endswith(config_ext):
@@ -1229,6 +1235,10 @@ def main():
             smtp = props['email.smtp.server']
         if 'email.to' in props:
             email = props['email.to'].split(',')
+        if 'nice.adjustment' in props:
+            nice_srv = props['nice.adjustment']
+            if (nice_srv) nice_srv = int(nice_srv)
+
         if len(cfglocs) == 0: 
             locs = os.path.join(os.path.dirname(cfgfile), 'backup.d')
             if os.path.isdir(locs): cfglocs.append(locs)
@@ -1271,7 +1281,7 @@ def main():
         if mode is 'server':
             is_client = False
             verbosity_level = 1 + verbosity
-            do_server(cfgs, args, force, cleanup)
+            do_server(cfgs, args, nice_srv, force, cleanup)
         elif mode is 'list':
             if list_type is None:
                 list_type = 'increments'

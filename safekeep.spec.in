@@ -116,6 +116,7 @@ id %{name} >/dev/null 2>&1 || \
 %doc sample.backup
 
 %changelog
+  - Run ssh/rdiff through nice so we can control the load better on the server
   - Do not compress the SSH traffic, it is handled by rdiff-backup
   - Add SSH verbosity control
   - Fix dopey MySQL dump.
