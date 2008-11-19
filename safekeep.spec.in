@@ -116,6 +116,8 @@ id %{name} >/dev/null 2>&1 || \
 %doc sample.backup
 
 %changelog
+  - Do not compress the SSH traffic, it is handled by rdiff-backup
+  - Add SSH verbosity control
   - Fix dopey MySQL dump.
 
 * Tue Oct 7 2008 Dimi Paun <dimi@lattica.com> 1.0.5-1

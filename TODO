@@ -4,7 +4,6 @@ Next release:
   * Add tests db dumps
   * Avoid snapshotting snapshots
   * Don't snapshot a device if a snapshot is already present
-  * Local backup to bypass ssh
   * Protect against multiple safekeep instance running at once
   * Run ssh/rdiff through nice so we can control the load better
   * Use -l with ssh to limit the bandwidth used during the backup
@@ -17,8 +16,6 @@ Feedback from users:
     http://dag.wieers.com/blog/content/call-for-participation-on-mksysb
 
 Future (post 1.0):
-  * Support more of rdiff-backup special file selectors
-  * Package it up for Ubuntu/Debian
   * Modify the test to not rely on Lattica's servers
   * Decide how big the snapshot size should be automagically
   * Fully automatic shapshotting mode
