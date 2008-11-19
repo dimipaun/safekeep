@@ -53,11 +53,44 @@ nice.adjustment::
 	to 19 (least favorable).
 	If no nice level is specified, safekeep is not niced.
 
+bandwidth.overall::
+	This is the default bandwidth limit for both upload and
+	download for all the clients. It is an integer number of KB/s
+	(see NOTES section for more information). 
+	This value is optional.
+	
+bandwidth.download::
+	This is the default bandwidth limit for download across all clients.
+	If specified (with a value greater than 0) it will override
+	the value set in `bandwidth.overall` (refer to it for more
+	informatio). This value is optional.
+
+bandwidth.upload::
+	This is the default bandwidth limit for upload across all clients.
+	If specified (with a value greater than 0) it will override
+	the value set in `bandwidth.overall` (refer to it for more
+	informatio). This value is optional.
+
+NOTES
+-----
+Safekeep uses `trickle` to implement bandwidth throttling (see
+http://monkey.org/~marius/pages/?page=trickle for more information). 
+You  will need to install it separately to use this feature (most
+Linux distributions have it packaged as `trickle`).
+
+The bandwidth is calculated as an average over a 256KB window, 
+and it is  expressed as an integer number of kilo-bytes per second 
+(e.g. 100, meaning 100KB/s). Bandwidth limits of zero are ignored.
+
+The bandwidth throtlling can be customized for both download and upload
+(see `bandwidth.download` and `bandwidth.upload`) as well as on a per-client
+basis (see `safekeep.backup(5)` for more information).
+
 FILES
 -----
     /etc/safekeep/safekeep.conf
 
 SEE ALSO
 --------
-safekeep(1), safekeep.backup(5), rdiff-backup(1), lvcreate(8)
+safekeep(1), safekeep.backup(5), rdiff-backup(1), trickle(1), lvcreate(8)
 

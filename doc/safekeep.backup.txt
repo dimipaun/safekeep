@@ -30,6 +30,10 @@ The full set of supported elements and attributes looks as follows:
     key-data="/home/jdoe/.ssh/backup2_id_dsa"
   />
 
+  <!-- you can customize the bandwidth limit on a client basis,
+       for example to 50KB/s download/upload -->
+  <bandwidth overall="80" download="50" upload="50" />
+
   <!-- location where the backups will be stored on the server
        and for how long (D=days, W=weeks, M=months, or Y=years) -->
   <repo path="./data" retention="10D"/>
@@ -117,6 +121,23 @@ are separated by '/', attributes are introduced by '@':
 	to the client for the data channel. Use of the default value 
 	is recommended.
 	Optional, defaults to `~/.ssh/safekeep-server-data-key`.
+
+/backup/bandwidth/@overall::
+        This is the client bandwidth limit for both upload and download. 
+	It is an integer number of KB/s (see the NOTES section in 
+	`safekeep.conf(5)` for more information).
+        Optional, overrides `bandwidth.overall` in `safekeep.conf(5)`
+	if specified. 
+	
+/backup/bandwidth/@download::
+        This is the client bandwidth limit for download (see 
+	`/backup/bandwidth/@overall` for more information).
+        Optional, overrides `/backup/bandwidth/@overall` if specified. 
+	
+/backup/bandwidth/@upload::
+        This is the client bandwidth limit for upload (see 
+	`/backup/bandwidth/@overall` for more information).
+        Optional, overrides `/backup/bandwidth/@overall` if specified. 
 
 /backup/repo/@path::
 	The path under which the backups will be stored. Relative
@@ -292,5 +313,5 @@ FILES
 
 SEE ALSO
 --------
-safekeep(1), rdiff-backup(1), lvcreate(8)
+safekeep(1), safekeep.conf(5), rdiff-backup(1), lvcreate(8)
 
