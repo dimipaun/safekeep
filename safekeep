@@ -784,7 +784,7 @@ def do_server_rdiff(cfg, bdir, nice, force):
                 trickle += ' -u ' + limit_ul
 
         if trickle:
-            if !try_to_run(trickle_cmd + ' -V'):
+            if not try_to_run(trickle_cmd + ' -V'):
                 warn('Trickle not available, bandwidth limiting disabled')
                 trickle = ''
 
@@ -1301,7 +1301,7 @@ def main():
                  cfgfile = config_file
             props = {}
 
-        def get_int(prop):
+        def get_int(p):
             v = props.get(p)
             if v is not None and v is not '':
                 return int(v)
