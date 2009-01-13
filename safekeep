@@ -161,8 +161,9 @@ def spawn(args):
     return ret
 
 def send_notification(email, smtp):
-    info('Sending email to %s via %s' % (','.join(email), smtp))
     global logbuf
+    if not logbuf: return
+    info('Sending email to %s via %s' % (','.join(email), smtp))
     hostname = socket.gethostname()
     msg = 'From: SafeKeep@' + hostname + \
           '\r\nTo: ' + ', '.join(email) + \
