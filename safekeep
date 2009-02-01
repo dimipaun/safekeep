@@ -486,11 +486,13 @@ def mount_information(reverse = False):
     cout.close()
     cin.close()
     mounts = []
+    pattern = re.compile(r"^(\S+) on (.+) type (\S+) \((\S+)\)")
     if reverse:
         lines.reverse()
     for line in lines:
-        (device, blah1, mountpoint, blah2, mounttype, mountoptions) = line.split()
-        mounts.append([device, mountpoint, mounttype, mountoptions[1:-1]])
+        matches = pattern.match(line)
+        if not matches is None:
+            mounts.append(matches.groups())
     return mounts
 
 def map_lvm_device(device):
