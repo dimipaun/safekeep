@@ -116,6 +116,8 @@ id %{name} >/dev/null 2>&1 || \
 %doc sample.backup
 
 %changelog
+  - Avoid errors when dealing with mounts containing spaces.
+  - Don't send out empty emails.
   - Correctly handle LVM names that contain dashes
   - Allow passing the pgpasswd to PostgreSQL as well
   - Add pass-through options for the DB dump command
