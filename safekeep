@@ -791,7 +791,7 @@ def do_server_rdiff(cfg, bdir, nice, force):
                 warn('Trickle not available, bandwidth limiting disabled')
                 trickle = ''
 
-        schema = '% ssh %s -i %s %%s rdiff-backup --server' % (trickle, verbosity_ssh, cfg['key_data'])
+        schema = '%s ssh %s -i %s %%s rdiff-backup --server' % (trickle, verbosity_ssh, cfg['key_data'])
         args.extend(['--remote-schema', schema])
 
     if force:
