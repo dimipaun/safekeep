@@ -37,6 +37,12 @@
       size="500M"
     />
 
+    <!-- location of a script to be executed on the client at different
+        stages of the run.  It is called with three arguments:
+        the step of the backup, backup id and the backup root directory -->
+    <script
+      path="/path/to/script"
+    />
   </setup>
 
   <!-- data to be backuped -->

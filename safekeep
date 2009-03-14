@@ -16,7 +16,7 @@
 # along with Safekeep.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import generators
-import getopt, os, os.path, popen2, re, sys, fnmatch
+import getopt, os, os.path, popen2, re, sys, fnmatch, stat
 import commands, tempfile, time, traceback
 import getpass, pwd, xml.dom.minidom
 import socket, smtplib
@@ -325,6 +325,7 @@ def parse_config(backup_el, dflt_id):
     setup_el = backup_el.getElementsByTagName('setup')
     dumps = []
     snaps = []
+    script = None
     if len(setup_el) > 0:
         dump_els = setup_el[0].getElementsByTagName('dump')
         for dump_el in dump_els:
@@ -332,6 +333,11 @@ def parse_config(backup_el, dflt_id):
         snap_els = setup_el[0].getElementsByTagName('snapshot')
         for snap_el in snap_els:
             snaps.append(parse_snap(snap_el))
+        script_el = setup_el[0].getElementsByTagName('script')
+        if len(script_el) == 1:
+            script = script_el[0].getAttribute('path')
+        elif len(script_el) > 1:
+            raise ConfigException('Can not have more than one setup script element')
 
     data_el = backup_el.getElementsByTagName('data')
     
@@ -353,7 +359,7 @@ def parse_config(backup_el, dflt_id):
         cludes = [{ 'type' : 'exclude', 'path' : path, 'glob' : None, 'regexp' : None } for path in path_xcludes]
 
     return { 'id': id, 'host' : host, 'user' : user, 'key_ctrl' : key_ctrl, 'key_data' : key_data,
-             'dir' : dir, 'retention' : retention, 'dumps' : dumps, 'snaps' : snaps,
+             'dir' : dir, 'retention' : retention, 'dumps' : dumps, 'snaps' : snaps, 'script' : script,
              'cludes' : cludes, 'options' : options, 'bw': bw}
 
 def parse_locs(cfglocs):
@@ -394,10 +400,42 @@ def parse_locs(cfglocs):
     return cfgs
 
 ######################################################################
-# DB and SNAPSHOT support
+# Script, DB and SNAPSHOT support
 #   setup methods can raise exception to signal errors
 #   teardown methods must succeed and cleanup the state
 ######################################################################
+
+def check_script_permissions(script):
+    if not os.path.isfile(script):
+        return '%s is not a regular file' % script
+    if not os.access(script, os.X_OK):
+        return '%s is not executable' % script
+
+    statinfo = os.stat(script)
+    if statinfo.st_uid and statinfo.st_uid != os.getuid():
+        return '%s is owned by others' % script
+
+    if (statinfo.st_mode & (stat.S_IWGRP | stat.S_IWOTH)):
+        return '%s is writable by others' % script
+
+    return None
+
+def client_side_script(step, cfg, bdir):
+    debug('Do client_side_script: step %s' % step)
+
+    ret = None
+    script = cfg['script']
+
+    if script:
+        debug('client_side_script: script = %s' % script)
+        if os.path.exists(script):
+            ret = check_script_permissions(script)
+            if not ret:
+                ret = spawn([script, step, cfg['id'], bdir])
+        else:
+            debug('client_side_script: %s not found' % script)
+
+    return ret
 
 def do_client_dbdump(cfg):
     debug('Doing DB dumps')
@@ -715,21 +753,29 @@ def do_client():
             try:
                 line = sys.stdin.readline()
                 if line.startswith('ALOHA'):
-                    do_client_compat(line.split(':', 1)[1])
+                    do_client_compat(line.strip().split(':', 1)[1])
                     send('OK %s, %s' % (PROTOCOL, VERSION))
                 elif line.startswith('CONFIG'):
                     cfg = do_client_config(line)
-                    send('OK')
+                    ret = client_side_script('STARTUP', cfg, bdir)
+                    if ret:
+                        send('ERROR Client-side setup script failed: %s' % ret)
+                    else:
+                        send('OK')
                 elif line.startswith('SETUP'):
+                    client_side_script('PRE-SETUP', cfg, bdir)
                     bdir = do_client_setup(cfg)
+                    client_side_script('POST-SETUP', cfg, bdir)
                     send('OK ' + bdir)
                 elif line.startswith('CLEANUP'):
                     dir = line[7:].strip()
                     if dir == bdir: should_cleanup = False
                     do_client_cleanup(cfg, dir)
+                    client_side_script('POST-BACKUP', cfg, bdir)
                     send('OK')
                 elif line.startswith('SCRUB'):
                     do_client_scrub()
+                    client_side_script('POST-SCRUB', cfg, bdir)
                     send('OK')
                 elif not line:
                     break
@@ -1362,8 +1408,8 @@ def main():
     try:
         global is_client, verbosity_level, verbosity_ssh, verbosity_trickle
 
-        if verbosity > 0:
-            verbosity_trickle = verbosity_ssh = '-' + verbosity * 'v'
+        if verbosity > 2:
+            verbosity_trickle = verbosity_ssh = '-' + (verbosity-2) * 'v'
         if mode is 'server':
             is_client = False
             verbosity_level = 1 + verbosity

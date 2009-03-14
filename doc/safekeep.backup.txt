@@ -64,6 +64,13 @@ The full set of supported elements and attributes looks as follows:
       size="500M"
     />
 
+    <!-- location of a script to be executed on the client at different
+         stages of the run.  It is called with three arguments:
+         the step of the backup, backup id and the backup root directory -->
+    <script
+      path="/path/to/script"
+    />
+
   </setup>
 
   <!-- data to be backup -->
@@ -250,6 +257,16 @@ are separated by '/', attributes are introduced by '@':
 	of the original device's size.
 	Mandatory for a `<snapshot>` element.
 
+/backup/setup/script/@path::
+       Execute the script specified path on the client at certain steps
+       of the backup process.
+       This script is executed with three arguments:
+       - Backup id (/backup/@id)
+       - Backup step
+       - Backup root directory (valid after creation of a snapshot)
+       See the `CLIENT SCRIPT` section for more information.
+       Mandatory for a `<script>` element.
+
 /backup/data/exclude/@path::
 	Exclude the file or files matched by the path. 
 	If a directory is matched, then files under that directory will also
@@ -305,6 +322,46 @@ as if that file does not exist in the source directory.
 
 For more information on file selection semantics, please see
 `rdiff-backup(1)`.
+
+CLIENT SCRIPT
+-------------
+`safekeep(1)` support the optional execution of a script or program
+on the client system at different steps during execution of the backup.
+
+Note: specification of a script which does not exist is not considered an
+error, and is treated as the same as not specifying a script.  However, if
+the specified path does match a file or directory, the security tests listed
+below will occur.
+
+This script is executed with the following three arguments:
+- Safekeep step
+- Backup id
+- Backup root directory, which may be set during the creation of a snapshot.
+
+The steps currently defined and tokens passed, are:
+- STARTUP - prior to any execution, however, if it exits with a non-zero
+status this constitues an error and the backup is aborted.
+- PRE-SETUP - prior to running any setup steps being run.  A non-zero status
+is considered a warning and execution continues.
+- POST-SETUP - after setup, but prior to execution of backup.  A non-zero
+status is considered a warning, and execution continues.
+- POST-BACKUP - after execution of backup.  A non-zero status is considered
+a warning, and execution continues.
+- POST-SCRUB - after execution of a server cleanup step, normally only seen
+after a backup failure.  A non-zero status is considered a warning, and
+execution continues.
+
+Due to security considerations, there are a number of checks made on this
+script prior to execution and failure of any of these steps will cause the
+backup for that client to be aborted.  The following tests are applied prior
+to each execution of the script (i.e. multiple time per backup), in order:
+- script is a regular file, not a directory or special file,
+- script is executable by the user running on the client system,
+- script is owned by root or the user running on the client system,
+- script is NOT writable by any one except the script owner.
+
+Note: no test is made on the ownership of the parent directory or any other
+directories.
 
 
 FILES
