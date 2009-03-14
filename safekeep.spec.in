@@ -116,6 +116,8 @@ id %{name} >/dev/null 2>&1 || \
 %doc sample.backup
 
 %changelog
+  - Add a few trigger points where external scripts can be executed
+  - Less verbosity from external helpers when invoked with -v
   - Avoid errors when dealing with mounts containing spaces.
   - Don't send out empty emails.
   - Correctly handle LVM names that contain dashes
