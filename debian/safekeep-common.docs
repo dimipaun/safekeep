@@ -3,4 +3,4 @@ COPYING
 LICENSE
 README
 TODO
-client-script-sample.sh
+samples/client-script-sample.sh
