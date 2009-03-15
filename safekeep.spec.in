@@ -98,7 +98,7 @@ id %{name} >/dev/null 2>&1 || \
 %defattr(-,root,root,-)
 %{_bindir}/safekeep
 %{_mandir}/man1/safekeep.1*
-%doc AUTHORS COPYING LICENSE README TODO client-script-sample.sh
+%doc AUTHORS COPYING LICENSE README TODO samples/client-script-sample.sh
 
 %files client
 %defattr(-,root,root,-)
@@ -113,9 +113,10 @@ id %{name} >/dev/null 2>&1 || \
 %{_sysconfdir}/cron.daily/safekeep
 %{_mandir}/man5/safekeep.conf.5*
 %{_mandir}/man5/safekeep.backup.5*
-%doc sample.backup
+%doc samples/sample.backup
 
 %changelog
+  - Move the samples to a separate directory
   - Add a few trigger points where external scripts can be executed
   - Less verbosity from external helpers when invoked with -v
   - Avoid errors when dealing with mounts containing spaces.
