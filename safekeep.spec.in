@@ -116,6 +116,9 @@ id %{name} >/dev/null 2>&1 || \
 %doc samples/sample.backup
 
 %changelog
+  - Rework the handling of device files, fifos and sockets as data attributes.
+  - Now special files are by default included, unless explicitely excluded.
+  - A bunch of spelling fixes sprinkled throughout.
   - Move the samples to a separate directory
   - Add a few trigger points where external scripts can be executed
   - Less verbosity from external helpers when invoked with -v
