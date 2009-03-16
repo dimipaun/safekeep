@@ -263,6 +263,13 @@ def parse_bandwidth(bw_el):
         'upload': int(bw_el.getAttribute('upload') or 0)
     }
 
+def parse_data_attributes(data_el):
+    return {
+        'exclude-devices': (data_el.getAttribute('exclude-devices') or 'false'),
+        'exclude-sockets': (data_el.getAttribute('exclude-sockets') or 'false'),
+        'exclude-fifos': (data_el.getAttribute('exclude-fifos') or 'false')
+    }
+
 def parse_config(backup_el, dflt_id):
     if backup_el.tagName != 'backup':
         raise ConfigException('Invalid config file, the top level element must be <backup>')
@@ -293,7 +300,7 @@ def parse_config(backup_el, dflt_id):
     if len(bw_el) == 1:
         bw = parse_bandwidth(bw_el[0])
     elif len(bw_el) > 1:
-        raise ConfigException('Can not have more than a bandwidth element')
+        raise ConfigException('Can not have more than one bandwidth element')
 
     repo_el = backup_el.getElementsByTagName('repo')
     dir = None
@@ -302,7 +309,7 @@ def parse_config(backup_el, dflt_id):
         dir = repo_el[0].getAttribute('path')
         retention = repo_el[0].getAttribute('retention')
     elif len(repo_el) > 1:
-        raise ConfigException('Can not have more than a repo element')
+        raise ConfigException('Can not have more than one repo element')
     if not dir: dir = id
     dir = os.path.join(base_dir, dir)
 
@@ -313,6 +320,8 @@ def parse_config(backup_el, dflt_id):
             if options_el.nodeType != options_el.ELEMENT_NODE:
                 continue
             option = options_el.nodeName
+            if option == 'special-files':
+                    warn('options element special-files is deprecated, use data attributes instead')
             if option in ('special-files', 'rdiff-backup'):
                 if options_el.hasAttributes():
                     for key, value in options_el.attributes.items():
@@ -339,9 +348,11 @@ def parse_config(backup_el, dflt_id):
         elif len(script_el) > 1:
             raise ConfigException('Can not have more than one setup script element')
 
+    data_options = {}
     data_el = backup_el.getElementsByTagName('data')
     
-    if data_el:
+    if len(data_el) == 1:
+        data_options = parse_data_attributes(data_el[0])
         child_els = data_el[0].childNodes
         cludes = []
         for child_el in child_els:
@@ -351,6 +362,8 @@ def parse_config(backup_el, dflt_id):
                 continue
             cludes.append(parse_clude(child_el))
         cludes.append({ 'type' : 'exclude', 'path' : '', 'glob' : '', 'regexp' : '.*' })
+    elif len(data_el) > 1:
+        raise ConfigException('Can not have more than one data element')
     else:
         path_xcludes = [ '/dev/', '/media/', '/mnt/', '/net/', '/proc/', '/selinux/', '/sys/',
                          '/tmp/', '/var/cache', '/var/lock', '/var/run', '/var/tmp',
@@ -360,7 +373,7 @@ def parse_config(backup_el, dflt_id):
 
     return { 'id': id, 'host' : host, 'user' : user, 'key_ctrl' : key_ctrl, 'key_data' : key_data,
              'dir' : dir, 'retention' : retention, 'dumps' : dumps, 'snaps' : snaps, 'script' : script,
-             'cludes' : cludes, 'options' : options, 'bw': bw}
+             'cludes' : cludes, 'data_options' : data_options, 'options' : options, 'bw' : bw}
 
 def parse_locs(cfglocs):
     cfgfiles = []
@@ -497,7 +510,7 @@ def do_client_dbdump(cfg):
 def do_client_dbdump_teardown(cfg):
     debug('Tear down DB dumps')
     for dump in cfg['dumps']:
-        if dump['cleanup'] != 'true':
+        if dump['cleanup'].lower() != 'true':
             continue
         try:
             os.remove(dump['file'])
@@ -844,7 +857,15 @@ def do_server_rdiff(cfg, bdir, nice, force):
         args.extend(['--force'])
 
     options_append = []
-    special_files = ['--exclude-device-files', '--exclude-sockets', '--exclude-fifos']
+
+    special_files = []
+    if cfg['data_options'].get('exclude-devices').lower() == 'true':
+       special_files.extend(['--exclude-device-files'])
+    if cfg['data_options'].get('exclude-sockets').lower() == 'true':
+        special_files.extend(['--exclude-sockets'])
+    if cfg['data_options'].get('exclude-fifos').lower() == 'true':
+        special_files.extend(['--exclude-fifos'])
+
     for option in cfg['options']:
         if 'special-files' in option:
             if 'include' in option['special-files']:

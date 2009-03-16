@@ -9,7 +9,7 @@
     key-data="/home/jdoe/.ssh/backup2_id_dsa"
   />
 
-  <!-- location where the backuped data will be stored on the server
+  <!-- location where the backed up data will be stored on the server
        and for how long (s=sec, m=min, h=hours, D=days, W=weeks, M=months, or Y=years) -->
   <repo
     path="./data"
@@ -45,8 +45,8 @@
     />
   </setup>
 
-  <!-- data to be backuped -->
-  <data>
+  <!-- data to be backed up -->
+  <data exclude-fifos="true" exclude-sockets="true">
     <!-- each type of tag can be present more than one time -->
     <!-- if a database dump was created, it must be added in this section -->
     <include path="/home"/>

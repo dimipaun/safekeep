@@ -38,16 +38,12 @@ The full set of supported elements and attributes looks as follows:
        and for how long (D=days, W=weeks, M=months, or Y=years) -->
   <repo path="./data" retention="10D"/>
 
-  <options>
-    <special-files include="false" />
-  </options>
-
   <!-- settings for database dump and for volume snapshot -->
   <setup>
     <!-- database type ("postgres" or "mysql"), and database name,
          DB user with backup rights, location of the dump file on the client 
          host, and flag to remove or not the dump file after the backup is done.
-         Databases can be dumped individualy using a dump clause for each database. -->
+         Databases can be dumped individually using a dump clause for each database. -->
     <dump
       type="postgres"
       db="my_db"
@@ -74,7 +70,7 @@ The full set of supported elements and attributes looks as follows:
   </setup>
 
   <!-- data to be backup -->
-  <data>
+  <data exclude-fifos="true" exclude-sockets="true">
     <!-- each type of tag can be present more than one time -->
     <!-- if a database dump was created, it must be added in this section -->
     <include path="/home"/>
@@ -156,7 +152,7 @@ are separated by '/', attributes are introduced by '@':
 	will fail altogether if the directory can not be created.
 	Optional, defaults to the client ID, see `/backup/@id`.
 	Use of the default value is *highly* recommended. 
-	*NOTE*: if you must set this value explicitely, you must
+	*NOTE*: if you must set this value explicitly, you must
 	make sure that the path is not shared between different boxes;
 	a shared repository path _will_ result in data loss.
 
@@ -179,11 +175,12 @@ are separated by '/', attributes are introduced by '@':
 	Optional, defaults to empty (unlimited retention).
 
 /backup/options/special-files/@include::
+       NOTE: THIS OPTION HAS BEEN DEPRECATED.  See data attributes below.
        One of "true" or "false". If "true", the dump file will
        include all special files, including device files, fifo files and
        socket files.
        Optional, defaults to "false". 
-       *NOTE*: specification of no options is equalent to false, but the
+       *NOTE*: specification of no options is equivalent to false, but the
        inclusion of other options may cause the underlying backup defaults
        to be use.
 
@@ -267,6 +264,30 @@ are separated by '/', attributes are introduced by '@':
        See the `CLIENT SCRIPT` section for more information.
        Mandatory for a `<script>` element.
 
+/backup/data/@exclude-devices::
+       One of "true" or "false". If "true", the dump file will
+       exclude all device files.
+       Optional, defaults to "false". 
+       *NOTE*: specification of no attributes is equivalent to false, but the
+       inclusion of other options may cause the underlying backup defaults
+       to be use.
+
+/backup/data/@exclude-fifos::
+       One of "true" or "false". If "true", the dump file will
+       exclude all fifos.
+       Optional, defaults to "false". 
+       *NOTE*: specification of no attributes is equivalent to false, but the
+       inclusion of other options may cause the underlying backup defaults
+       to be use.
+
+/backup/data/@exclude-sockets::
+       One of "true" or "false". If "true", the dump file will
+       exclude all sockets.
+       Optional, defaults to "false". 
+       *NOTE*: specification of no attribute is equivalent to false, but the
+       inclusion of other options may cause the underlying backup defaults
+       to be use.
+
 /backup/data/exclude/@path::
 	Exclude the file or files matched by the path. 
 	If a directory is matched, then files under that directory will also
@@ -314,7 +335,7 @@ which are set using one of the `<include>`/`<exclude>` elements.
 Each file selection condition either matches or doesn't match a given file. 
 A given file is included or excluded by the file selection system when the
 first matching file selection condition specifies that the file be included
-or excluded respecively; if the file matches no include or exclude 
+or excluded respectively; if the file matches no include or exclude 
 statement, it is by default excluded.
 
 When backing up, if a file is excluded, `safekeep(1)` acts 
@@ -340,7 +361,7 @@ This script is executed with the following three arguments:
 
 The steps currently defined and tokens passed, are:
 - STARTUP - prior to any execution, however, if it exits with a non-zero
-status this constitues an error and the backup is aborted.
+status this constitutes an error and the backup is aborted.
 - PRE-SETUP - prior to running any setup steps being run.  A non-zero status
 is considered a warning and execution continues.
 - POST-SETUP - after setup, but prior to execution of backup.  A non-zero
