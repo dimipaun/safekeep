@@ -1,3 +1,164 @@
+2009-03-30 06:10 +0000 [r640]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/ANNOUNCE: Prep the ANNOUNCE file
+
+2009-03-30 06:01 +0000 [r639]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in, safekeep/trunk/safekeep: Pre
+	  release
+
+2009-03-16 15:05 +0000 [r638]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in: Update changelog
+
+2009-03-16 15:05 +0000 [r637]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.backup.txt, safekeep/trunk/safekeep,
+	  safekeep/trunk/samples/sample.backup: Frank Crawford
+	  <frank@crawford.emu.id.au> Rework the handling of device files,
+	  fifos and sockets as data attributes. Now special files are by
+	  default included, unless explicitely excluded. A bunch of
+	  spelling fixes sprinkled throughout.
+
+2009-03-15 14:52 +0000 [r636]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/debian/safekeep-server.docs,
+	  safekeep/trunk/debian/safekeep-common.docs: Fix the DEB packages
+	  for the new samples/ dir.
+
+2009-03-15 14:50 +0000 [r635]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/samples/client-script-sample.sh (added),
+	  safekeep/trunk/doc/client-script-sample.sh (removed),
+	  safekeep/trunk/safekeep.spec.in, safekeep/trunk/samples (added),
+	  safekeep/trunk/sample.backup (removed),
+	  safekeep/trunk/samples/sample.backup (added): Move the samples to
+	  a separate directory.
+
+2009-03-14 21:17 +0000 [r634]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in: Update changelog
+
+2009-03-14 21:14 +0000 [r633]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.backup.txt,
+	  safekeep/trunk/doc/client-script-sample.sh (added),
+	  safekeep/trunk/safekeep.spec.in,
+	  safekeep/trunk/debian/safekeep-common.docs,
+	  safekeep/trunk/safekeep, safekeep/trunk/sample.backup: Frank
+	  Crawford <frank@crawford.emu.id.au> Implements the discussion of
+	  invoking an external script on the client side, during a backup
+	  being run.
+
+2009-03-01 06:17 +0000 [r632]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in: Update changelog
+
+2009-03-01 06:16 +0000 [r631]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Frank Crawford
+	  <frank@crawford.emu.id.au> Fix serious typo.
+
+2009-02-01 17:18 +0000 [r630]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Frank Crawford
+	  <frank@crawford.emu.id.au> Avoid errors when dealing with mounts
+	  containing spaces.
+
+2009-01-13 05:11 +0000 [r629]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Frank Crawford
+	  <frank@crawford.emu.id.au> Don't send out empty emails.
+
+2008-11-19 20:42 +0000 [r628]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.backup.txt,
+	  safekeep/trunk/doc/safekeep.conf.txt,
+	  safekeep/trunk/safekeep.conf: Document the new bandwidth limiting
+	  feature.
+
+2008-11-19 19:33 +0000 [r627]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Fix a few typos
+
+2008-11-19 19:21 +0000 [r626]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in: Update ChangeLog
+
+2008-11-19 19:19 +0000 [r625]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Frederic Bourqui <fbourqui@yahoo.com>
+	  Recover escaped dashes ('-').
+
+2008-11-19 19:05 +0000 [r624]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.backup.txt,
+	  safekeep/trunk/safekeep.spec.in, safekeep/trunk/safekeep: Allow
+	  passing the pgpasswd to PostgreSQL as well.
+
+2008-11-19 18:40 +0000 [r623]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.backup.txt,
+	  safekeep/trunk/safekeep.spec.in, safekeep/trunk/safekeep: Add
+	  pass-through options for the DB dump command
+
+2008-11-19 18:16 +0000 [r622]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in, safekeep/trunk/safekeep,
+	  safekeep/trunk/TODO: First cut at implementing bandwidth limiting
+	  based on trickle.
+
+2008-11-19 16:39 +0000 [r621]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in, safekeep/trunk/safekeep.conf: By
+	  default, run safekeep with nice +10 on the server side
+
+2008-11-19 16:37 +0000 [r620]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.conf.txt,
+	  safekeep/trunk/safekeep.spec.in, safekeep/trunk/safekeep,
+	  safekeep/trunk/TODO: Run ssh/rdiff through nice so we can control
+	  the load better on the server.
+
+2008-11-19 15:05 +0000 [r619]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in, safekeep/trunk/TODO: Remove
+	  implemented items
+
+2008-11-19 14:59 +0000 [r618]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Do not compress the SSH transport. This
+	  places significantly higher load on the system, and it's not
+	  likely to be useful as it is handled by rdiff-backup anyway.
+
+2008-11-19 14:58 +0000 [r617]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Add SSH verbosity control
+
+2008-11-19 14:19 +0000 [r616]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Add -C to the PG dumps.
+
+2008-10-16 16:14 +0000 [r615]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in: Update changelog
+
+2008-10-16 16:14 +0000 [r614]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/TODO: Update TODO.
+
+2008-10-14 22:07 +0000 [r613]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Fix dopey MySQL dump.
+
+2008-10-07 20:33 +0000 [r609]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/ANNOUNCE: Update list of supported Fedoras
+
+2008-10-07 19:58 +0000 [r605]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/ChangeLog: Update ChangeLog
+
 2008-10-07 19:57 +0000 [r604]  Dimi Paun <dimi@lattica.com>
 
 	* safekeep/trunk/safekeep.spec.in: Update RPM changelog
