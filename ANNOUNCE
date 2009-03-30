@@ -1,35 +1,39 @@
-This is release 1.0.5 of SafeKeep, a centralized and easy to use 
+This is release 1.2.0 of SafeKeep, a centralized and easy to use 
 backup application that combines the best features of a mirror 
 and an incremental backup.
 
 What's new in this release:
-  - Allow providing the password for the DB user used for the DB dump
-  - Add config option for passing additional flags to rdiff-backup
-  - Avoid backing up special files by default
-  - Avoid creating multiple LVM snapshots (avoids some LVM bugs)
-  - Add new --cleanup option to help recovery from crashes
-  - Make it easier to package on platforms that don't have asciidoc
+  - Implement bandwidth limiting, based on trickle
+  - Add support for niced backup server (defaults to nice +10)
+  - External callbacks throughout the backup process
+  - Several minor improvements and fixes in usability
+  - We now backup all special files by default 
+  - Add pass-through options for the DB dump command
+  - Allow passing the pgpasswd to PostgreSQL
+  - Avoid errors for mounts containing spaces
+  - Correctly handle LVM names that contain dashes
+  - Fix dopey MySQL dump.
 
-Many thanks to Frank Crawford for providing patches for
-most of the new features and bug fixes in this release!
+Many thanks to Frank Crawford for providing many patches
+for new features and bug fixes in this release.
 
 Because of lags created by using mirrors, this message may reach you before 
 the release is available at the public sites. Sources and binaries will be 
 available from the following locations:
 
   - RedHat EL 3,4,5, CentOS 3,4,5, Fedora 4,5,6,7,8,9,10:
-  http://prdownloads.sourceforge.net/safekeep/safekeep-common-1.0.5-1.fc8.noarch.rpm
-  http://prdownloads.sourceforge.net/safekeep/safekeep-client-1.0.5-1.fc8.noarch.rpm
-  http://prdownloads.sourceforge.net/safekeep/safekeep-server-1.0.5-1.fc8.noarch.rpm
-  http://prdownloads.sourceforge.net/safekeep/safekeep-1.0.5-1.fc8.src.rpm
+  http://prdownloads.sourceforge.net/safekeep/safekeep-common-1.2.0-1.fc8.noarch.rpm
+  http://prdownloads.sourceforge.net/safekeep/safekeep-client-1.2.0-1.fc8.noarch.rpm
+  http://prdownloads.sourceforge.net/safekeep/safekeep-server-1.2.0-1.fc8.noarch.rpm
+  http://prdownloads.sourceforge.net/safekeep/safekeep-1.2.0-1.fc8.src.rpm
  
   - Ubuntu Edgy, Dapper, and Breezy:
-  http://prdownloads.sourceforge.net/safekeep/safekeep-common_1.0.5_all.deb
-  http://prdownloads.sourceforge.net/safekeep/safekeep-client_1.0.5_all.deb
-  http://prdownloads.sourceforge.net/safekeep/safekeep-server_1.0.5_all.deb
+  http://prdownloads.sourceforge.net/safekeep/safekeep-common_1.2.0_all.deb
+  http://prdownloads.sourceforge.net/safekeep/safekeep-client_1.2.0_all.deb
+  http://prdownloads.sourceforge.net/safekeep/safekeep-server_1.2.0_all.deb
 
   - Source:
-  http://prdownloads.sourceforge.net/safekeep/safekeep-1.0.5.tar.gz
+  http://prdownloads.sourceforge.net/safekeep/safekeep-1.2.0.tar.gz
 
 To find out more about the project visit on our website:
   http://safekeep.sourceforge.net
