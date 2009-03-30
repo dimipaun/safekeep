@@ -116,6 +116,7 @@ id %{name} >/dev/null 2>&1 || \
 %doc samples/sample.backup
 
 %changelog
+* Mon Mar 30 2009 Dimi Paun <dimi@lattica.com> 1.2.0-1
   - Rework the handling of device files, fifos and sockets as data attributes.
   - Now special files are by default included, unless explicitely excluded.
   - A bunch of spelling fixes sprinkled throughout.
