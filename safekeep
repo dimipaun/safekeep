@@ -823,7 +823,7 @@ def do_server_rdiff(cfg, bdir, nice, force):
     args = []
 
     if nice:
-        args.extend(['nice', '-n' + nice])
+        args.extend(['nice', '-n' + str(nice)])
 
     args.extend(['rdiff-backup'])
 
