@@ -129,7 +129,7 @@ def try_to_run(cmd):
     proc.fromchild.close()
     rc = proc.wait()
 
-    return os.WIFEXITED(rc) and os.WEXITSTATUS(rc) == 0
+    return os.WIFEXITED(rc) and os.WEXITSTATUS(rc) in (0,1)
 
 def spawn(args):
     if isinstance(args, str) or isinstance(args, unicode):
