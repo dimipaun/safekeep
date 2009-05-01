@@ -122,7 +122,6 @@ def error(msg):
     log(msg, 'ERR')
 
 def try_to_run(cmd):
-    cmd = cmd.split(' ')[0]
     proc = popen2.Popen4(cmd)
     proc.tochild.close()
     for line in proc.fromchild:
