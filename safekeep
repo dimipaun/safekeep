@@ -841,9 +841,9 @@ def do_server_rdiff(cfg, bdir, nice, force):
         if limit_dl or limit_ul:
             trickle = trickle_cmd + ' ' + verbosity_trickle
             if limit_dl:
-                trickle += ' -d ' + limit_dl
+                trickle += ' -d ' + str(limit_dl)
             if limit_ul:
-                trickle += ' -u ' + limit_ul
+                trickle += ' -u ' + str(limit_ul)
 
         if trickle:
             if not try_to_run(trickle_cmd + ' -V'):
