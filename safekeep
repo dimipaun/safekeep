@@ -58,7 +58,7 @@ base_dir = None
 default_bandwidth = {}
 
 PROTOCOL = "1.1"
-VERSION = "1.2.0"
+VERSION = "1.2.1"
 VEBOSITY_BY_CLASS = {'DBG': 3, 'INFO': 2, 'WARN': 1, 'ERR': 0}
 
 ######################################################################
