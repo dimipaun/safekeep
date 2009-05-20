@@ -1,3 +1,53 @@
+2009-05-20 21:22 +0000 [r655]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/ANNOUNCE: Prepare the announcement.
+
+2009-05-20 20:36 +0000 [r654]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Prep new release
+
+2009-05-01 06:42 +0000 [r653]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Deh, we have to accept 1 as a status too
+
+2009-05-01 06:39 +0000 [r652]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Don't strip off the parameters
+
+2009-05-01 06:37 +0000 [r651]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Fix test
+
+2009-05-01 06:28 +0000 [r650]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Fix typo
+
+2009-05-01 06:26 +0000 [r649]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: These may end up being ints afterall
+
+2009-05-01 06:25 +0000 [r648]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.conf: Fix the names of the bandwidth
+	  limiting settings
+
+2009-04-30 17:26 +0000 [r647]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in: Update changelog
+
+2009-04-30 17:24 +0000 [r646]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Bryan Talbot <btalbot@aeriagames.com>
+	  Avoid concatenating non-strings to strings.
+
+2009-03-30 06:24 +0000 [r643]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/Makefile: Fix SF deployment.
+
+2009-03-30 06:11 +0000 [r641]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/ChangeLog: Update ChangeLog
+
 2009-03-30 06:10 +0000 [r640]  Dimi Paun <dimi@lattica.com>
 
 	* safekeep/trunk/ANNOUNCE: Prep the ANNOUNCE file
