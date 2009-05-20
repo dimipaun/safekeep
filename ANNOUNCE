@@ -1,39 +1,30 @@
-This is release 1.2.0 of SafeKeep, a centralized and easy to use 
+This is release 1.2.1 of SafeKeep, a centralized and easy to use 
 backup application that combines the best features of a mirror 
 and an incremental backup.
 
 What's new in this release:
-  - Implement bandwidth limiting, based on trickle
-  - Add support for niced backup server (defaults to nice +10)
-  - External callbacks throughout the backup process
-  - Several minor improvements and fixes in usability
-  - We now backup all special files by default 
-  - Add pass-through options for the DB dump command
-  - Allow passing the pgpasswd to PostgreSQL
-  - Avoid errors for mounts containing spaces
-  - Correctly handle LVM names that contain dashes
-  - Fix dopey MySQL dump.
+  - Fix error while trying to nice the server
 
-Many thanks to Frank Crawford for providing many patches
-for new features and bug fixes in this release.
+Thanks go to Bryan Talbot and Frank Crawford for providing patches
+for the problems addressed in this release.
 
 Because of lags created by using mirrors, this message may reach you before 
 the release is available at the public sites. Sources and binaries will be 
 available from the following locations:
 
   - RedHat EL 3,4,5, CentOS 3,4,5, Fedora 4,5,6,7,8,9,10:
-  http://prdownloads.sourceforge.net/safekeep/safekeep-common-1.2.0-1.fc8.noarch.rpm
-  http://prdownloads.sourceforge.net/safekeep/safekeep-client-1.2.0-1.fc8.noarch.rpm
-  http://prdownloads.sourceforge.net/safekeep/safekeep-server-1.2.0-1.fc8.noarch.rpm
-  http://prdownloads.sourceforge.net/safekeep/safekeep-1.2.0-1.fc8.src.rpm
+  http://prdownloads.sourceforge.net/safekeep/safekeep-common-1.2.1-1.noarch.rpm
+  http://prdownloads.sourceforge.net/safekeep/safekeep-client-1.2.1-1.noarch.rpm
+  http://prdownloads.sourceforge.net/safekeep/safekeep-server-1.2.1-1.noarch.rpm
+  http://prdownloads.sourceforge.net/safekeep/safekeep-1.2.1-1.src.rpm
  
   - Ubuntu Edgy, Dapper, and Breezy:
-  http://prdownloads.sourceforge.net/safekeep/safekeep-common_1.2.0_all.deb
-  http://prdownloads.sourceforge.net/safekeep/safekeep-client_1.2.0_all.deb
-  http://prdownloads.sourceforge.net/safekeep/safekeep-server_1.2.0_all.deb
+  http://prdownloads.sourceforge.net/safekeep/safekeep-common_1.2.1_all.deb
+  http://prdownloads.sourceforge.net/safekeep/safekeep-client_1.2.1_all.deb
+  http://prdownloads.sourceforge.net/safekeep/safekeep-server_1.2.1_all.deb
 
   - Source:
-  http://prdownloads.sourceforge.net/safekeep/safekeep-1.2.0.tar.gz
+  http://prdownloads.sourceforge.net/safekeep/safekeep-1.2.1.tar.gz
 
 To find out more about the project visit on our website:
   http://safekeep.sourceforge.net
