@@ -79,7 +79,7 @@ html: $(DOC_HTML)
 man: $(DOC_MAN)
 
 %.html: %.txt
-	asciidoc -b xhtml11 -d manpage -f doc/asciidoc.conf $<
+	asciidoc -b html4 -d manpage -f doc/asciidoc.conf $<
 
 %.1 %.5: %.xml
 	xmlto -o doc -m doc/callouts.xsl man $<
