@@ -14,7 +14,7 @@ svnroot     := $(shell LANG=C svn info 2>/dev/null | grep Root | cut -c 18-)
 releasedir  := releases
 repo_srv    := root@ulysses
 repo_dir    := /var/www/repos/lattica
-webroot     := ../website/WebContent/
+webroot     := ../../website/trunk/WebContent/
 MAN_TXT     := doc/safekeep.txt doc/safekeep.conf.txt doc/safekeep.backup.txt
 DOC_MAN     := doc/safekeep.1 doc/safekeep.conf.5 doc/safekeep.backup.5
 DOC_HTML    := $(patsubst %.txt,%.html,$(MAN_TXT))
