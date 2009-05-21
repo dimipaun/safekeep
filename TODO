@@ -5,6 +5,7 @@ Next release:
   * Avoid snapshotting snapshots
   * Don't snapshot a device if a snapshot is already present
   * Protect against multiple safekeep instance running at once
+  * Do not include fifos and sockets by default
 
 Feedback from users:
   * Øyvind Skaar <os@opoint.no>: FreeBSD have snapshot capabilities
