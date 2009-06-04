@@ -121,17 +121,7 @@ def warn(msg):
 def error(msg):
     log(msg, 'ERR')
 
-def try_to_run(cmd):
-    proc = popen2.Popen4(cmd)
-    proc.tochild.close()
-    for line in proc.fromchild:
-        info(line.rstrip())
-    proc.fromchild.close()
-    rc = proc.wait()
-
-    return os.WIFEXITED(rc) and os.WEXITSTATUS(rc) in (0,1)
-
-def spawn(args):
+def do_spawn(args):
     if isinstance(args, str) or isinstance(args, unicode):
         debug('Run [' + args + ']')
         cmd = args.split(' ')[0]
@@ -143,7 +133,10 @@ def spawn(args):
     for line in proc.fromchild:
         info(line.rstrip())
     proc.fromchild.close()
-    rc = proc.wait()
+    return proc.wait()
+
+def spawn(args):
+    rc = do_spawn(args)
     if os.WIFEXITED(rc):
         if os.WEXITSTATUS(rc) == 0:
             ret = None
@@ -158,6 +151,10 @@ def spawn(args):
     if ret:
         error('%s failed: %s' % (cmd, ret));
     return ret
+
+def try_to_run(cmd):
+    rc = do_spawn(args)
+    return os.WIFEXITED(rc) and os.WEXITSTATUS(rc) in (0,1)
 
 def send_notification(email, smtp):
     global logbuf
