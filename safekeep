@@ -16,28 +16,13 @@
 # along with Safekeep.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import generators
-import getopt, os, os.path, popen2, re, sys, fnmatch, stat
+import getopt, os, os.path, re, sys, fnmatch, stat
+import subprocess
 import commands, tempfile, time, traceback
 import getpass, pwd, xml.dom.minidom
 import socket, smtplib
 
-######################################################################
-# Python 2.2 compatibility
-######################################################################
-# There is no guarantee that we'll continue supporting Python 2.2
-# indefinitely, but we make a reasonable effor to do so as long as
-# it doesn't result in major complication/ugliness.
-
-try:
-    True, False
-except NameError:
-    True, False = 1, 0
-
-def enumerate(obj):
-    i = -1
-    for item in obj:
-        i += 1
-        yield i, item
+from subprocess import PIPE, STDOUT
 
 ######################################################################
 # Global settings
@@ -56,6 +41,7 @@ backup_user = None
 home_dir = None
 base_dir = None
 default_bandwidth = {}
+cmd = "<Missing>"
 
 PROTOCOL = "1.1"
 VERSION = "1.2.1"
@@ -121,40 +107,61 @@ def warn(msg):
 def error(msg):
     log(msg, 'ERR')
 
-def do_spawn(args):
+def args_to_list(args):
     if isinstance(args, str) or isinstance(args, unicode):
-        debug('Run [' + args + ']')
-        cmd = args.split(' ')[0]
+        return args.split(None)
     else:
-        debug('Run [' + ' '.join(args) + ']')
-        cmd = args[0]
-    proc = popen2.Popen4(args)
-    proc.tochild.close()
-    for line in proc.fromchild:
+        return args
+
+def do_spawn(args, shell=False):
+    global cmd
+    argslist = args_to_list(args)
+    cmd = argslist[0]
+    if shell:
+        # If passed to a shell then give args exactly as specified.
+        debug('Run [' + args + ']')
+        proc = subprocess.Popen(args, bufsize=1, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
+    else:
+        # Otherwise split into separate elements.
+        debug('Run [' + ' '.join(argslist) + ']')
+        proc = subprocess.Popen(argslist, bufsize=1, shell=False, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
+    proc.stdin.close()
+    for line in proc.stdout:
         info(line.rstrip())
-    proc.fromchild.close()
+    proc.stdout.close()
     return proc.wait()
 
-def spawn(args):
-    rc = do_spawn(args)
-    if os.WIFEXITED(rc):
-        if os.WEXITSTATUS(rc) == 0:
-            ret = None
-        else:
-            ret = 'exited with non zero status: %d' % os.WEXITSTATUS(rc)
-    elif os.WIFSIGNALED(rc):
-        ret = 'killed by signal: %d' % os.WTERMSIG(rc)
-    elif os.WCOREDUMP(rc):
-        ret = 'coredumped'
+def spawn(args, shell=False):
+    global cmd
+    try:
+        rc = do_spawn(args, shell=shell)
+    except OSError, ex:
+        error("OSError: %s: %s" % (cmd, ex))
+
+    if not rc:
+        ret = None
+    elif rc > 0:
+        ret = 'exited with non zero status: %d' % rc
+    elif rc < 0:
+        ret = 'killed by signal: %d' % -rc
     else:
         ret = 'unknown exit status: %d' + rc
     if ret:
         error('%s failed: %s' % (cmd, ret));
     return ret
 
-def try_to_run(cmd):
-    rc = do_spawn(args)
-    return os.WIFEXITED(rc) and os.WEXITSTATUS(rc) in (0,1)
+def try_to_run(args, shell=False):
+    try:
+        rc = do_spawn(args, shell=shell)
+    except OSError, ex:
+        return False
+    return rc in (0,1)
+
+def cmd_run(args):
+    argslist = args_to_list(args)
+    debug('Run [' + ' '.join(argslist) + ']')
+    p = subprocess.Popen(argslist, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
+    return (p.stdin, p.stdout)
 
 def send_notification(email, smtp):
     global logbuf
@@ -170,8 +177,8 @@ def send_notification(email, smtp):
         server.sendmail('SafeKeep@' + hostname, email, msg)
         server.quit()
     else:
-        cmd = '/usr/sbin/sendmail -t'
-        pin = os.popen(cmd, 'w')
+        cmd = ['/usr/sbin/sendmail', '-t']
+        pin = subprocess.Popen(cmd, stdin=PIPE).stdin
         try:
             pin.write(msg)
         finally:
@@ -472,7 +479,7 @@ def do_client_dbdump(cfg):
         elif type in ('mysql'):
             args = ['mysqldump']
             if dump['dbuser']:
-                args.extend(['-u' + dump['dbuser']])
+                args.extend(['-u', dump['dbuser']])
             if dump['dbpasswd']:
                 args.extend(['-p' + dump['dbpasswd']])
             if not dump['db']:
@@ -495,7 +502,7 @@ def do_client_dbdump(cfg):
         if passwdfile:
            environ['PGPASSFILE'] = passwdfile
         try:
-            ec = spawn(cmd)
+            ec = spawn(cmd, shell=True)
         finally:
             if passwdfile:
                 del os.environ['PGPASSFILE']
@@ -515,7 +522,7 @@ def do_client_dbdump_teardown(cfg):
                  (dump['file'], dump['db'], e))
 
 def lvm_snap_information():
-    (cin, cout) = os.popen4(['lvs', '--separator', ':', '--noheadings'])
+    (cin, cout) = cmd_run(['lvs', '--separator', ':', '--noheadings'])
     lines = cout.readlines()
     cout.close()
     cin.close()
@@ -528,7 +535,7 @@ def lvm_snap_information():
     return lvms
 
 def mount_information(reverse = False):
-    (cin, cout) = os.popen4('mount')
+    (cin, cout) = cmd_run(['mount'])
     lines = cout.readlines()
     cout.close()
     cin.close()
@@ -947,8 +954,7 @@ def do_server(cfgs, ids, nice, force, cleanup):
                 cmd = 'ssh %s -T -i %s -l %s %s safekeep --client' % (verbosity_ssh, cfg['key_ctrl'], cfg['user'], cfg['host'])
             else:
                 cmd = 'safekeep --client'
-            debug('Run [' + cmd + ']')
-            (cin, cout) = os.popen4(cmd)
+            (cin, cout) = cmd_run(cmd)
 
             cin.write('ALOHA: %s, %s\n' % (PROTOCOL, VERSION))
             cin.flush()
@@ -1085,7 +1091,7 @@ def do_keys(cfgs, ids, identity, status, dump, deploy):
                     if backup_user is not work_user:
                         gencmd = 'su -s /bin/sh -c %s - %s' % (commands.mkarg(gencmd), backup_user)
                     debug(gencmd)
-                    if os.system(gencmd):
+                    if subprocess.call(gencmd, shell=True):
                         error('%s: Failed to generate key %s. Skipping client.' % (id, privatekeyfile))
                         break
             if not os.path.isfile(publickeyfile):
@@ -1112,7 +1118,7 @@ def do_keys(cfgs, ids, identity, status, dump, deploy):
         if status or deploy:
             cmd = '%s %s@%s "if test -f .ssh/authorized_keys; then cat .ssh/authorized_keys; fi"' % (basessh, cfg['user'], cfg['host'])
             debug(cmd)
-            out = os.popen(cmd, 'r')
+            out = subprocess.Popen(cmd, shell=True, stdout=PIPE).stdout
             authtext = out.read()
             if out.close():
                 warn('%s: Failed to read the authorized_keys file.' % id)
@@ -1134,7 +1140,7 @@ def do_keys(cfgs, ids, identity, status, dump, deploy):
             if deploy:
                 cmd = '%s %s@%s "umask 077; test -d .ssh || mkdir .ssh; cat >> .ssh/authorized_keys"' % (basessh, cfg['user'], cfg['host'])
                 debug(cmd)
-                pipe = os.popen(cmd, 'w')
+                pipe = subprocess.Popen(cmd, shell=True, stdin=PIPE).stdin
                 pipe.write('%s\n' % '\n'.join([key[4] for key in new_keys]))
                 if pipe.close():
                     error('Failed to deliver the keys to the client')
