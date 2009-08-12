@@ -79,13 +79,13 @@ html: $(DOC_HTML)
 man: $(DOC_MAN)
 
 %.html: %.txt
-	asciidoc -b html4 -d manpage -f doc/asciidoc.conf $<
+	asciidoc --unsafe -b html4 -d manpage -f doc/asciidoc.conf $<
 
 %.1 %.5: %.xml
 	xmlto -o doc -m doc/callouts.xsl man $<
 
 %.xml: %.txt
-	asciidoc -b docbook -d manpage -f doc/asciidoc.conf $<
+	asciidoc --unsafe -b docbook -d manpage -f doc/asciidoc.conf $<
 
 $(DOC_HTML) $(DOC_MAN): doc/asciidoc.conf
 
