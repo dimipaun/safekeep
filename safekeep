@@ -145,7 +145,7 @@ def spawn(args, shell=False):
     elif rc < 0:
         ret = 'killed by signal: %d' % -rc
     else:
-        ret = 'unknown exit status: %d' + rc
+        ret = 'unknown exit status: %d' % rc
     if ret:
         error('%s failed: %s' % (cmd, ret));
     return ret
@@ -224,7 +224,7 @@ def parse_dump(dump_el):
     if not type:
         raise ConfigException('You need to specify the database type')
     if type not in ('postgres', 'postgresql', 'pgsql', 'mysql'):
-        raise ConfigException('Invalid database type: ' + type)
+        raise ConfigException('Invalid database type: %s' % type)
     db = dump_el.getAttribute('db')
     user = dump_el.getAttribute('user')
     dbuser = dump_el.getAttribute('dbuser')
@@ -481,7 +481,7 @@ def do_client_dbdump(cfg):
             if dump['dbuser']:
                 args.extend(['-u', dump['dbuser']])
             if dump['dbpasswd']:
-                args.extend(['-p' + dump['dbpasswd']])
+                args.extend(['-p%s' % dump['dbpasswd']])
             if not dump['db']:
                 args.append('-A')
             args.extend(opts)
@@ -508,7 +508,7 @@ def do_client_dbdump(cfg):
                 del os.environ['PGPASSFILE']
                 os.remove(passwdfile)
         if ec:
-            warn('Can not dump the database: ' + dump['db'])
+            warn('Can not dump the database: %s' % dump['db'])
 
 def do_client_dbdump_teardown(cfg):
     debug('Tear down DB dumps')
@@ -584,22 +584,22 @@ def do_client_snap(cfg, bdir):
         device = snap['device']
         (lvmdev, snapdev, snapmnt, snaptyp) = gather_snap_information(device, bdir)
         if not snapmnt:
-            warn('Cannot find the mountpoint for: ' + device)
+            warn('Cannot find the mountpoint for: %s' % device)
             continue
         args = ['lvcreate', '--snapshot', '--size', snap['size'],
                 '--name', os.path.basename(snapdev), lvmdev]
         ec = spawn(args)
         if ec:
-            warn('Can not snapshot the device: ' + device)
+            warn('Can not snapshot the device: %s' % device)
             continue
         # no need to mkdir since the mountpoint already exists
         args = ['mount', '-t', snaptyp, snapdev, snapmnt]
         ec = spawn(args)
         if ec:
-            warn('Can not mount the snapshot: ' + device)
+            warn('Can not mount the snapshot: %s' % device)
             ret = spawn(['lvremove', '--force', snapdev])
             if ret:
-                warn('Can not tear down snapshot: ' + device)
+                warn('Can not tear down snapshot: %s' % device)
 
 def do_client_snap_teardown(cfg, bdir):
     assert is_temp_root(bdir)
@@ -610,14 +610,14 @@ def do_client_snap_teardown(cfg, bdir):
         device = snap['device']
         (lvmdev, snapdev, snapmnt, snaptyp) = gather_snap_information(device, bdir)
         if not snapmnt:
-            warn('Can not find the mountpoint for: ' + device)
+            warn('Can not find the mountpoint for: %s' % device)
             continue
         ret = spawn(['umount', snapmnt])
         if ret:
             warn('Can not umount the snapshot: %s' % snapmnt)
         ret = spawn(['lvremove', '--force', snapdev])
         if ret:
-            warn('Can not tear down snapshot: ' + device)
+            warn('Can not tear down snapshot: %s' % device)
 
 ######################################################################
 # Client implementation
@@ -660,7 +660,7 @@ def do_client_setup(cfg):
             try:
                 os.rmdir(bdir)
             except Exception, e:
-                warn('Failed to remove: ' + bdir)
+                warn('Failed to remove: %s' % bdir)
             bdir = '/'
         else:
             do_client_snap(cfg, bdir)
@@ -677,7 +677,7 @@ def do_client_cleanup(cfg, bdir):
 
         ret = spawn(['umount', '-l', bdir])
         if ret:
-            warn('Failed to unmount: ' + bdir)
+            warn('Failed to unmount: %s' % bdir)
         else:
             try:
                 os.rmdir(bdir)
@@ -716,12 +716,12 @@ def do_client_scrub():
                     info("Removing rbind directory %s" % mountpoint)
                     ret = spawn(['umount', '-l', mountpoint])
                     if ret:
-                        warn('Failed to unmount: ' + mountpoint)
+                        warn('Failed to unmount: %s' % mountpoint)
                     else:
                         try:
                             os.rmdir(mountpoint)
                         except Exception, e:
-                            warn('Failed to remove: ' + mountpoint)
+                            warn('Failed to remove: %s' % mountpoint)
                 else:
                     ret = spawn(['umount', mountpoint])
                     if ret:
@@ -730,7 +730,7 @@ def do_client_scrub():
                     info("Removing snapshot %s" % device)
                     ret = spawn(['lvremove', '--force', device])
                     if ret:
-                        warn('Can not tear down snapshot: ' + device)
+                        warn('Can not tear down snapshot: %s' % device)
                 scrubbed = True
 
         # Now cleanup any snapshots still hanging around
@@ -741,7 +741,7 @@ def do_client_scrub():
             info("Removing snapshot %s" % device)
             ret = spawn(['lvremove', '--force', device])
             if ret:
-                warn('Can not tear down snapshot: ' + device)
+                warn('Can not tear down snapshot: %s' % device)
             scrubbed = True
 
         # Now cleanup any safekeep directories still hanging around
@@ -755,7 +755,7 @@ def do_client_scrub():
                     try:
                         os.rmdir(mountpoint)
                     except Exception, e:
-                        warn('Failed to remove: ' + mountpoint)
+                        warn('Failed to remove: %s' % mountpoint)
 
         if not scrubbed:
             info('No cleanup required')
@@ -796,7 +796,7 @@ def do_client():
                 elif not line:
                     break
                 else:
-                    send('ERROR Unknown command: ' + line)
+                    send('ERROR Unknown command: %s' % line)
                     break
             except Exception, e:
                 traceback.print_exc(file=sys.stdout)
@@ -1459,7 +1459,7 @@ def main():
                 keys_status = True
             do_keys(cfgs, args, identity, keys_status, keys_print, keys_deploy)
         else:
-            assert False, 'Unknown mode: ' + mode
+            assert False, 'Unknown mode: %s' % (mode)
     except Exception, ex:
         traceback.print_exc(file=sys.stdout)
         error('ERROR: %s' % ex)
