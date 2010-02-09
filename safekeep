@@ -462,14 +462,14 @@ def do_client_dbdump(cfg):
         if type in ('postgres', 'postgresql', 'pgsql'):
             if dump['db']:
                 args = ['pg_dump']
-                args.extend('-C')
+                args.extend(['-C'])
             else:
                 args = ['pg_dumpall']
             if dump['dbuser']:
                 args.extend(['-U', dump['dbuser']])
             args.extend(opts)
             if dump['db']:
-                args.append(dump['db'])
+                args.extend([dump['db']])
             if dump['dbpasswd']:
                 (fd, passwdfile) = tempfile.mkstemp()
                 f = file(fd)
@@ -483,10 +483,10 @@ def do_client_dbdump(cfg):
             if dump['dbpasswd']:
                 args.extend(['-p%s' % dump['dbpasswd']])
             if not dump['db']:
-                args.append('-A')
+                args.extend(['-A'])
             args.extend(opts)
             if dump['db']:
-                args.append(dump['db'])
+                args.extend([dump['db']])
 
         else:
             warn('Invalid database type: ' + type)
