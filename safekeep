@@ -73,8 +73,7 @@ def log(msg, cls=None):
     if is_client or verbosity_level >= cutoff:
         logbuf.append(msg)
         if is_client:
-            print msg
-            sys.stdout.flush()
+            send(msg)
         else:
             print >> sys.stderr, msg
 
