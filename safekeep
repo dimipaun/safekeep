@@ -52,7 +52,7 @@ VEBOSITY_BY_CLASS = {'DBG': 3, 'INFO': 2, 'WARN': 1, 'ERR': 0}
 ######################################################################
 
 def send(msg):
-    print msg
+    print msg.encode('utf-8')
     sys.stdout.flush()
 
 def log(msg, cls=None):
@@ -75,7 +75,7 @@ def log(msg, cls=None):
         if is_client:
             send(msg)
         else:
-            print >> sys.stderr, msg
+            print >> sys.stderr, msg.encode('utf-8')
 
 def info_file(file, marker=None):
     info('## File: ' + file)
