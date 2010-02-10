@@ -499,7 +499,7 @@ def do_client_dbdump(cfg):
 
 
         if passwdfile:
-           environ['PGPASSFILE'] = passwdfile
+           os.environ['PGPASSFILE'] = passwdfile
         try:
             ec = spawn(cmd, shell=True)
         finally:
