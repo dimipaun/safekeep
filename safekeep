@@ -106,24 +106,10 @@ def warn(msg):
 def error(msg):
     log(msg, 'ERR')
 
-def args_to_list(args):
-    if isinstance(args, str) or isinstance(args, unicode):
-        return args.split(None)
-    else:
-        return args
-
 def do_spawn(args, shell=False, stdin=None, stdout=False):
-    global cmd
-    argslist = args_to_list(args)
-    cmd = argslist[0]
-    if shell:
-        # If passed to a shell then give args exactly as specified.
-        debug('Run [' + args + ']')
-        proc = subprocess.Popen(args, bufsize=1, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
-    else:
-        # Otherwise split into separate elements.
-        debug('Run [' + ' '.join(argslist) + ']')
-        proc = subprocess.Popen(argslist, bufsize=1, shell=False, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
+    debug('Run [' + args + ']')
+    proc = subprocess.Popen(args, bufsize=1, shell=shell, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
+
     if stdin:
         proc.stdin.write(stdin)
     proc.stdin.close()
@@ -137,7 +123,11 @@ def do_spawn(args, shell=False, stdin=None, stdout=False):
     return (proc.wait(), ''.join(lines))
 
 def _spawn(args, shell=False, stdin=None, stdout=False):
-    global cmd
+    if isinstance(args, str) or isinstance(args, unicode):
+        cmd = args.split(None)[0]
+    else:
+        cmd = args[0]
+
     try:
         rc, out = do_spawn(args, shell, stdin, stdout)
     except OSError, ex:
