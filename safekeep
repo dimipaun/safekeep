@@ -112,7 +112,7 @@ def args_to_list(args):
     else:
         return args
 
-def do_spawn(args, shell=False, stdout=False):
+def do_spawn(args, shell=False, stdin=None, stdout=False):
     global cmd
     argslist = args_to_list(args)
     cmd = argslist[0]
@@ -124,6 +124,8 @@ def do_spawn(args, shell=False, stdout=False):
         # Otherwise split into separate elements.
         debug('Run [' + ' '.join(argslist) + ']')
         proc = subprocess.Popen(argslist, bufsize=1, shell=False, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
+    if stdin:
+        proc.stdin.write(stdin)
     proc.stdin.close()
     lines=[]
     for line in proc.stdout:
@@ -134,12 +136,14 @@ def do_spawn(args, shell=False, stdout=False):
     proc.stdout.close()
     return (proc.wait(), ''.join(lines))
 
-def spawn(args, shell=False):
+def _spawn(args, shell=False, stdin=None, stdout=False):
     global cmd
     try:
-        rc, out = do_spawn(args, shell=shell)
+        rc, out = do_spawn(args, shell, stdin, stdout)
     except OSError, ex:
-        error("OSError: %s: %s" % (cmd, ex))
+        ret = "OSError: %s" % (ex)
+        error('%s failed: %s' % (cmd, ret));
+        return ret
 
     if not rc:
         ret = None
@@ -151,7 +155,22 @@ def spawn(args, shell=False):
         ret = 'unknown exit status: %d' % rc
     if ret:
         error('%s failed: %s' % (cmd, ret));
-    return ret
+    return (ret, out)
+
+# this just spawns an external program (optionally through a shell)
+# and returns True it it fails, and False if it successed
+def spawn(args, shell=False):
+    rc, out = _spawn(args, shell)
+    return rc
+
+# this spawans an external program (optionally through a shell),
+# feeds it any input via stdin, captures the output and returns it.
+# if it fails it returns None, otherwise it returns the output
+def call(args, shell=False, stdin=None):
+    rc, out = _spawn(args, shell, stdin, stdout=True)
+    if not rc:
+        return None
+    return out
 
 def try_to_run(args):
     try:
