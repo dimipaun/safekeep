@@ -105,7 +105,7 @@ def error(msg):
     log(msg, 'ERR')
 
 def do_spawn(args, stdin=None, stdout=False):
-    debug('Run [' + ' '.joint(args) + ']')
+    debug('Run [' + ' '.join(args) + ']')
     _shell = isinstance(args, types.StringTypes)
     if stdin:
         _stdin = subprocess.PIPE
@@ -642,7 +642,7 @@ def do_client_config(cmd):
         if not line: raise ConfigException('Unexpected end of file')
         cfgStr += line
 
-    do_client_config_parse(cfgStr, dflt_id)
+    return do_client_config_parse(cfgStr, dflt_id)
 
 def do_client_config_parse(cfgStr, dflt_id=None):
     dom = xml.dom.minidom.parseString(cfgStr)
@@ -814,6 +814,7 @@ def do_client():
                     send('ERROR Unknown command: %s' % line)
                     break
             except Exception, e:
+                traceback.print_exc(file=sys.stdout)
                 ex = e
                 break
     finally:
