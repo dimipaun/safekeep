@@ -184,11 +184,7 @@ def send_notification(email, smtp):
         server.quit()
     else:
         cmd = ['/usr/sbin/sendmail', '-t']
-        pin = subprocess.Popen(cmd, stdin=PIPE).stdin
-        try:
-            pin.write(msg)
-        finally:
-            pin.close()
+        call(cmd, stdin=msg)
 
 def is_temp_root(dir):
     return dir != '/'
@@ -1134,10 +1130,8 @@ def do_keys(cfgs, ids, nice_rem, identity, status, dump, deploy):
 
         if status or deploy:
             cmd = '%s %s@%s "if test -f .ssh/authorized_keys; then cat .ssh/authorized_keys; fi"' % (basessh, cfg['user'], cfg['host'])
-            debug(cmd)
-            out = subprocess.Popen(cmd, shell=True, stdout=PIPE).stdout
-            authtext = out.read()
-            if out.close():
+            authtext = call(cmd)
+            if authtext is None:
                 warn('%s: Failed to read the authorized_keys file.' % id)
             auth_keys = parse_authorized_keys(authtext)
             this_keys = parse_authorized_keys(output)
@@ -1156,10 +1150,9 @@ def do_keys(cfgs, ids, nice_rem, identity, status, dump, deploy):
                 print '%s: Keys will be deployed on the client.' % id
             if deploy:
                 cmd = '%s %s@%s "umask 077; test -d .ssh || mkdir .ssh; cat >> .ssh/authorized_keys"' % (basessh, cfg['user'], cfg['host'])
-                debug(cmd)
-                pipe = subprocess.Popen(cmd, shell=True, stdin=PIPE).stdin
-                pipe.write('%s\n' % '\n'.join([key[4] for key in new_keys]))
-                if pipe.close():
+                keys = '%s\n' % '\n'.join([key[4] for key in new_keys])
+                out = call(cmd, shell=True, stdin=keys)
+                if out is None:
                     error('Failed to deliver the keys to the client')
 
 
