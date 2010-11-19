@@ -179,12 +179,6 @@ def try_to_run(args):
         return False
     return rc in (0,1)
 
-def cmd_run(args):
-    argslist = args_to_list(args)
-    debug('Run [' + ' '.join(argslist) + ']')
-    p = subprocess.Popen(argslist, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
-    return (p.stdin, p.stdout)
-
 def send_notification(email, smtp):
     global logbuf
     if not logbuf: return
@@ -545,10 +539,7 @@ def do_client_dbdump_teardown(cfg):
                  (dump['file'], dump['db'], e))
 
 def lvm_snap_information():
-    (cin, cout) = cmd_run(['lvs', '--separator', ':', '--noheadings'])
-    lines = cout.readlines()
-    cout.close()
-    cin.close()
+    lines = call(['lvs', '--separator', ':', '--noheadings']) or ''
     lvms = []
     for line in lines:
         if line.count(':') > 3:
@@ -558,10 +549,7 @@ def lvm_snap_information():
     return lvms
 
 def mount_information(reverse = False):
-    (cin, cout) = cmd_run(['mount'])
-    lines = cout.readlines()
-    cout.close()
-    cin.close()
+    lines = call(['mount']) or ''
     mounts = []
     pattern = re.compile(r"^(\S+) on (.+) type (\S+) \((\S+)\)")
     if reverse:
@@ -979,11 +967,14 @@ def do_server(cfgs, ids, nice, force, cleanup):
             if cfg['retention'] and os.path.isdir(rdiff_logdir) and not cleanup:
                 do_server_data_cleanup(cfg)
 
+            cmd = []
             if cfg['host']:
-                cmd = 'ssh %s -T -i %s -l %s %s safekeep --client' % (verbosity_ssh, cfg['key_ctrl'], cfg['user'], cfg['host'])
-            else:
-                cmd = 'safekeep --client'
-            (cin, cout) = cmd_run(cmd)
+                cmd.extend(['ssh', verbosity_ssh, '-T', '-i', cfg['key_ctrl'], '-l', cfg['user'], cfg['host'])
+            cmd.extend(['safekeep', '--client'])
+    
+            proc = subprocess.Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
+            cin = proc.stdin
+            cout = proc.stdout
 
             cin.write('ALOHA: %s, %s\n' % (PROTOCOL, VERSION))
             cin.flush()
