@@ -124,6 +124,8 @@ id %{name} >/dev/null 2>&1 || \
   - Fix a bug when dumping a specific Postgresql database.
   - Prepare the code for newer Python versions
   - Drop support for Python < 2.4, subprocess module isn't supported.
+  - Try to remove a snapshot up to 10 times in a row to workaround
+    silly udev bug: https://bugzilla.redhat.com/show_bug.cgi?id=577798
   - Multiple internal cleanups, and minor bugs fixes.
 
 * Thu Apr 30 2009 Dimi Paun <dimi@lattica.com> 1.2.1-1

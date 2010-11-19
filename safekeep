@@ -615,7 +615,13 @@ def do_client_snap_teardown(cfg, bdir):
         ret = spawn(['umount', snapmnt])
         if ret:
             warn('Can not umount the snapshot: %s' % snapmnt)
-        ret = spawn(['lvremove', '--force', snapdev])
+
+        # stupid workaround for https://bugzilla.redhat.com/show_bug.cgi?id=577798
+        for i in range(1,10):
+            ret = spawn(['lvremove', '--force', snapdev])
+            if not ret:
+                break
+
         if ret:
             warn('Can not tear down snapshot: %s' % device)
 
