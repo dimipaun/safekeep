@@ -22,8 +22,6 @@ import commands, tempfile, time, traceback
 import getpass, pwd, xml.dom.minidom
 import socket, smtplib
 
-from subprocess import PIPE, STDOUT
-
 ######################################################################
 # Global settings
 ######################################################################
@@ -108,12 +106,20 @@ def error(msg):
 
 def do_spawn(args, stdin=None, stdout=False):
     debug('Run [' + args + ']')
-    shell = isinstance(args, types.StringTypes)
-    proc = subprocess.Popen(args, bufsize=1, shell=shell, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
+    _shell = isinstance(args, types.StringTypes)
+    if stdin:
+        _stdin = subprocess.PIPE
+    else:
+        _stdin = None
+    if stdout:
+        _stderr = None
+    else:
+        _stderr = subprocess.STDOUT
+    proc = subprocess.Popen(args, bufsize=1, shell=_shell, stdin=_stdin, stdout=subprocess.PIPE, stderr=_stderr, close_fds=True)
 
     if stdin:
         proc.stdin.write(stdin)
-    proc.stdin.close()
+        proc.stdin.close()
     lines=[]
     for line in proc.stdout:
         if stdout:
