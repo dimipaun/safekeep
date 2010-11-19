@@ -955,7 +955,7 @@ def do_server(cfgs, ids, nice, force, cleanup):
 
             cmd = []
             if cfg['host']:
-                cmd.extend(['ssh', verbosity_ssh, '-T', '-i', cfg['key_ctrl'], '-l', cfg['user'], cfg['host'])
+                cmd.extend(['ssh', verbosity_ssh, '-T', '-i', cfg['key_ctrl'], '-l', cfg['user'], cfg['host']])
             cmd.extend(['safekeep', '--client'])
    
             (cin,cout) = os.popen2(cmd)
