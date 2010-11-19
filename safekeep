@@ -105,7 +105,7 @@ def error(msg):
     log(msg, 'ERR')
 
 def do_spawn(args, stdin=None, stdout=False):
-    debug('Run [' + args + ']')
+    debug('Run [' + ' '.joint(args) + ']')
     _shell = isinstance(args, types.StringTypes)
     if stdin:
         _stdin = subprocess.PIPE
