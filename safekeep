@@ -642,6 +642,9 @@ def do_client_config(cmd):
         if not line: raise ConfigException('Unexpected end of file')
         cfgStr += line
 
+    do_client_config_parse(cfgStr, dflt_id)
+
+def do_client_config_parse(cfgStr, dflt_id=None):
     dom = xml.dom.minidom.parseString(cfgStr)
     try:
         return parse_config(dom.documentElement, dflt_id)
@@ -774,6 +777,7 @@ def do_client():
     debug("Do client main loop")
     should_cleanup = True
     bdir = '/'
+    cfg = do_client_config_parse('<backup/>', 'def')
     try:
         while True:
             try:
