@@ -46,12 +46,22 @@ email.smtp.server::
 	`/usr/sbin/sendmail` to deliver the mail.
 
 nice.adjustment::
-	The nice level adjustment for safekeep, for the time
-	being used only on the server side.
+	The default nice level adjustment for safekeep.
 	It specifies an integer to be added to the current nice 
 	level. Nicenesses range from -20 (most favorable scheduling) 
 	to 19 (least favorable).
 	If no nice level is specified, safekeep is not niced.
+
+nice.adjustment.server::
+	The nice level adjustment for safekeep, used on the server side.
+	It overrides the generic setting in nice.adjustment.
+
+nice.adjustment.client::
+	The default nice adjustment for the client. This settings is normally
+	not all that important, as most of the load is on the server side.
+	You can also set the remove nice level on a per-client basis in
+	the .backup file (see /backup/host/@nice).
+	NB: if you change this value, you will have to re-deploy the auth keys.
 
 bandwidth.overall::
 	This is the default bandwidth limit for both upload and

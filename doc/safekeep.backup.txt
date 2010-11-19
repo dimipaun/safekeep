@@ -25,7 +25,7 @@ The full set of supported elements and attributes looks as follows:
   <!-- the client backup host, the user under which the servers will connect,
        the SSH keys used for control and data transfer -->
   <host
-    name="myhost" user="root"
+    name="myhost" user="root" nice="10"
     key-ctrl="/home/jdoe/.ssh/backup_id_dsa"
     key-data="/home/jdoe/.ssh/backup2_id_dsa"
   />
@@ -112,6 +112,12 @@ are separated by '/', attributes are introduced by '@':
 	must have read permissions for the files that will be backed up,
 	so it most likely needs to be 'root'.
 	Optional, defaults to 'root'.
+
+/backup/host/@nice::
+	The nice adjustment for the client. This settings is normally
+	not all that important, as most of the load rests on the server side.
+	NB: if you change this value, you will have to re-deploy the auth keys.
+	Optional, defaults to no nice level.
 
 /backup/host/@key-ctrl::
 	This is the private key used to establish the SSH connection

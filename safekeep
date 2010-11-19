@@ -282,6 +282,7 @@ def parse_config(backup_el, dflt_id):
     if host_el:
         host = host_el[0].getAttribute('name')
         user = host_el[0].getAttribute('user')
+        nice = host_el[0].getAttribute('nice')
         key_ctrl = host_el[0].getAttribute('key-ctrl')
         key_data = host_el[0].getAttribute('key-data')
     else:
@@ -373,7 +374,7 @@ def parse_config(backup_el, dflt_id):
                          '/var/named/chroot/var/run', '/var/named/chroot/var/tmp' ]
         cludes = [{ 'type' : 'exclude', 'path' : path, 'glob' : None, 'regexp' : None } for path in path_xcludes]
 
-    return { 'id': id, 'host' : host, 'user' : user, 'key_ctrl' : key_ctrl, 'key_data' : key_data,
+    return { 'id': id, 'host' : host, 'nice' : nice, 'user' : user, 'key_ctrl' : key_ctrl, 'key_data' : key_data,
              'dir' : dir, 'retention' : retention, 'dumps' : dumps, 'snaps' : snaps, 'script' : script,
              'cludes' : cludes, 'data_options' : data_options, 'options' : options, 'bw' : bw}
 
@@ -1060,7 +1061,7 @@ def do_list(cfgs, ids, list_type, list_date, list_parsable):
         info('------------------------------------------------------------------')
     debug('Server listing done')
 
-def do_keys(cfgs, ids, identity, status, dump, deploy):
+def do_keys(cfgs, ids, nice_rem, identity, status, dump, deploy):
     for cfg in cfgs.itervalues():
         id = cfg['id']
         if ids and id not in ids: continue
@@ -1068,6 +1069,13 @@ def do_keys(cfgs, ids, identity, status, dump, deploy):
         if not cfg['host']:
             info('%s: Client is local, it needs no keys' % id)
             continue
+
+        nice = cfg['nice'] or nice_rem
+        if nice:
+            nice_cmd = 'nice -n%s' % (nice)
+        else:
+            nice_cmd = ''
+ 
         cmds = ['safekeep --client', 'rdiff-backup --server --restrict-read-only /']
         privatekeyfiles = [cfg.get('key_ctrl'), cfg.get('key_data')]
         lines = []
@@ -1099,7 +1107,7 @@ def do_keys(cfgs, ids, identity, status, dump, deploy):
             fin = open(publickeyfile, 'r')
             publickey = fin.read()
             fin.close()
-            line = 'command="%s",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty %s' % (cmd, publickey.strip())
+            line = 'command="%s%s",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty %s' % (nice_cmd, cmd, publickey.strip())
             lines.append(line)
         else:
             keys_ok = True
@@ -1386,7 +1394,9 @@ def main():
             smtp = props['email.smtp.server']
         if 'email.to' in props:
             email = props['email.to'].split(',')
-        nice_srv = get_int('nice.adjustment')
+        nice_def = get_int('nice.adjustment')
+        nice_srv = get_int('nice.adjustment.server') or nice_def
+        nice_cln = get_int('nice.adjustment.client') or nice_def
 
         global default_bandwidth
         default_bandwidth['overall'] = get_int('bandwidth.limit') or 0
@@ -1456,7 +1466,7 @@ def main():
             verbosity_level = 1 + verbosity
             if not keys_status and not keys_print and not keys_deploy: 
                 keys_status = True
-            do_keys(cfgs, args, identity, keys_status, keys_print, keys_deploy)
+            do_keys(cfgs, args, nice_cln, identity, keys_status, keys_print, keys_deploy)
         else:
             assert False, 'Unknown mode: %s' % (mode)
     except Exception, ex:

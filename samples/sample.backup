@@ -4,7 +4,7 @@
   <!-- the client backup host, the user under which the servers will connect,
        the SSH keys used for launching "safekeep -c" and "rdiff-backup" -->
   <host
-    name="my_box.corp.com" user="root"
+    name="my_box.corp.com" user="root" nice="10"
     key-ctrl="/home/jdoe/.ssh/backup_id_dsa"
     key-data="/home/jdoe/.ssh/backup2_id_dsa"
   />
