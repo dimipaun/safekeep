@@ -286,7 +286,7 @@ def parse_config(backup_el, dflt_id):
         key_ctrl = host_el[0].getAttribute('key-ctrl')
         key_data = host_el[0].getAttribute('key-data')
     else:
-        host = user = key_ctrl = key_data = None
+        host = user = nice = key_ctrl = key_data = None
     if host and not user:
         user = 'root'
     if host and not key_ctrl:
