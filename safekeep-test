@@ -167,7 +167,9 @@ def localTest(tmproot):
         cmd = "diff -u %(tmproot)s/md5sums.client %(tmproot)s/md5sums.restore"
         if os.system(cmd % params):
             raise TestFailure("The MD5 sums differ")
-        shutil.rmtree(os.path.join(tmproot, 'restore'))
+        dir = os.path.join(tmproot, 'restore')
+        os.system("chmod +w " + dir)
+        shutil.rmtree(dir)
         time.sleep(1) 
 
 def takeOver(host, role, verrel):
@@ -492,6 +494,7 @@ def main():
         if nocleanup:
             print tmproot
         else:
+            os.system("chmod -R +w " +tmproot)
             shutil.rmtree(tmproot)
 
     sys.exit(exitcode)
