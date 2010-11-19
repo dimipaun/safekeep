@@ -957,10 +957,8 @@ def do_server(cfgs, ids, nice, force, cleanup):
             if cfg['host']:
                 cmd.extend(['ssh', verbosity_ssh, '-T', '-i', cfg['key_ctrl'], '-l', cfg['user'], cfg['host'])
             cmd.extend(['safekeep', '--client'])
-    
-            proc = subprocess.Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
-            cin = proc.stdin
-            cout = proc.stdout
+   
+            (cin,cout) = os.popen2(cmd)
 
             cin.write('ALOHA: %s, %s\n' % (PROTOCOL, VERSION))
             cin.flush()
