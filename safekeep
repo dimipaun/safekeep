@@ -778,6 +778,7 @@ def do_client():
     should_cleanup = True
     bdir = '/'
     cfg = do_client_config_parse('<backup/>', 'def')
+    ex = None
     try:
         while True:
             try:
@@ -813,12 +814,14 @@ def do_client():
                     send('ERROR Unknown command: %s' % line)
                     break
             except Exception, e:
-                traceback.print_exc(file=sys.stdout)
-                send('ERROR %s' % e)
+                ex = e
+                break
     finally:
         if should_cleanup:
             do_client_cleanup(cfg, bdir)
 
+    if ex:
+        send('ERROR %s' % (ex or ''))
 
 ######################################################################
 # Server implementation
@@ -1482,8 +1485,7 @@ def main():
         else:
             assert False, 'Unknown mode: %s' % (mode)
     except Exception, ex:
-        traceback.print_exc(file=sys.stdout)
-        error('ERROR: %s' % ex)
+        error('ERROR: %s' % (ex or ''))
 
     if email and not noemail:
         send_notification(email, smtp)
