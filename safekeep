@@ -17,10 +17,16 @@
 
 from __future__ import generators
 import getopt, os, os.path, re, sys, fnmatch, stat, types
-import subprocess
 import commands, tempfile, time, traceback
 import getpass, pwd, xml.dom.minidom
 import socket, smtplib
+
+try:
+    import subprocess
+    from subprocess import PIPE, STDOUT
+except:
+    PIPE = -1
+    STDOUT = -2
 
 ######################################################################
 # Global settings
@@ -108,26 +114,47 @@ def do_spawn(args, stdin=None, stdout=False):
     debug('Run [' + ' '.join(args) + ']')
     _shell = isinstance(args, types.StringTypes)
     if stdin:
-        _stdin = subprocess.PIPE
+        _stdin = PIPE
     else:
         _stdin = None
     if stdout:
         _stderr = None
     else:
-        _stderr = subprocess.STDOUT
-    proc = subprocess.Popen(args, bufsize=1, shell=_shell, stdin=_stdin, stdout=subprocess.PIPE, stderr=_stderr, close_fds=True)
+        _stderr = STDOUT
+
+    if 'subprocess' in dir():
+        proc = subprocess.Popen(args, bufsize=1, shell=_shell, stdin=_stdin, stdout=PIPE, stderr=_stderr, close_fds=True)
+        child_in = proc.stdin
+        child_out = proc.stdout
+        def do_wait():
+            return proc_wait()
+
+    else:
+        if _shell:
+            args = ["/bin/sh", "-c"].extends(args)
+        if _stderr:
+            (child_in, child_out) = os.popen4(args)
+        else:
+            (child_in, child_out) = os.popen3(args)
+            
+        if not stdin:
+            child_in.close()
+        
+        def do_wait():
+            return 0
 
     if stdin:
-        proc.stdin.write(stdin)
-        proc.stdin.close()
+        child_in.write(stdin)
+        child_in.close()
+
     lines=[]
-    for line in proc.stdout:
+    for line in child_out:
         if stdout:
             lines.append(line)
         else:
             info(line.rstrip())
-    proc.stdout.close()
-    return (proc.wait(), ''.join(lines))
+    child_out.close()
+    return (do_wait(), ''.join(lines))
 
 def _spawn(args, stdin=None, stdout=False):
     if isinstance(args, types.StringTypes):
