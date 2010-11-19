@@ -124,7 +124,7 @@ def do_spawn(args, stdin=None, stdout=False):
     return (proc.wait(), ''.join(lines))
 
 def _spawn(args, stdin=None, stdout=False):
-    if isinstance(args, str) or isinstance(args, unicode):
+    if isinstance(args, types.StringTypes):
         cmd = args.split(None)[0]
     else:
         cmd = args[0]
