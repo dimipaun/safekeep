@@ -112,7 +112,7 @@ def args_to_list(args):
     else:
         return args
 
-def do_spawn(args, shell=False):
+def do_spawn(args, shell=False, stdout=False):
     global cmd
     argslist = args_to_list(args)
     cmd = argslist[0]
@@ -125,15 +125,19 @@ def do_spawn(args, shell=False):
         debug('Run [' + ' '.join(argslist) + ']')
         proc = subprocess.Popen(argslist, bufsize=1, shell=False, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
     proc.stdin.close()
+    lines=[]
     for line in proc.stdout:
-        info(line.rstrip())
+        if stdout:
+            lines.append(line)
+        else:
+            info(line.rstrip())
     proc.stdout.close()
-    return proc.wait()
+    return (proc.wait(), ''.join(lines))
 
 def spawn(args, shell=False):
     global cmd
     try:
-        rc = do_spawn(args, shell=shell)
+        rc, out = do_spawn(args, shell=shell)
     except OSError, ex:
         error("OSError: %s: %s" % (cmd, ex))
 
@@ -151,7 +155,7 @@ def spawn(args, shell=False):
 
 def try_to_run(args):
     try:
-        rc = do_spawn(args)
+        rc, out = do_spawn(args)
     except OSError, ex:
         return False
     return rc in (0,1)
