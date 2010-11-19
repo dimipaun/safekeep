@@ -1104,7 +1104,7 @@ def do_keys(cfgs, ids, nice_rem, identity, status, dump, deploy):
                     if backup_user is not work_user:
                         gencmd = 'su -s /bin/sh -c %s - %s' % (commands.mkarg(gencmd), backup_user)
                     debug(gencmd)
-                    if subprocess.call(gencmd, shell=True):
+                    if subprocess.Popen(gencmd, shell=True).wait():
                         error('%s: Failed to generate key %s. Skipping client.' % (id, privatekeyfile))
                         break
             if not os.path.isfile(publickeyfile):
