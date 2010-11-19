@@ -149,9 +149,9 @@ def spawn(args, shell=False):
         error('%s failed: %s' % (cmd, ret));
     return ret
 
-def try_to_run(args, shell=False):
+def try_to_run(args):
     try:
-        rc = do_spawn(args, shell=shell)
+        rc = do_spawn(args)
     except OSError, ex:
         return False
     return rc in (0,1)
@@ -1104,7 +1104,7 @@ def do_keys(cfgs, ids, nice_rem, identity, status, dump, deploy):
                     if backup_user is not work_user:
                         gencmd = 'su -s /bin/sh -c %s - %s' % (commands.mkarg(gencmd), backup_user)
                     debug(gencmd)
-                    if subprocess.Popen(gencmd, shell=True).wait():
+                    if os.system(gencmd):
                         error('%s: Failed to generate key %s. Skipping client.' % (id, privatekeyfile))
                         break
             if not os.path.isfile(publickeyfile):
