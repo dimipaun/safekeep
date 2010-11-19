@@ -1072,7 +1072,7 @@ def do_keys(cfgs, ids, nice_rem, identity, status, dump, deploy):
 
         nice = cfg['nice'] or nice_rem
         if nice:
-            nice_cmd = 'nice -n%s' % (nice)
+            nice_cmd = 'nice -n%s ' % (nice)
         else:
             nice_cmd = ''
  
