@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2006-2007 Lattica, Inc.
+# Copyright (C) 2006-2010 Lattica, Inc.
 #
 # SafeKeep is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@ default_bandwidth = {}
 cmd = "<Missing>"
 
 PROTOCOL = "1.1"
-VERSION = "1.2.1"
+VERSION = "1.3.0"
 VEBOSITY_BY_CLASS = {'DBG': 3, 'INFO': 2, 'WARN': 1, 'ERR': 0}
 
 ######################################################################
