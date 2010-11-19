@@ -16,7 +16,7 @@
 # along with Safekeep.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import generators
-import getopt, os, os.path, re, sys, fnmatch, stat
+import getopt, os, os.path, re, sys, fnmatch, stat, types
 import subprocess
 import commands, tempfile, time, traceback
 import getpass, pwd, xml.dom.minidom
@@ -106,8 +106,9 @@ def warn(msg):
 def error(msg):
     log(msg, 'ERR')
 
-def do_spawn(args, shell=False, stdin=None, stdout=False):
+def do_spawn(args, stdin=None, stdout=False):
     debug('Run [' + args + ']')
+    shell = isinstance(args, types.StringTypes)
     proc = subprocess.Popen(args, bufsize=1, shell=shell, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
 
     if stdin:
@@ -122,14 +123,14 @@ def do_spawn(args, shell=False, stdin=None, stdout=False):
     proc.stdout.close()
     return (proc.wait(), ''.join(lines))
 
-def _spawn(args, shell=False, stdin=None, stdout=False):
+def _spawn(args, stdin=None, stdout=False):
     if isinstance(args, str) or isinstance(args, unicode):
         cmd = args.split(None)[0]
     else:
         cmd = args[0]
 
     try:
-        rc, out = do_spawn(args, shell, stdin, stdout)
+        rc, out = do_spawn(args, stdin, stdout)
     except OSError, ex:
         ret = "OSError: %s" % (ex)
         error('%s failed: %s' % (cmd, ret));
@@ -149,15 +150,15 @@ def _spawn(args, shell=False, stdin=None, stdout=False):
 
 # this just spawns an external program (optionally through a shell)
 # and returns True it it fails, and False if it successed
-def spawn(args, shell=False):
-    rc, out = _spawn(args, shell)
+def spawn(args):
+    rc, out = _spawn(args)
     return rc
 
 # this spawans an external program (optionally through a shell),
 # feeds it any input via stdin, captures the output and returns it.
 # if it fails it returns None, otherwise it returns the output
-def call(args, shell=False, stdin=None):
-    rc, out = _spawn(args, shell, stdin, stdout=True)
+def call(args, stdin=None):
+    rc, out = _spawn(args, stdin, stdout=True)
     if not rc:
         return None
     return out
@@ -505,7 +506,7 @@ def do_client_dbdump(cfg):
         if passwdfile:
            os.environ['PGPASSFILE'] = passwdfile
         try:
-            ec = spawn(cmd, shell=True)
+            ec = spawn(cmd)
         finally:
             if passwdfile:
                 del os.environ['PGPASSFILE']
@@ -1149,7 +1150,7 @@ def do_keys(cfgs, ids, nice_rem, identity, status, dump, deploy):
             if deploy:
                 cmd = '%s %s@%s "umask 077; test -d .ssh || mkdir .ssh; cat >> .ssh/authorized_keys"' % (basessh, cfg['user'], cfg['host'])
                 keys = '%s\n' % '\n'.join([key[4] for key in new_keys])
-                out = call(cmd, shell=True, stdin=keys)
+                out = call(cmd, stdin=keys)
                 if out is None:
                     error('Failed to deliver the keys to the client')
 
