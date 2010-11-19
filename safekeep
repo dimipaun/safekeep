@@ -1438,6 +1438,7 @@ def main():
         if 'email.to' in props:
             email = props['email.to'].split(',')
         nice_def = get_int('nice.adjustment')
+        if nice_def is None: nice_def = 10
         nice_srv = get_int('nice.adjustment.server') or nice_def
         nice_cln = get_int('nice.adjustment.client') or nice_def
 

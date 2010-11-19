@@ -50,7 +50,8 @@ nice.adjustment::
 	It specifies an integer to be added to the current nice 
 	level. Nicenesses range from -20 (most favorable scheduling) 
 	to 19 (least favorable).
-	If no nice level is specified, safekeep is not niced.
+	To disable nice, set this value to 0.
+	If no nice level is specified, safekeep is niced at +10.
 
 nice.adjustment.server::
 	The nice level adjustment for safekeep, used on the server side.
