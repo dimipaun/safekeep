@@ -24,9 +24,11 @@ import socket, smtplib
 try:
     import subprocess
     from subprocess import PIPE, STDOUT
+    use_subprocess = True
 except:
     PIPE = -1
     STDOUT = -2
+    use_subprocess = False
 
 ######################################################################
 # Global settings
@@ -128,16 +130,13 @@ def do_spawn(args, stdin=None, stdout=False):
     else:
         _stderr = STDOUT
 
-    if 'subprocess' in dir():
+    if use_subprocess:
         proc = subprocess.Popen(args, bufsize=1, shell=_shell, stdin=_stdin, stdout=PIPE, stderr=_stderr, close_fds=True)
         child_in = proc.stdin
         child_out = proc.stdout
-        def do_wait():
-            return proc_wait()
-
     else:
         if _shell:
-            args = ["/bin/sh", "-c"].extend(args)
+            args = ["/bin/sh", "-c", args]
         if _stderr:
             (child_in, child_out) = os.popen4(args)
         else:
@@ -146,9 +145,6 @@ def do_spawn(args, stdin=None, stdout=False):
         if not stdin:
             child_in.close()
         
-        def do_wait():
-            return 0
-
     if stdin:
         child_in.write(stdin)
         child_in.close()
@@ -160,7 +156,12 @@ def do_spawn(args, stdin=None, stdout=False):
         else:
             info(line.rstrip())
     child_out.close()
-    return (do_wait(), ''.join(lines))
+
+    if use_subprocess:
+        return (proc.wait(), ''.join(lines))
+    else:
+        return (0, ''.join(lines))
+        
 
 def _spawn(args, stdin=None, stdout=False):
     if isinstance(args, types.StringTypes):
