@@ -131,7 +131,7 @@ def do_spawn(args, stdin=None, stdout=False):
 
     else:
         if _shell:
-            args = ["/bin/sh", "-c"].extends(args)
+            args = ["/bin/sh", "-c"].extend(args)
         if _stderr:
             (child_in, child_out) = os.popen4(args)
         else:
@@ -873,11 +873,12 @@ def do_server_rdiff(cfg, bdir, nice, ionice, force):
     if nice:
         args.extend(['nice', '-n' + str(nice)])
 
-    if ionice and ionice != 'none' and try_to_run('ionice'):
-        if ionice == 'idle':
-            args.extend(['ionice', '-c3', '-t'])
+    ionice_cmd = 'ionice'
+    if ionice and ionice != 'none' and try_to_run(ionice_cmd):
+        if ionice is 'idle':
+            args.extend([ionice_cmd, '-c3', '-t'])
         else:
-            args.extend(['ionice', '-c2', '-n' + ionice, '-t'])
+            args.extend([ionice_cmd, '-c2', '-n' + ionice, '-t'])
 
     args.extend(['rdiff-backup'])
 
