@@ -64,6 +64,17 @@ nice.adjustment.client::
 	the .backup file (see /backup/host/@nice).
 	NB: if you change this value, you will have to re-deploy the auth keys.
 
+ionice.adjustment::
+	The default IO nice level adjustment for safekeep.
+	It can be either 'none', 'idle', or an integer between 0-7
+	(with 0 being higher priority). See ionice(1) for more information.
+	This is currently being used only on the server side, where
+	IO load tends to be a problem.
+	NB: this depends on the availability of 'ionice(1)' on the
+	system where the server is running. If ionice cannot be found,
+	this setting is ignored.
+	If no level is specified, it defaults to 'idle'.
+
 bandwidth.overall::
 	This is the default bandwidth limit for both upload and
 	download for all the clients. It is an integer number of KB/s

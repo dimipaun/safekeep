@@ -867,11 +867,17 @@ def do_server_getanswer(cout):
         else:
             log(line[:-1])
 
-def do_server_rdiff(cfg, bdir, nice, force):
+def do_server_rdiff(cfg, bdir, nice, ionice, force):
     args = []
 
     if nice:
         args.extend(['nice', '-n' + str(nice)])
+
+    if ionice and ionice != 'none' and try_to_run('ionice'):
+        if ionice == 'idle':
+            args.extend(['ionice', '-c3', '-t'])
+        else:
+            args.extend(['ionice', '-c2', '-n' + ionice, '-t'])
 
     args.extend(['rdiff-backup'])
 
@@ -968,7 +974,7 @@ def do_server_compat(client_versions):
     elif server_minor > client_minor:
         warn('Protocol mismatch: %s <> %s' % (PROTOCOL, client_protocol))
 
-def do_server(cfgs, ids, nice, force, cleanup):
+def do_server(cfgs, ids, nice, ionice, force, cleanup):
     debug("Do server main loop")
     for cfg in cfgs.itervalues():
         id = cfg['id']
@@ -1038,7 +1044,7 @@ def do_server(cfgs, ids, nice, force, cleanup):
                 else:
                     backup_marker = None
 
-                do_server_rdiff(cfg, bdir, nice, force)
+                do_server_rdiff(cfg, bdir, nice, ionice, force)
 
                 errs = 0
                 if os.path.isdir(rdiff_logdir):
@@ -1441,6 +1447,9 @@ def main():
         if nice_def is None: nice_def = 10
         nice_srv = get_int('nice.adjustment.server') or nice_def
         nice_cln = get_int('nice.adjustment.client') or nice_def
+        ionice_def = get_int('ionice.adjustment')
+        if ionice_def is None: ionice_def = 'idle'
+        if ionice_def is '': ionice_def = 'none'
 
         global default_bandwidth
         default_bandwidth['overall'] = get_int('bandwidth.limit') or 0
@@ -1489,7 +1498,7 @@ def main():
         if mode is 'server':
             is_client = False
             verbosity_level = 1 + verbosity
-            do_server(cfgs, args, nice_srv, force, cleanup)
+            do_server(cfgs, args, nice_srv, ionice_def, force, cleanup)
         elif mode is 'list':
             if list_type is None:
                 list_type = 'increments'
