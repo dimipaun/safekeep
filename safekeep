@@ -82,7 +82,7 @@ def log(msg, cls=None):
             print >> sys.stderr, msg.encode('utf-8')
 
 def info_file(file, marker=None):
-    info('## File: ' + file)
+    info('# File: ' + file)
     errs = 0;
     fin = open(file, 'r')
     try:
@@ -98,6 +98,9 @@ def info_file(file, marker=None):
         fin.close()
     return errs
 
+def stacktrace():
+    return "\n" + traceback.format_exc()
+
 def debug(msg):
     log(msg, 'DBG')
 
@@ -107,8 +110,11 @@ def info(msg):
 def warn(msg):
     log(msg, 'WARN')
 
-def error(msg):
-    log(msg, 'ERR')
+def error(msg, ex):
+    extra = ""
+    if ex:
+        extra = stacktrace()
+    log(msg + extra, 'ERR')
 
 def do_spawn(args, stdin=None, stdout=False):
     debug('Run [' + ' '.join(args) + ']')
@@ -841,7 +847,6 @@ def do_client():
                     send('ERROR Unknown command: %s' % line)
                     break
             except Exception, e:
-                traceback.print_exc(file=sys.stdout)
                 ex = e
                 break
     finally:
@@ -849,7 +854,7 @@ def do_client():
             do_client_cleanup(cfg, bdir)
 
     if ex:
-        send('ERROR %s' % (ex or ''))
+        send('TRACEBACK ' + ex  + '>>>' + stacktrace().replace('\n', '###'))
 
 ######################################################################
 # Server implementation
@@ -862,6 +867,10 @@ def do_server_getanswer(cout):
             return line[2:-1].strip()
         elif line.startswith('ERROR'):
             raise Exception(line[5:].strip())
+        elif line.startswith('TRACEBACK'):
+            i = line.find('>>>')
+            error(line[i+3:].replace('###', '\n'))
+            raise Exception(line[10:i].strip())
         elif not line:
             raise Exception('client died unexpectedly')
         else:
@@ -1069,13 +1078,12 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
             else:
                 info('Server backup for client %s: OK (%d WARNINGS)' % (id, errs))
 
-        except Exception, e:
+        except Exception, ex:
             if cleanup and not cleaned_up:
                 info('Client-side cleanup for client %s: FAILED' % id)
                 do_server_rdiff_cleanup(cfg)
             else:
-                error(e)
-                error('Server backup for client %s: FAILED' % id)
+                error('Server backup for client %s: FAILED' % id, ex)
 
     info('------------------------------------------------------------------')
     debug('Server backup done')
@@ -1527,7 +1535,7 @@ def main():
         else:
             assert False, 'Unknown mode: %s' % (mode)
     except Exception, ex:
-        error('ERROR: %s' % (ex or ''))
+        error('ERROR: %s' % (ex or ''), ex)
 
     if email and not noemail:
         send_notification(email, smtp)
