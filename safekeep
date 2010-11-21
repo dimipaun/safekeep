@@ -874,11 +874,14 @@ def do_server_rdiff(cfg, bdir, nice, ionice, force):
         args.extend(['nice', '-n' + str(nice)])
 
     ionice_cmd = 'ionice'
-    if ionice and ionice != 'none' and try_to_run(ionice_cmd):
-        if ionice is 'idle':
-            args.extend([ionice_cmd, '-c3', '-t'])
+    if ionice and ionice != 'none':
+        if try_to_run(ionice_cmd):
+            if ionice is 'idle':
+                args.extend([ionice_cmd, '-c3', '-t'])
+            else:
+                args.extend([ionice_cmd, '-c2', '-n' + ionice, '-t'])
         else:
-            args.extend([ionice_cmd, '-c2', '-n' + ionice, '-t'])
+            warn('ionice(1) not available, ignoring ionice.adjustment')
 
     args.extend(['rdiff-backup'])
 
