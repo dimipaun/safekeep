@@ -121,7 +121,9 @@ rpm: tar
 	mv $(rpmroot)/SRPMS/$(snapshotname)-$(release)*.src.rpm .
 	mv $(rpmroot)/RPMS/noarch/$(name)-*-$(version).$(version_ts)-$(release)*.noarch.rpm .
 
-dist:
+dist: $(releasedir)/$(releasename).tar.gz
+
+$(releasedir)/$(releasename).tar.gz:
 	svn export $(svnroot)/safekeep/tags/$(tagname) $(releasename)
 	cat $(releasename)/$(name).spec.in | sed 's/^%define version.*/%define version $(version)/' > $(releasename)/$(name).spec
 	cat $(releasename)/debian/changelog.in | sed 's/^safekeep.*/safekeep ($(version)) unstable; urgency=low/' > $(releasename)/debian/changelog
@@ -129,40 +131,52 @@ dist:
 	cd $(releasename); make docs
 	rm -rf $(releasename)
 
-distdeb: dist
-	tar xz -C /tmp -f $(releasedir)/$(releasename).tar.gz
-	rm -rf $(releasedir)/$(releasename).tar.gz
-	cd /tmp/$(releasename) && debuild --check-dirname-regex 'safekeep(-.*)?'
+distdeb: distdeb-build distdeb-sign
+
+distdeb-build: $(releasedir)/$(releasename).tar.gz
+	tar xz -C /tmp -f $<
+	cd /tmp/$(releasename) && dpkg-buildpackage -us -uc
 	mv /tmp/$(name)-*_$(version)_all.deb $(releasedir)
 
-distrpm: dist
-	rpmbuild -ta $(releasedir)/$(releasename).tar.gz
+distdeb-sign:
+	debsign $(releasedir)/$(name)-*_$(version)_all.deb
+
+distrpm: distrpm-build distrpm-sign
+
+distrpm-build: $(releasedir)/$(releasename).tar.gz
+	rpmbuild -ta $<
 	mv $(rpmroot)/SRPMS/$(releasename)-$(release)*.src.rpm $(releasedir)
 	mv $(rpmroot)/RPMS/noarch/$(name)-*-$(version)-$(release)*.noarch.rpm $(releasedir)
+
+distrpm-sign:
 	rpm --addsign $(releasedir)/$(releasename)-$(release)*.src.rpm $(releasedir)/$(name)-*-$(version)-$(release)*.noarch.rpm
 
-dist-all: dist
-	ssh $(deb_box) 'cd ~/safekeep/safekeep; svn up; cd trunk; make distdeb'
+dist-sign: distrpm-sign distdeb-sign
+
+dist-all: dist distdeb-remote fetch-debs distrpm-remote fetch-rpms dist-sign
+
+distdeb-remote:
+	ssh $(deb_box) 'cd ~/safekeep/safekeep; svn up; cd trunk; make distdeb-build'
+
+fetch-debs:
 	scp $(deb_box):~/safekeep/safekeep/trunk/$(releasedir)/$(name)-*_$(version)_all.deb $(releasedir)
-	ssh $(rpm_box) 'cd ~/safekeep/safekeep; svn up; cd trunk; make distrpm'
-	scp $(rpm_box):~/safekeep/safekeep/trunk/$(name)-*$(version)-$(release).*.rpm $(releasedir)
 
-deploy-src-to-sf:
-	echo -e "cd $(sf_dir)\nmkdir $(version)" | sftp -b- $(sf_login)
-	scp $(releasedir)/$(releasename).tar.gz $(sf_login):$(sf_dir)/$(version)
-	scp ANNOUNCE $(sf_login):$(sf_dir)/$(version)/README.txt
+distrpm-remote:
+	ssh $(rpm_box) 'cd ~/safekeep/safekeep; svn up; cd trunk; make distrpm-build'
 
-deploy-rpms-to-sf:
-	scp $(releasedir)/$(releasename)-$(release)*.src.rpm $(releasedir)/$(name)-*-$(version)-$(release)*.noarch.rpm $(sf_login):$(sf_dir)/$(version)
-
-deploy-debs-to-sf:
-	scp $(releasedir)/$(name)-*_$(version)_all.deb $(sf_login):$(sf_dir)/$(version)
+fetch-rpms:
+	scp $(rpm_box):~/safekeep/safekeep/trunk/$(releasedir)/$(name)-*$(version)-$(release).*.rpm $(releasedir)
 
 deploy-lattica:
 	scp $(releasedir)/${name}{,-common,-client,-server}-${version}-*.rpm ${repo_srv}:${repo_dir}/upload
 	ssh ${repo_srv} "cd ${repo_dir}; ./deploy-rpms.sh upload/${name}-*${version}-*.rpm"
 
 deploy-sf: deploy-src-to-sf deploy-rpms-to-sf deploy-debs-to-sf
+	echo -e "cd $(sf_dir)\nmkdir $(version)" | sftp -b- $(sf_login)
+	scp $(releasedir)/$(releasename).tar.gz $(sf_login):$(sf_dir)/$(version)
+	scp ANNOUNCE $(sf_login):$(sf_dir)/$(version)/README.txt
+	scp $(releasedir)/$(releasename)-$(release)*.src.rpm $(releasedir)/$(name)-*-$(version)-$(release)*.noarch.rpm $(sf_login):$(sf_dir)/$(version)
+	scp $(releasedir)/$(name)-*_$(version)_all.deb $(sf_login):$(sf_dir)/$(version)
 
 check:
 	safekeep-test --local
