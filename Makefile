@@ -11,6 +11,8 @@ tagname     := $(shell echo Release-$(releasename) | tr . _)
 dirname     := $(shell basename $(PWD))
 rpmroot     := $(shell grep '%_topdir' ~/.rpmmacros 2>/dev/null | sed 's/^[^ \t]*[ \t]*//')
 svnroot     := $(shell LANG=C svn info 2>/dev/null | grep Root | cut -c 18-)
+sf_login    := dimi,$(name)@frs.sourceforge.net
+sf_dir	    := /home/frs/project/s/sa/$(name)
 releasedir  := releases
 repo_srv    := root@ulysses
 repo_dir    := /var/www/repos/lattica
@@ -129,13 +131,24 @@ distdeb: dist
 	tar xz -C /tmp -f $(releasedir)/$(releasename).tar.gz
 	rm -rf $(releasedir)/$(releasename).tar.gz
 	cd /tmp/$(releasename) && debuild --check-dirname-regex 'safekeep(-.*)?'
-	mv /tmp/$(releasename)/safekeep*deb $(releasedir)
+	mv /tmp/$(name)-*_$(version)_all.deb $(releasedir)
 
 distrpm: dist
 	rpmbuild -ta $(releasedir)/$(releasename).tar.gz
 	mv $(rpmroot)/SRPMS/$(releasename)-$(release)*.src.rpm $(releasedir)
 	mv $(rpmroot)/RPMS/noarch/$(name)-*-$(version)-$(release)*.noarch.rpm $(releasedir)
 	rpm --addsign $(releasedir)/$(releasename)-$(release)*.src.rpm $(releasedir)/$(name)-*-$(version)-$(release)*.noarch.rpm
+
+deploy-src-to-sf:
+	echo -e "cd $(sf_dir)\nmkdir $(version)" | sftp -b- $(sf_login)
+	scp $(releasedir)/$(releasename).tar.gz $(sf_login):$(sf_dir)/$(version)
+	scp ANNOUNCE $(sf_login):$(sf_dir)/$(version)/README.txt
+
+deploy-rpms-to-sf:
+	scp $(releasedir)/$(releasename)-$(release)*.src.rpm $(releasedir)/$(name)-*-$(version)-$(release)*.noarch.rpm $(sf_login):$(sf_dir)/$(version)
+
+deploy-debs-to-sf:
+	scp $(releasedir)/$(name)-*_$(version)_all.deb $(sf_login):$(sf_dir)/$(version)
 
 deploy-lattica:
 	scp $(releasedir)/${name}{,-common,-client,-server}-${version}-*.rpm ${repo_srv}:${repo_dir}/upload
