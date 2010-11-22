@@ -171,7 +171,7 @@ deploy-lattica:
 	scp $(releasedir)/${name}{,-common,-client,-server}-${version}-*.rpm ${repo_srv}:${repo_dir}/upload
 	ssh ${repo_srv} "cd ${repo_dir}; ./deploy-rpms.sh upload/${name}-*${version}-*.rpm"
 
-deploy-sf: deploy-src-to-sf deploy-rpms-to-sf deploy-debs-to-sf
+deploy-sf: 
 	echo -e "cd $(sf_dir)\nmkdir $(version)" | sftp -b- $(sf_login)
 	scp $(releasedir)/$(releasename).tar.gz $(sf_login):$(sf_dir)/$(version)
 	scp ANNOUNCE $(sf_login):$(sf_dir)/$(version)/README.txt
