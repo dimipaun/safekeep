@@ -11,6 +11,8 @@ tagname     := $(shell echo Release-$(releasename) | tr . _)
 dirname     := $(shell basename $(PWD))
 rpmroot     := $(shell grep '%_topdir' ~/.rpmmacros 2>/dev/null | sed 's/^[^ \t]*[ \t]*//')
 svnroot     := $(shell LANG=C svn info 2>/dev/null | grep Root | cut -c 18-)
+deb_box	    := 192.168.3.202
+rpm_box     := 192.168.3.242
 sf_login    := dimi,$(name)@frs.sourceforge.net
 sf_dir	    := /home/frs/project/s/sa/$(name)
 releasedir  := releases
@@ -139,6 +141,12 @@ distrpm: dist
 	mv $(rpmroot)/RPMS/noarch/$(name)-*-$(version)-$(release)*.noarch.rpm $(releasedir)
 	rpm --addsign $(releasedir)/$(releasename)-$(release)*.src.rpm $(releasedir)/$(name)-*-$(version)-$(release)*.noarch.rpm
 
+dist-all: dist
+	ssh $(deb_box) 'cd ~/safekeep/safekeep; svn up; cd trunk; make distdeb'
+	scp $(deb_box):~/safekeep/safekeep/trunk/$(releasedir)/$(name)-*_$(version)_all.deb $(releasedir)
+	ssh $(rpm_box) 'cd ~/safekeep/safekeep; svn up; cd trunk; make distrpm'
+	scp $(rpm_box):~/safekeep/safekeep/trunk/$(name)-*$(version)-$(release).*.rpm $(releasedir)
+
 deploy-src-to-sf:
 	echo -e "cd $(sf_dir)\nmkdir $(version)" | sftp -b- $(sf_login)
 	scp $(releasedir)/$(releasename).tar.gz $(sf_login):$(sf_dir)/$(version)
@@ -154,8 +162,7 @@ deploy-lattica:
 	scp $(releasedir)/${name}{,-common,-client,-server}-${version}-*.rpm ${repo_srv}:${repo_dir}/upload
 	ssh ${repo_srv} "cd ${repo_dir}; ./deploy-rpms.sh upload/${name}-*${version}-*.rpm"
 
-deploy-sf:
-	scp releases/${name}{-${version}.tar.gz,{,-common,-client,-server}-${version}-*.rpm} frs.sourceforge.net:uploads
+deploy-sf: deploy-src-to-sf deploy-rpms-to-sf deploy-debs-to-sf
 
 check:
 	safekeep-test --local
