@@ -130,7 +130,7 @@ def info(msg):
 def warn(msg):
     log(msg, 'WARN')
 
-def error(msg, ex):
+def error(msg, ex=None):
     extra = ""
     if ex:
         extra = stacktrace()
@@ -873,7 +873,7 @@ def do_client():
             do_client_cleanup(cfg, bdir)
 
     if ex:
-        send('TRACEBACK ' + ex  + '>>>' + stacktrace().replace('\n', '###'))
+        send('TRACEBACK ' + str(ex)  + '>>>' + stacktrace().replace('\n', '###'))
 
 ######################################################################
 # Server implementation
