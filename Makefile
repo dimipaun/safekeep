@@ -14,7 +14,7 @@ svnroot     := $(shell LANG=C svn info 2>/dev/null | grep Root | cut -c 18-)
 deb_box	    := 192.168.3.202
 rpm_box     := 192.168.3.242
 sf_login    := dimi,$(name)@frs.sourceforge.net
-sf_dir	    := /home/frs/project/s/sa/$(name)
+sf_dir	    := /home/frs/project/s/sa/$(name)/$(name)
 releasedir  := releases
 repo_srv    := root@ulysses
 repo_dir    := /var/www/repos/lattica
