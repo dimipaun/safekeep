@@ -94,7 +94,7 @@ def log(msg, cls=None):
         msg = '%s: %s' % (cls, msg)
     else:
         for c in VEBOSITY_BY_CLASS.keys():
-            if msg.startswith(c + ': '):
+            if msg.upper().startswith(c + ': '):
                 cls = c
                 break
         else:
