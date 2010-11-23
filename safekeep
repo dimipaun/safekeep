@@ -75,6 +75,14 @@ VEBOSITY_BY_CLASS = {'DBG': 3, 'INFO': 2, 'WARN': 1, 'ERR': 0}
 # Miscellaneous support functions
 ######################################################################
 
+class ClientException(Exception):
+    def __init__(self, value, traceback=None):
+        self.value = value
+        self.traceback = traceback
+
+    def __str__(self):
+        return repr(self.value)
+
 def send(msg):
     print msg.encode('utf-8')
     sys.stdout.flush()
@@ -885,11 +893,10 @@ def do_server_getanswer(cout):
         if line.startswith('OK'):
             return line[2:-1].strip()
         elif line.startswith('ERROR'):
-            raise Exception(line[5:].strip())
+            raise ClientException(line[5:].strip())
         elif line.startswith('TRACEBACK'):
             i = line.find('>>>')
-            error(line[i+3:].replace('###', '\n'))
-            raise Exception(line[10:i].strip())
+            raise ClientException(line[10:i].strip(), line[i+3:].replace('###', '\n'))
         elif not line:
             raise Exception('client died unexpectedly')
         else:
@@ -1035,7 +1042,9 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
 
             cmd = []
             if cfg['host']:
-                cmd.extend(['ssh', verbosity_ssh, '-T', '-i', cfg['key_ctrl'], '-l', cfg['user'], cfg['host']])
+                cmd.extend(['ssh'])
+		if verbosity_ssh: cmd.extend([verbosity_ssh])
+		cmd.extend(['-T', '-i', cfg['key_ctrl'], '-l', cfg['user'], cfg['host']])
             cmd.extend(['safekeep', '--client'])
    
             (cin,cout) = os.popen2(cmd)
@@ -1102,7 +1111,11 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
                 info('Client-side cleanup for client %s: FAILED' % id)
                 do_server_rdiff_cleanup(cfg)
             else:
-                error('Server backup for client %s: FAILED' % id, ex)
+		if isinstance(ex, ClientException):
+        	    error('Client %s: FAILED due to: %s' % (id, ex or ''))
+		    if ex.traceback: error(ex.traceback)
+		else:
+                    error('Server backup for client %s: FAILED' % id, ex)
 
     info('------------------------------------------------------------------')
     debug('Server backup done')
