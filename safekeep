@@ -921,33 +921,32 @@ def do_server_rdiff(cfg, bdir, nice, ionice, force):
                 args.extend([ionice_cmd, '-c2', '-n%s' % (ionice), '-t'])
         else:
             warn('ionice(1) not available, ignoring ionice.adjustment')
+ 
+    # handle bandwidth limiting via trickle
+    def get_bw(vals, d):
+        return vals.get(d) or vals.get('overall')
+    def get_bandwidth(cfg, d):
+        return get_bw(cfg['bw'], d) or get_bw(default_bandwidth, d)
+    trickle = []
+    limit_dl = get_bandwidth(cfg, 'download')
+    limit_ul = get_bandwidth(cfg, 'upload')
+    if limit_dl or limit_ul:
+        trickle.extend([trickle_cmd])
+	if verbosity_trickle: trickle.extend([verbosity_trickle])
+        if limit_dl:
+            trickle.extend(['-d', str(limit_dl)])
+        if limit_ul:
+            trickle.extend(['-u', str(limit_ul)])
+    if len(trickle):
+        if not try_to_run([trickle_cmd, '-V']):
+	    warn('Trickle not available, bandwidth limiting disabled')
+	    trickle = []
+    args.extend(trickle)
 
     args.extend(['rdiff-backup'])
 
     if cfg['host']:
-        trickle = ''
-
-        def get_bw(vals, dir):
-            return vals.get(dir) or vals.get('overall')
-
-        def get_bandwidth(cfg, dir):
-            return get_bw(cfg['bw'], dir) or get_bw(default_bandwidth, dir)
-
-        limit_dl = get_bandwidth(cfg, 'download')
-        limit_ul = get_bandwidth(cfg, 'upload')
-        if limit_dl or limit_ul:
-            trickle = trickle_cmd + ' ' + verbosity_trickle
-            if limit_dl:
-                trickle += ' -d ' + str(limit_dl)
-            if limit_ul:
-                trickle += ' -u ' + str(limit_ul)
-
-        if trickle:
-            if not try_to_run(trickle_cmd + ' -V'):
-                warn('Trickle not available, bandwidth limiting disabled')
-                trickle = ''
-
-        schema = '%s ssh %s -i %s %%s rdiff-backup --server' % (trickle, verbosity_ssh, cfg['key_data'])
+        schema = 'ssh %s -i %s %%s rdiff-backup --server' % (verbosity_ssh, cfg['key_data'])
         args.extend(['--remote-schema', schema])
 
     if force:
