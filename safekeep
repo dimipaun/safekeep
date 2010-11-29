@@ -1491,7 +1491,7 @@ def main():
         if nice_def is None: nice_def = 10
         nice_srv = get_int('nice.adjustment.server') or nice_def
         nice_cln = get_int('nice.adjustment.client') or nice_def
-        ionice_def = get_int('ionice.adjustment')
+        ionice_def = props.get('ionice.adjustment')
         if ionice_def is None: ionice_def = 'idle'
         if ionice_def is '': ionice_def = 'none'
 
