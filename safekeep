@@ -1248,6 +1248,7 @@ def do_keys(cfgs, ids, nice_rem, identity, status, dump, deploy):
 
 # parses authozied_keys, see sshd(8) man page for details
 def parse_authorized_keys(keystext):
+    if not keystext: keystext = ''
     keys = []
     for line in keystext.splitlines():
         line = line.strip()
