@@ -231,7 +231,7 @@ def call(args, stdin=None):
 
 def try_to_run(args):
     try:
-        rc, out = do_spawn(args)
+        rc, out = do_spawn(args, None, True)
     except OSError, ex:
         return False
     return rc in (0,1)
