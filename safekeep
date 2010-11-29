@@ -914,7 +914,7 @@ def do_server_rdiff(cfg, bdir, nice, ionice, force):
             if ionice is 'idle':
                 args.extend([ionice_cmd, '-c3', '-t'])
             else:
-                args.extend([ionice_cmd, '-c2', '-n' + ionice, '-t'])
+                args.extend([ionice_cmd, '-c2', '-n%s' % (ionice), '-t'])
         else:
             warn('ionice(1) not available, ignoring ionice.adjustment')
 
