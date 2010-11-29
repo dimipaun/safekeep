@@ -1507,8 +1507,11 @@ def main():
     if backup_user and backup_user != work_user:
         (user, pswd, uid, gid, gecos, home_dir, shell) = pwd.getpwnam(backup_user)
         if mode is not 'keys':
-            os.setregid(gid, gid)
-            os.setreuid(uid, uid)
+            try:
+                os.setregid(gid, gid)
+                os.setreuid(uid, uid)
+            except OSError, ex:
+                warn("Cannot setreuid(): " + str(ex))
             os.environ['HOME'] = home_dir
     else:
         backup_user = work_user
