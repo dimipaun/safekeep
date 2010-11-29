@@ -145,7 +145,11 @@ def error(msg, ex=None):
     log(msg + extra, 'ERR')
 
 def do_spawn(args, stdin=None, stdout=False):
-    debug('Run [' + ' '.join(args) + ']')
+    if isinstance(args, types.StringTypes):
+        debug('Run [' + args + ']')
+    else:
+        debug('Run [' + ' '.join(args) + ']')
+
     _shell = isinstance(args, types.StringTypes)
     if stdin:
         _stdin = PIPE
@@ -225,7 +229,7 @@ def spawn(args):
 # if it fails it returns None, otherwise it returns the output
 def call(args, stdin=None):
     rc, out = _spawn(args, stdin, stdout=True)
-    if not rc:
+    if rc:
         return None
     return out
 
@@ -1219,7 +1223,7 @@ def do_keys(cfgs, ids, nice_rem, identity, status, dump, deploy):
         if identity: basessh += ' -i %s' % (commands.mkarg(identity))
 
         if status or deploy:
-            cmd = '%s %s@%s "if test -f .ssh/authorized_keys; then cat .ssh/authorized_keys; fi"' % (basessh, cfg['user'], cfg['host'])
+            cmd = [basessh, '%s@%s' % (cfg['user'], cfg['host']), "if test -f .ssh/authorized_keys; then cat .ssh/authorized_keys; fi"]
             authtext = call(cmd)
             if authtext is None:
                 warn('%s: Failed to read the authorized_keys file.' % id)
@@ -1239,7 +1243,7 @@ def do_keys(cfgs, ids, nice_rem, identity, status, dump, deploy):
             if status:
                 print '%s: Keys will be deployed on the client.' % id
             if deploy:
-                cmd = '%s %s@%s "umask 077; test -d .ssh || mkdir .ssh; cat >> .ssh/authorized_keys"' % (basessh, cfg['user'], cfg['host'])
+                cmd = [basessh, '%s@%s' % (cfg['user'], cfg['host']), "umask 077; test -d .ssh || mkdir .ssh; cat >> .ssh/authorized_keys"]
                 keys = '%s\n' % '\n'.join([key[4] for key in new_keys])
                 out = call(cmd, stdin=keys)
                 if out is None:
