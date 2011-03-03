@@ -1177,7 +1177,7 @@ def do_keys(cfgs, ids, nice_rem, identity, status, dump, deploy):
  
         cmds = ['safekeep --client', 'rdiff-backup --server --restrict-read-only /']
         privatekeyfiles = [cfg.get('key_ctrl'), cfg.get('key_data')]
-        lines = []
+        output = []
         keys_ok = False
         for (cmd, privatekeyfile) in zip(cmds, privatekeyfiles):
             publickeyfile = privatekeyfile + '.pub'
@@ -1207,14 +1207,13 @@ def do_keys(cfgs, ids, nice_rem, identity, status, dump, deploy):
             publickey = fin.read()
             fin.close()
             line = 'command="%s%s",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty %s' % (nice_cmd, cmd, publickey.strip())
-            lines.append(line)
+            output.append(line)
         else:
             keys_ok = True
 
         if not keys_ok:
             continue
 
-        output = '\n'.join(lines)
         if dump:
             print output
 
@@ -1227,7 +1226,7 @@ def do_keys(cfgs, ids, nice_rem, identity, status, dump, deploy):
             if authtext is None:
                 warn('%s: Failed to read the authorized_keys file.' % id)
                 authtext = []
-            auth_keys = parse_authorized_keys(''.join(authtext))
+            auth_keys = parse_authorized_keys(authtext)
             this_keys = parse_authorized_keys(output)
             new_keys = []
             for this_key in this_keys:
@@ -1253,7 +1252,7 @@ def do_keys(cfgs, ids, nice_rem, identity, status, dump, deploy):
 # parses authozied_keys, see sshd(8) man page for details
 def parse_authorized_keys(keystext):
     keys = []
-    for line in keystext.splitlines():
+    for line in keystext:
         line = line.strip()
         if not line or line[0] == '#': continue
         if line[0] in '0123456789':
