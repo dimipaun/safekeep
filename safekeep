@@ -1226,6 +1226,7 @@ def do_keys(cfgs, ids, nice_rem, identity, status, dump, deploy):
             authtext = call(cmd)
             if authtext is None:
                 warn('%s: Failed to read the authorized_keys file.' % id)
+                authtext = ''
             auth_keys = parse_authorized_keys(authtext)
             this_keys = parse_authorized_keys(output)
             new_keys = []
@@ -1251,7 +1252,6 @@ def do_keys(cfgs, ids, nice_rem, identity, status, dump, deploy):
 
 # parses authozied_keys, see sshd(8) man page for details
 def parse_authorized_keys(keystext):
-    if not keystext: keystext = ''
     keys = []
     for line in keystext.splitlines():
         line = line.strip()
