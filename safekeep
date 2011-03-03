@@ -1224,7 +1224,7 @@ def do_keys(cfgs, ids, nice_rem, identity, status, dump, deploy):
             cmd = [basessh, '%s@%s' % (cfg['user'], cfg['host']), "if test -f .ssh/authorized_keys; then cat .ssh/authorized_keys; fi"]
             authtext = call(cmd)
             if authtext is None:
-                warn('%s: Failed to read the authorized_keys file.' % id)
+                warn('%s: Failed to read the %s@%s:~/.ssh/authorized_keys file.' % (id, cfg['user'], cfg['host']))
                 authtext = []
             auth_keys = parse_authorized_keys(authtext)
             this_keys = parse_authorized_keys(output)
