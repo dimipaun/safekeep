@@ -188,9 +188,9 @@ def do_spawn(args, stdin=None, stdout=False):
     child_out.close()
 
     if use_subprocess:
-        return (proc.wait(), ''.join(lines))
+        return (proc.wait(), lines)
     else:
-        return (0, ''.join(lines))
+        return (0, lines)
         
 
 def _spawn(args, stdin=None, stdout=False):
@@ -1226,8 +1226,8 @@ def do_keys(cfgs, ids, nice_rem, identity, status, dump, deploy):
             authtext = call(cmd)
             if authtext is None:
                 warn('%s: Failed to read the authorized_keys file.' % id)
-                authtext = ''
-            auth_keys = parse_authorized_keys(authtext)
+                authtext = []
+            auth_keys = parse_authorized_keys(''.join(authtext))
             this_keys = parse_authorized_keys(output)
             new_keys = []
             for this_key in this_keys:
