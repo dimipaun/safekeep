@@ -12,16 +12,8 @@ If you want to install from source, you can do so by running (as root):
    $ make install
 
 NOTE: installing this way is not equivalent to a package install. 
-You will have to manually take care of a number of other
-steps that are automatically taken care of by the packages such as
-creating /etc/safekeep.d, installing the cron job script, creating
-the safekeep user, and so on.
-
-Please make sure you understand all the ramifications of doing a
-source install before you chose this option. Feel free to ask
-questions on the mailing list:
-     safekeep-devel@lists.sourceforge.net
-if you run into any problems.
+You will have to manually create the safekeep user on the server,
+and to setup the .ssh directory. 
 
 INSTALL NOTES
 ~~~~~~~~~~~~~

@@ -97,12 +97,17 @@ changelog:
 	svn log -v --xml | svn2log.py -D 0 -u doc/users
 
 install:
-	install -m 755 safekeep "/usr/bin/"
-	install -d -m 755 "/etc/safekeep/backup.d/"
-	install -m 755 safekeep.conf "/etc/safekeep/"
-	install -m 755 doc/safekeep.1 "/usr/share/man/man1/"
-	install -m 755 doc/safekeep.conf.5 "/usr/share/man/man5/"
-	install -m 755 doc/safekeep.backup.5 "/usr/share/man/man5/"
+	install -d -m 755 "$(DESTDIR)/usr/bin/"
+	install -m 755 $(name) "$(DESTDIR)/usr/bin/"
+	install -d -m 755 "$(DESTDIR)/etc/$(name)/backup.d"
+	install -m 664 $(name).conf "$(DESTDIR)/etc/$(name)/"
+	install -d -m 755 "$(DESTDIR)/etc/cron.daily"
+	install -m 755 $(name).cron "$(DESTDIR)/etc/cron.daily/$(name)"
+	install -d -m 755 "$(DESTDIR)/usr/share/man/man1/"
+	install -m 444 doc/$(name).1 "$(DESTDIR)/usr/share/man/man1/"
+	install -d -m 755 "$(DESTDIR)/usr/share/man/man5/"
+	install -m 444 doc/$(name).conf.5 "$(DESTDIR)/usr/share/man/man5/"
+	install -m 444 doc/$(name).backup.5 "$(DESTDIR)/usr/share/man/man5/"
 
 tar:
 	svn export -r {'$(timestamp_svn)'} $(svnroot)/safekeep/trunk $(snapshotname)
