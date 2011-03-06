@@ -10,7 +10,7 @@ Summary:        The SafeKeep backup system
 
 Group:          Applications/System
 License:        GPLv2+
-URL:            http://safekeep.sourceforge.net
+URL:            http://%{name}.sourceforge.net
 Source0:        http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -40,7 +40,7 @@ Group:          Applications/System
 Requires:       openssh-server
 Requires:       coreutils
 Requires:       util-linux
-Requires:       safekeep-common = %{version}-%{release}
+Requires:       %{name}-common = %{version}-%{release}
 
 %description client
 SafeKeep is a client/server backup system which enhances the
@@ -55,7 +55,7 @@ Group:          Applications/System
 Requires(pre):  %{_sbindir}/useradd
 Requires(pre):  %{_sbindir}/groupadd
 Requires:       openssh, openssh-clients
-Requires:       safekeep-common = %{version}-%{release}
+Requires:       %{name}-common = %{version}-%{release}
 
 %description server
 SafeKeep is a client/server backup system which enhances the
@@ -72,17 +72,17 @@ make build
 
 %install
 rm -rf %{buildroot}
-install -d -m 755 "%{buildroot}%{_sysconfdir}/safekeep/backup.d"
-install -m 664 safekeep.conf "%{buildroot}%{_sysconfdir}/safekeep/"
+install -d -m 755 "%{buildroot}%{_sysconfdir}/%{name}/backup.d"
+install -m 664 %{name}.conf "%{buildroot}%{_sysconfdir}/%{name}/"
 install -d -m 755 "%{buildroot}%{_sysconfdir}/cron.daily"
-install -m 755 safekeep.cron "%{buildroot}%{_sysconfdir}/cron.daily/safekeep"
+install -m 755 %{name}.cron "%{buildroot}%{_sysconfdir}/cron.daily/%{name}"
 install -d -m 755 "%{buildroot}%{_bindir}/"
-install -m 755 safekeep "%{buildroot}%{_bindir}/"
+install -m 755 %{name} "%{buildroot}%{_bindir}/"
 install -d -m 755 "%{buildroot}%{_mandir}/man1/"
-install -m 444 doc/safekeep.1 "%{buildroot}%{_mandir}/man1/"
+install -m 444 doc/%{name}.1 "%{buildroot}%{_mandir}/man1/"
 install -d -m 755 "%{buildroot}%{_mandir}/man5/"
-install -m 444 doc/safekeep.conf.5 "%{buildroot}%{_mandir}/man5/"
-install -m 444 doc/safekeep.backup.5 "%{buildroot}%{_mandir}/man5/"
+install -m 444 doc/%{name}.conf.5 "%{buildroot}%{_mandir}/man5/"
+install -m 444 doc/%{name}.backup.5 "%{buildroot}%{_mandir}/man5/"
 install -d -m 750 "%{buildroot}%{homedir}"
 install -d -m 700 "%{buildroot}%{homedir}/.ssh"
 
@@ -93,12 +93,12 @@ rm -rf "%{buildroot}"
 %{_sbindir}/groupadd -f -r %{name}
 id %{name} >/dev/null 2>&1 || \
 %{_sbindir}/useradd -r -g %{name} -d %{homedir} -s /sbin/nologin \
-  -c "Used by safekeep to run and store backups." %{name}
+  -c "Used by %{name} to run and store backups." %{name}
 
 %files common
 %defattr(-,root,root,-)
-%{_bindir}/safekeep
-%{_mandir}/man1/safekeep.1*
+%{_bindir}/%{name}
+%{_mandir}/man1/%{name}.1*
 %doc AUTHORS COPYING LICENSE README INSTALL TODO samples/client-script-sample.sh
 
 %files client
@@ -108,12 +108,12 @@ id %{name} >/dev/null 2>&1 || \
 %defattr(-,root,root,-)
 %attr(750,%{name},%{name}) %dir %{homedir}
 %attr(700,%{name},%{name}) %dir %{homedir}/.ssh
-%dir %{_sysconfdir}/safekeep
-%dir %{_sysconfdir}/safekeep/backup.d
-%config(noreplace) %{_sysconfdir}/safekeep/safekeep.conf
-%{_sysconfdir}/cron.daily/safekeep
-%{_mandir}/man5/safekeep.conf.5*
-%{_mandir}/man5/safekeep.backup.5*
+%dir %{_sysconfdir}/%{name}
+%dir %{_sysconfdir}/%{name}/backup.d
+%config(noreplace) %{_sysconfdir}/%{name}/%{name}.conf
+%{_sysconfdir}/cron.daily/%{name}
+%{_mandir}/man5/%{name}.conf.5*
+%{_mandir}/man5/%{name}.backup.5*
 %doc samples/sample.backup
 
 %changelog
