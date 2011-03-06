@@ -11,9 +11,12 @@ If you want to install from source, you can do so by running (as root):
 
    $ make install
 
-NOTE: installing this way is not equivalent to a package install. 
-You will have to manually create the safekeep user on the server,
-and to setup the .ssh directory. 
+On the server side, you need to create the storage directory and user:
+   $ install -d -m 750 "/var/lib/safekeep"
+   $ install -d -m 700 "/var/lib/safekeep/.ssh"
+   $ groupadd -f -r safekeep
+   $ useradd -r -g safekeep -d /var/lib/safekeep -s /sbin/nologin safekeep
+
 
 INSTALL NOTES
 ~~~~~~~~~~~~~
