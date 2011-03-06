@@ -17,6 +17,11 @@ steps that are automatically taken care of by the packages such as
 creating /etc/safekeep.d, installing the cron job script, creating
 the safekeep user, and so on.
 
+Please make sure you understand all the ramifications of doing a
+source install before you chose this option. Feel free to ask
+questions on the mailing list:
+     safekeep-devel@lists.sourceforge.net
+if you run into any problems.
 
 INSTALL NOTES
 ~~~~~~~~~~~~~

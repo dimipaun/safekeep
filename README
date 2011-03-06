@@ -22,23 +22,9 @@ Requirements
 Install
 ~~~~~~~
 It is recommended that you install the packaged version of SafeKeep,
-via the provided RPMs or DEBs. However, if you can not use those
-packages, or want to install from source, you can do so by running
-as root the command:
+via the provided RPMs or DEBs.
 
-   $ make install
-
-NOTE: installing SafeKeep this way is not equivalent to a package 
-install. You will have to manually take care of a number of other
-steps that are automatically taken care of by the packages such as
-creating /etc/safekeep.d, installing the cron job script, creating
-the safekeep user, and so on.
-
-Please make sure you understand all the ramifications of doing a
-source install before you chose this option. Feel free to ask
-questions on the mailing list:
-     safekeep-devel@lists.sourceforge.net
-if you run into any problems.
+For more installation related notes, please see the INSTALL file.
 
 Full Test
 ~~~~~~~~~
