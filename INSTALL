@@ -1,0 +1,42 @@
+PACKAGE INSTALL
+~~~~~~~~~~~~~~~
+
+It is highly recommended that you install the packaged version of 
+SafeKeep via the provided RPMs or DEBs.
+
+
+SOURCE INSTALL
+~~~~~~~~~~~~~~
+If you want to install from source, you can do so by running (as root):
+
+   $ make install
+
+NOTE: installing this way is not equivalent to a package install. 
+You will have to manually take care of a number of other
+steps that are automatically taken care of by the packages such as
+creating /etc/safekeep.d, installing the cron job script, creating
+the safekeep user, and so on.
+
+
+INSTALL NOTES
+~~~~~~~~~~~~~
+
+Safekeep is designed such that the same script can be used on both the 
+backup server (which initiates backups from clients), as well as on 
+individual clients to handle client specific tasks such as 
+dedicated ssh key generation and client-side backup processes such as dump. 
+
+As a result, safekeep is packaged in such a way that clients which want 
+to communicate with a safekeep managed backup server can choose to install 
+the safekeep-client subpackage to ensure correct safekeep client 
+configuration. This safekeep-client subpackage does not itself install any 
+additional files at this time. But it does ensure that the correct client 
+side applications are in place for safekeep managed backup services.
+
+It is recommended that all computers acting as safekeep clients install 
+the safekeep-client subpackage, even though at this time it is 
+technically optional if the necessary components such as an ssh server, 
+coreutils and util-linux are installed correctly on the client Fedora 
+system. In future version of safekeep the safekeep-client package may 
+become necessary for correct client operation.
+

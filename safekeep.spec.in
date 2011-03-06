@@ -99,7 +99,7 @@ id %{name} >/dev/null 2>&1 || \
 %defattr(-,root,root,-)
 %{_bindir}/safekeep
 %{_mandir}/man1/safekeep.1*
-%doc AUTHORS COPYING LICENSE README TODO samples/client-script-sample.sh
+%doc AUTHORS COPYING LICENSE README INSTALL TODO samples/client-script-sample.sh
 
 %files client
 %defattr(-,root,root,-)
