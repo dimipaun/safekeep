@@ -107,7 +107,7 @@ id %{name} >/dev/null 2>&1 || \
 %doc samples/sample.backup
 
 %changelog
-* Sun Mar 6 2010 Dimi Paun <dimi@lattica.com> 1.3.2-1
+* Sun Mar 6 2011 Dimi Paun <dimi@lattica.com> 1.3.2-1
   - Fixed some issued introduced by the new subprocess wrappers.
   - Always return multi-line output from subprocesses as an array of strings.
   - Better source-based installation and documentation.
