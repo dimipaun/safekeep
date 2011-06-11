@@ -237,8 +237,10 @@ def try_to_run(args):
     try:
         rc, out = do_spawn(args, None, True)
     except OSError, ex:
-        return False
-    return rc in (0,1)
+        return None
+    if not rc in (0,1):
+        return None
+    return out or ''
 
 def send_notification(email, smtp):
     global logbuf
@@ -914,7 +916,7 @@ def do_server_rdiff(cfg, bdir, nice, ionice, force):
 
     ionice_cmd = 'ionice'
     if ionice and ionice != 'none':
-        if try_to_run(ionice_cmd):
+        if try_to_run(ionice_cmd) is not None:
             if ionice is 'idle':
                 args.extend([ionice_cmd, '-c3', '-t'])
             else:
@@ -938,7 +940,7 @@ def do_server_rdiff(cfg, bdir, nice, ionice, force):
         if limit_ul:
             trickle.extend(['-u', str(limit_ul)])
     if len(trickle):
-        if not try_to_run([trickle_cmd, '-V']):
+        if try_to_run([trickle_cmd, '-V']) is not None:
 	    warn('Trickle not available, bandwidth limiting disabled')
 	    trickle = []
     args.extend(trickle)
