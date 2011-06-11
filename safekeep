@@ -916,18 +916,18 @@ def do_server_rdiff(cfg, bdir, nice, ionice, force):
 
     ionice_cmd = 'ionice'
     if ionice and ionice != 'none':
-        ionice_out = try_to_run(ionice_cmd, '-h')
+        ionice_out = try_to_run([ionice_cmd, '-h'])
         if ionice_out is not None:
-                ionice_args = []
+            ionice_args = []
             if ionice is 'idle':
                 ionice_args.extend(['-c3'])
             else:
                 ionice_args.extend(['-c2', '-n%s' % (ionice)])
 
-            if ionice_out.find('-t') > 0:
+            if ''.join(ionice_out).find('-t') > 0:
                 ionice_args.extend(['-t'])
 
-            if try_to_run(ionice_cmd, ionice_args + ['/bin/true']) is not None:
+            if try_to_run([ionice_cmd] + ionice_args + ['/bin/true']) is not None:
                 args.append(ionice_cmd)
                 args.extend(ionice_args)
             else:
