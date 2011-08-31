@@ -242,21 +242,23 @@ def try_to_run(args):
         return None
     return out or ''
 
-def send_notification(email, smtp):
+def send_notification(email_from, email, smtp):
     global logbuf
     if not logbuf: return
     info('Sending email to %s via %s' % (','.join(email), smtp))
-    hostname = socket.gethostname()
-    msg = 'From: SafeKeep@' + hostname + \
+    hostname = socket.getfqdn()
+    if not email_from:
+        email_from = 'SafeKeep@' + hostname
+    msg = 'From: ' + email_from + \
           '\r\nTo: ' + ', '.join(email) + \
           '\r\nSubject: SafeKeep results for ' + hostname + \
           '\r\n\r\n' + '\r\n'.join(logbuf)
     if smtp:
         server = smtplib.SMTP(smtp)
-        server.sendmail('SafeKeep@' + hostname, email, msg)
+        server.sendmail(email_from, email, msg)
         server.quit()
     else:
-        cmd = ['/usr/sbin/sendmail', '-t']
+        cmd = ['/usr/sbin/sendmail', '-t', '-f', email_from]
         call(cmd, stdin=msg)
 
 def is_temp_root(dir):
@@ -1503,6 +1505,8 @@ def main():
             smtp = props['email.smtp.server']
         if 'email.to' in props:
             email = props['email.to'].split(',')
+        if 'email.from' in props:
+            email_from = props['email.from']
         nice_def = get_int('nice.adjustment')
         if nice_def is None: nice_def = 10
         nice_srv = get_int('nice.adjustment.server') or nice_def
@@ -1589,7 +1593,7 @@ def main():
         error('ERROR: %s' % (ex or ''), ex)
 
     if email and not noemail:
-        send_notification(email, smtp)
+        send_notification(email_from, email, smtp)
 
 if __name__ == '__main__':
     main()
