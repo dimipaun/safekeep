@@ -1375,6 +1375,7 @@ def main():
     global backup_user, home_dir, base_dir
     mode = None
     email = []
+    email_from = None
     smtp = None
     cfgfile = None
     cfglocs = []
