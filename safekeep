@@ -278,7 +278,7 @@ def parse_prop_file(file):
     fin.close()
     for line in lines:
         line = line.strip()
-        if len(line) is 0 or line[0] is '#': continue
+        if len(line) == 0 or line[0] == '#': continue
         if '=' in line: 
             key, value = line.split('=', 1)
             props[key.strip()] = value.strip()
@@ -617,7 +617,7 @@ def mount_information(reverse = False):
         lines.reverse()
     for line in lines:
         matches = pattern.match(line)
-        if not matches is None:
+        if matches is not None:
             mounts.append(matches.groups())
     return mounts
 
@@ -921,7 +921,7 @@ def do_server_rdiff(cfg, bdir, nice, ionice, force):
         ionice_out = try_to_run([ionice_cmd, '-h'])
         if ionice_out is not None:
             ionice_args = []
-            if ionice is 'idle':
+            if ionice == 'idle':
                 ionice_args.extend(['-c3'])
             else:
                 ionice_args.extend(['-c2', '-n%s' % (ionice)])
@@ -1157,13 +1157,13 @@ def do_list(cfgs, ids, list_type, list_date, list_parsable):
 
         args = ['rdiff-backup']
 
-        if list_type is 'increments':
+        if list_type == 'increments':
             args.extend(['--list-increments'])
-        elif list_type is 'sizes':
+        elif list_type == 'sizes':
             args.extend(['--list-increment-sizes'])
-        elif list_type is 'changed':
+        elif list_type == 'changed':
             args.extend(['--list-changed-since', list_date])
-        elif list_type is 'attime':
+        elif list_type == 'attime':
             args.extend(['--list-at-time', list_date])
         else:
             assert False, 'Unknown list type: ' + list_type
@@ -1214,7 +1214,7 @@ def do_keys(cfgs, ids, nice_rem, identity, status, dump, deploy):
                 if deploy:
                     info('%s: Key do not exist, generating it now: %s' % (id, privatekeyfile))
                     gencmd = 'ssh-keygen -q -b 1024 -t dsa -N "" -C "SafeKeep auto generated key at %s@%s" -f %s' % (backup_user, os.uname()[1], privatekeyfile)
-                    if backup_user is not work_user:
+                    if backup_user != work_user:
                         gencmd = 'su -s /bin/sh -c %s - %s' % (commands.mkarg(gencmd), backup_user)
                     debug(gencmd)
                     if spawn(gencmd):
@@ -1285,13 +1285,13 @@ def parse_authorized_keys(keystext):
             for i, c in enumerate(line):
                 if in_str:
                     if in_esc: in_esc = False
-                    elif c is '\'': in_esc = True
-                    elif c is '"': in_str = False
+                    elif c == '\'': in_esc = True
+                    elif c == '"': in_str = False
                 else:
-                    if c is ' ':
+                    if c == ' ':
                         rest = line[i:].strip()
                         break
-                    elif c is '"': in_str = True
+                    elif c == '"': in_str = True
                 opts += c
             else:
                 info('Invalid key line, ignoring: %s' % line)
@@ -1315,7 +1315,7 @@ def parse_authorized_keys(keystext):
 
         base46enc = parts[1]
 
-        if len(parts) is 2:
+        if len(parts) == 2:
             comment = None
         else:
             comment = parts[2]
@@ -1470,22 +1470,22 @@ def main():
     if mode is None:
         usage(2)
 
-    if mode is not 'keys' and (identity or keys_status or keys_print or keys_deploy):
+    if mode != 'keys' and (identity or keys_status or keys_print or keys_deploy):
         usage(2)
 
-    if mode is not 'list' and (list_type or list_date or list_parsable):
+    if mode != 'list' and (list_type or list_date or list_parsable):
         usage(2)
 
-    if mode is not 'server' and (email or smtp):
+    if mode != 'server' and (email or smtp):
         usage(2)
 
     if not mode in ['server', 'client'] and cleanup:
         usage(2)
 
-    if mode is 'client' and cfglocs:
+    if mode == 'client' and cfglocs:
         usage(2)
 
-    if mode is not 'client':
+    if mode != 'client':
         if cfgfile is None and os.path.isfile(config_file): 
             cfgfile = config_file
         if cfgfile and os.path.isfile(cfgfile):
@@ -1499,7 +1499,7 @@ def main():
 
         def get_int(p):
             v = props.get(p)
-            if v is not None and v is not '':
+            if v is not None and v != '':
                 return int(v)
             return None
 
@@ -1519,7 +1519,7 @@ def main():
         nice_cln = get_int('nice.adjustment.client') or nice_def
         ionice_def = props.get('ionice.adjustment')
         if ionice_def is None: ionice_def = 'idle'
-        if ionice_def is '': ionice_def = 'none'
+        if ionice_def == '': ionice_def = 'none'
 
         global default_bandwidth
         default_bandwidth['overall'] = get_int('bandwidth.limit') or 0
@@ -1532,7 +1532,7 @@ def main():
 
     if backup_user and backup_user != work_user:
         (user, pswd, uid, gid, gecos, home_dir, shell) = pwd.getpwnam(backup_user)
-        if mode is not 'keys':
+        if mode != 'keys':
             try:
                 os.setregid(gid, gid)
                 os.setreuid(uid, uid)
@@ -1551,7 +1551,7 @@ def main():
     else:
         cfgs = {}
 
-    if mode is 'client':
+    if mode == 'client':
         if len(args) > 0: usage(2)
     else:
         ok = True
@@ -1568,17 +1568,17 @@ def main():
 
         if verbosity > 2:
             verbosity_trickle = verbosity_ssh = '-' + (verbosity-2) * 'v'
-        if mode is 'server':
+        if mode == 'server':
             is_client = False
             verbosity_level = 1 + verbosity
             do_server(cfgs, args, nice_srv, ionice_def, force, cleanup)
-        elif mode is 'list':
+        elif mode == 'list':
             if list_type is None:
                 list_type = 'increments'
             is_client = False
             verbosity_level = 2 + verbosity
             do_list(cfgs, args, list_type, list_date, list_parsable)
-        elif mode is 'client':
+        elif mode == 'client':
             if cleanup:
                 is_client = False
                 verbosity_level = 1 + verbosity
@@ -1587,7 +1587,7 @@ def main():
                 is_client = True
                 verbosity_level = 3 + verbosity
                 do_client()
-        elif mode is 'keys':
+        elif mode == 'keys':
             is_client = False
             verbosity_level = 1 + verbosity
             if not keys_status and not keys_print and not keys_deploy: 
