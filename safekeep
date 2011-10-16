@@ -1039,13 +1039,15 @@ def do_server_compat(client_versions):
 
 def do_server(cfgs, ids, nice, ionice, force, cleanup):
     debug("Do server main loop")
+    output_done = False
     for cfg in cfgs.itervalues():
         id = cfg['id']
         if ids and id not in ids: continue
         info('------------------------------------------------------------------')
         info('Server backup starting for client %s' % id)
+        output_done = True
 
-        cleaned_up = 0
+        cleaned_up = False
         try:
             if cfg['host']:
                 if not os.path.isfile(cfg['key_ctrl']):
@@ -1093,7 +1095,7 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
                 do_server_getanswer(cout)
                 bdir = '/'  # Fake directory for the rest of the cleanup
                 do_server_rdiff_cleanup(cfg)
-                cleaned_up = 1
+                cleaned_up = True
                 errs = 0
             else:
                 cin.write('SETUP\n')
@@ -1146,11 +1148,13 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
 		else:
                     error('Server backup for client %s: FAILED' % id, ex)
 
-    info('------------------------------------------------------------------')
+    if output_done:
+        info('------------------------------------------------------------------')
     debug('Server backup done')
 
 def do_list(cfgs, ids, list_type, list_date, list_parsable):
     debug("Do server listing main loop")
+    output_done = False
     for cfg in cfgs.itervalues():
         id = cfg['id']
         if ids and id not in ids: continue
@@ -1159,7 +1163,7 @@ def do_list(cfgs, ids, list_type, list_date, list_parsable):
         else:
             info('------------------------------------------------------------------')
             info('Server listing for client %s' % id)
-            
+        output_done = True
 
         args = ['rdiff-backup']
 
@@ -1180,9 +1184,9 @@ def do_list(cfgs, ids, list_type, list_date, list_parsable):
         args.extend([cfg['dir']])
         ret = spawn(args)
         if ret:
-            raise Exception('Failed to run rdiff-backup')
+            error('Failed to run rdiff-backup')
 
-    if not list_parsable:
+    if output_done and not list_parsable:
         info('------------------------------------------------------------------')
     debug('Server listing done')
 
@@ -1392,16 +1396,16 @@ def main():
     cfglocs = []
     verbosity = 0
     clientid = None
-    force = 0
-    cleanup = 0
-    noemail = 0
+    force = False
+    cleanup = False
+    noemail = False
     list_type = None
-    list_parsable = 0
+    list_parsable = False
     list_date = None
     identity = None
-    keys_status = None
-    keys_print = None
-    keys_deploy = None
+    keys_status = False
+    keys_print = False
+    keys_deploy = False
     nice_srv = None
     for o, a in opts:
         if o in ('-c', '--conf'):
@@ -1436,11 +1440,11 @@ def main():
             if mode: usage(2)
             mode = 'keys'
         elif o in ('--force', ):
-            force = 1
+            force = True
         elif o in ('--cleanup', ):
-            cleanup = 1
+            cleanup = True
         elif o in ('--noemail', ):
-            noemail = 1
+            noemail = True
         elif o in ('--increments', ):
             if list_type: usage(2)
             list_type = 'increments'
@@ -1448,7 +1452,7 @@ def main():
             if list_type: usage(2)
             list_type = 'sizes'
         elif o in ('--parsable-output', ):
-            list_parsable = 1
+            list_parsable = True
         elif o in ('--changed', ):
             if list_type: usage(2)
             list_type = 'changed'
