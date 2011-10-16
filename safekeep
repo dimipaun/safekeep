@@ -639,6 +639,17 @@ def gather_lvm_information(device):
             return (group, volume, mountpoint, mounttype)
     return (None, None, None, None)
 
+def do_lvremove(device):
+    (group, volume) = device.split('/')[-2:]
+    if group == 'mapper':
+        lvmdev = device;
+    else:
+        lvmdev = '/dev/mapper/%s-%s' % (group, volume.replace('-', '--'))
+    ret = spawn(['dmsetup', 'remove', lvmdev])
+    ret = spawn(['dmsetup', 'remove', lvmdev + '-cow'])
+    ret = spawn(['lvremove', '--force', device])
+    return ret
+
 def gather_snap_information(device, bdir):
     (group, volume, mountpoint, mounttype) = gather_lvm_information(device)
     if not mountpoint: return (None, None, None, None)
@@ -669,7 +680,7 @@ def do_client_snap(cfg, bdir):
         ec = spawn(args)
         if ec:
             warn('Can not mount the snapshot: %s' % device)
-            ret = spawn(['lvremove', '--force', snapdev])
+            ret = do_lvremove(snapdev)
             if ret:
                 warn('Can not tear down snapshot: %s' % device)
 
@@ -688,12 +699,7 @@ def do_client_snap_teardown(cfg, bdir):
         if ret:
             warn('Can not umount the snapshot: %s' % snapmnt)
 
-        # stupid workaround for https://bugzilla.redhat.com/show_bug.cgi?id=577798
-        for i in range(1,10):
-            ret = spawn(['lvremove', '--force', snapdev])
-            if not ret:
-                break
-
+        ret = do_lvremove(snapdev)
         if ret:
             warn('Can not tear down snapshot: %s' % device)
 
@@ -809,7 +815,7 @@ def do_client_scrub():
                         warn('Can not unmount the snapshot: %s' % mountpoint)
                 if fnmatch.fnmatch(device, '*_snap_safekeep-*'):
                     info("Removing snapshot %s" % device)
-                    ret = spawn(['lvremove', '--force', device])
+                    ret = do_lvremove(device)
                     if ret:
                         warn('Can not tear down snapshot: %s' % device)
                 scrubbed = True
@@ -820,7 +826,7 @@ def do_client_scrub():
         for (volume, group) in lvm_snap_information():
             device = os.path.join('/dev', group, volume)
             info("Removing snapshot %s" % device)
-            ret = spawn(['lvremove', '--force', device])
+            ret = do_lvremove(device)
             if ret:
                 warn('Can not tear down snapshot: %s' % device)
             scrubbed = True
