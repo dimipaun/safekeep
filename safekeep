@@ -645,9 +645,13 @@ def do_lvremove(device):
         lvmdev = device;
     else:
         lvmdev = '/dev/mapper/%s-%s' % (group, volume.replace('-', '--'))
-    ret = spawn(['dmsetup', 'remove', lvmdev])
-    ret = spawn(['dmsetup', 'remove', lvmdev + '-cow'])
-    ret = spawn(['lvremove', '--force', device])
+    for i in range(1,10):
+        ret = spawn(['sync'])
+        ret = spawn(['dmsetup', 'remove', lvmdev])
+        ret = spawn(['dmsetup', 'remove', lvmdev + '-cow'])
+        ret = spawn(['lvremove', '--force', device])
+        if not ret:
+            break
     return ret
 
 def gather_snap_information(device, bdir):
