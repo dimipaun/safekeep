@@ -1,3 +1,92 @@
+2011-10-20 14:42 +0000 [r765]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Frank Crawford
+	  <frank@crawford.emu.id.au> More reliable snapshot removal.
+
+2011-10-16 15:40 +0000 [r764]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Frank Crawford
+	  <frank@crawford.emu.id.au> - Changes the --list option to
+	  continue even if one of the hosts gives an error, - Stop printing
+	  the separator if nothing was printed earlier, and - Clean up some
+	  definitions to use True and False rather than 0 and 1 for
+	  variable that are booleans.
+
+2011-10-16 15:39 +0000 [r763]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Frank Crawford
+	  <frank@crawford.emu.id.au> It "fixes" the issues with the removal
+	  of snapshots, by executing "dmsetup remove" prior to the actual
+	  lvremove. This appears to be current best practice, although I've
+	  noticed there are some proposed patches for an upcoming lvm2
+	  update that may fix the issue fully.
+
+2011-10-13 19:40 +0000 [r762]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Replace object identies test ('is') with
+	  value comparisons ('=='). Based on a suggestion by Harald Nehring
+	  <harald.nehring@arcor.de>
+
+2011-09-30 00:22 +0000 [r761]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Marco Bozzolan <mailbox@s19n.net> Use
+	  the subprocess module when required, avoid noisy deprecation
+	  error.
+
+2011-09-30 00:19 +0000 [r760]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Marco Bozzolan <mailbox@s19n.net> Avoid
+	  exception when an 'email.to' is specified without an 'email.from'
+
+2011-08-31 13:02 +0000 [r759]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.conf.txt, safekeep/trunk/safekeep,
+	  safekeep/trunk/safekeep.conf: Marco Bozzolan <mailbox@s19n.net>
+	  Allow to specify a sender address for the log messages sent via
+	  e-mail.
+
+2011-06-11 16:14 +0000 [r758]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Fix a few bugs introduced by the
+	  previous patches
+
+2011-06-11 16:07 +0000 [r757]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Try to run ionice and make sure that it
+	  works before we try to use it. This should take care of system
+	  where we don't have enough privileges to run ionice(1), and we
+	  still want to proceed.
+
+2011-06-11 15:59 +0000 [r756]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Do not use the -t ionice switch unless
+	  it is supported, it is missnig in some versions.
+
+2011-06-11 15:52 +0000 [r755]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Have 'try_to_run' return the captured
+	  output of the command rather than just a boolean for additional
+	  flexibility.
+
+2011-06-11 15:20 +0000 [r754]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.cron: Do not run the server from cron if
+	  we have no backups setup to avoid meaningless noise from cron.
+	  Based on a patch by Frank Crawford.
+
+2011-03-07 03:04 +0000 [r752]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in: Fix typo
+
+2011-03-06 18:07 +0000 [r750]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/ChangeLog: Update ChangeLog
+
+2011-03-06 18:01 +0000 [r749]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep.spec.in, safekeep/trunk/ANNOUNCE: Prep
+	  release 1.3.2
+
 2011-03-06 17:50 +0000 [r748]  Dimi Paun <dimi@lattica.com>
 
 	* safekeep/trunk/safekeep: Update version
