@@ -1,35 +1,38 @@
-This is release 1.3.2 of SafeKeep, a centralized and easy to use 
+This is release 1.3.3 of SafeKeep, a centralized and easy to use 
 backup application that combines the best features of a mirror 
 and an incremental backup.
 
 What's new in this release:
-  - Fix a few serios errors preventing safekeep from running.
-  - More fixes for dealing with LVN snapshots, SSH key delivery.
-  - Fix a new typos and errors introduced in 1.3.1.
-  - Improved installation from source (aka 'make install').
+  - More fixes for dealing with LVM snapshots.
+  - Better handling of other failure conditions.
+  - Updates for Python syntax issues and changes.
+  - Allow specification of a sender address in e-mail messages.
+  - Better handling of ionice(1).
 
-Many thanks to Frank Crawford and Oliver Henshaw for the fixes
-that made this release possible.
+Many thanks to Marco Bozzolan and Harald Nehring for the fixes
+that made this release possible, and to Dimi Paun for his continual
+work with SafeKeep, who is currently having a life away from computers.
 
 Sources and binaries are available from the following locations:
 
-  - RedHat EL/CentOS 3,4,5,6 Fedora 8,9,10,11,12,13,14:
-  http://prdownloads.sourceforge.net/safekeep/safekeep-common-1.3.2-1.noarch.rpm
-  http://prdownloads.sourceforge.net/safekeep/safekeep-client-1.3.2-1.noarch.rpm
-  http://prdownloads.sourceforge.net/safekeep/safekeep-server-1.3.2-1.noarch.rpm
+  - RedHat EL/CentOS 3,4,5,6 Fedora 8,9,10,11,12,13,14,15,16:
+  http://prdownloads.sourceforge.net/safekeep/safekeep-common-1.3.3-1.noarch.rpm
+  http://prdownloads.sourceforge.net/safekeep/safekeep-client-1.3.3-1.noarch.rpm
+  http://prdownloads.sourceforge.net/safekeep/safekeep-server-1.3.3-1.noarch.rpm
  
   - Ubuntu Edgy, Dapper, Breezy, Hardy, Karmic, Lucid, Maverick, and Natty:
-  http://prdownloads.sourceforge.net/safekeep/safekeep-common_1.3.2_all.deb
-  http://prdownloads.sourceforge.net/safekeep/safekeep-client_1.3.2_all.deb
-  http://prdownloads.sourceforge.net/safekeep/safekeep-server_1.3.2_all.deb
+  http://prdownloads.sourceforge.net/safekeep/safekeep-common_1.3.3_all.deb
+  http://prdownloads.sourceforge.net/safekeep/safekeep-client_1.3.3_all.deb
+  http://prdownloads.sourceforge.net/safekeep/safekeep-server_1.3.3_all.deb
 
   - Source:
-  http://prdownloads.sourceforge.net/safekeep/safekeep-1.3.2.tar.gz
-  http://prdownloads.sourceforge.net/safekeep/safekeep-1.3.2-1.src.rpm
+  http://prdownloads.sourceforge.net/safekeep/safekeep-1.3.3.tar.gz
+  http://prdownloads.sourceforge.net/safekeep/safekeep-1.3.3-1.src.rpm
 
 To find out more about the project visit on our website:
   http://safekeep.sourceforge.net
 
 -- 
-Dimi Paun <dimi@lattica.com>
+Frank Crawford <frank@crawford.emu.id.au>
+for Dimi Paun <dimi@lattica.com>
 Lattica, Inc.
