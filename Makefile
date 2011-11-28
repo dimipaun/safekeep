@@ -13,12 +13,13 @@ rpmroot     := $(shell grep '%_topdir' ~/.rpmmacros 2>/dev/null | sed 's/^[^ \t]
 svnroot     := $(shell LANG=C svn info 2>/dev/null | grep Root | cut -c 18-)
 deb_box	    := 192.168.3.202
 rpm_box     := 192.168.3.242
-sf_login    := dimi,$(name)@frs.sourceforge.net
+SF_USER     := $(shell whoami)
+sf_login    := $(SF_USER),$(name)@frs.sourceforge.net
 sf_dir	    := /home/frs/project/s/sa/$(name)/$(name)
 releasedir  := releases
 repo_srv    := root@ulysses
 repo_dir    := /var/www/repos/lattica
-webroot     := ../website/WebContent/
+webroot     := ../../website/trunk/WebContent/
 MAN_TXT     := doc/safekeep.txt doc/safekeep.conf.txt doc/safekeep.backup.txt
 DOC_MAN     := doc/safekeep.1 doc/safekeep.conf.5 doc/safekeep.backup.5
 DOC_HTML    := $(patsubst %.txt,%.html,$(MAN_TXT))
