@@ -64,6 +64,7 @@ work_user = getpass.getuser()
 backup_user = None
 home_dir = None
 base_dir = None
+current_pid = os.getpid()
 default_bandwidth = {}
 cmd = "<Missing>"
 
@@ -140,7 +141,7 @@ def warn(msg):
 
 def error(msg, ex=None):
     extra = ""
-    if ex:
+    if ex and verbosity_level > 2:
         extra = stacktrace()
     log(msg + extra, 'ERR')
 
@@ -595,7 +596,7 @@ def do_client_dbdump_teardown(cfg):
             continue
         try:
             os.remove(dump['file'])
-        except Exception, e:
+        except OSError, e:
             warn('Unable to remove dump file: %s for database %s because: %s' %
                  (dump['file'], dump['db'], e))
 
@@ -738,20 +739,20 @@ def do_client_setup(cfg):
         debug('Checking FS snapshots')
         for snap in cfg['snaps']:
             device = snap['device']
-            if check_lvm_information(device):
-                raise Exception("Previous snapshots found for %s: run 'safekeep --server --cleanup' to correct" % device)
+            if check_lvm_information(device) and not do_client_scrub():
+                raise Exception("Previous snapshots found for %s and automatic correction failed: run 'safekeep --server --cleanup' to correct" % device)
 
         ret = spawn(['modprobe', 'dm-snapshot'])
         if ret:
             warn('modprobe dm-snapshot failed, continuing')
-        bdir = tempfile.mkdtemp("-rbind", "safekeep-", "/mnt")
+        bdir = tempfile.mkdtemp("-rbind", "safekeep-%d-" % current_pid, "/mnt")
         ret = spawn(['mount', '--rbind', '/', bdir])
         if ret:
             warn('mount --rbind failed, snapshotting will be disabled')
             try:
                 os.rmdir(bdir)
-            except Exception, e:
-                warn('Failed to remove: %s' % bdir)
+            except OSError, e:
+                warn('Failed to remove: %s: %s' % (bdir, e))
             bdir = '/'
         else:
             do_client_snap(cfg, bdir)
@@ -772,8 +773,8 @@ def do_client_cleanup(cfg, bdir):
         else:
             try:
                 os.rmdir(bdir)
-            except Exception, e:
-                warn('Unable to remove: ' + bdir)
+            except OSError, e:
+                warn('Unable to remove: %s: %s' % (bdir, e))
 
     do_client_dbdump_teardown(cfg)
 
@@ -791,6 +792,22 @@ def do_client_scrub():
             info('No cleanup performed')
     else:
         scrubbed = False
+
+        # Go through and see if any come from existing safekeep processes
+        pattern = re.compile(r"_snap_safekeep-(\d+)-")
+        lvm_snap_list = lvm_snap_information()
+        for (volume, group) in lvm_snap_list:
+            matches = pattern.search(volume)
+            if matches is not None:
+                pid = matches.group(1)
+                # Look up /proc/<pid>/cmdline to see what process is running
+                proc_file = "/proc/" + pid + "/cmdline"
+                if pid != current_pid and os.path.exists(proc_file):
+                    fin = open(proc_file, "r")
+                    (cmd, arg0, args) = fin.read().split('\0', 2)
+                    fin.close()
+                    if os.path.basename(arg0) == "safekeep":
+                        raise Exception('another safekeep process running: pid %s' % pid)
 
         if os.environ['PATH'][-1] == ':':
             os.environ['PATH'] += '/sbin:/usr/sbin:/usr/local/sbin:'
@@ -811,8 +828,8 @@ def do_client_scrub():
                     else:
                         try:
                             os.rmdir(mountpoint)
-                        except Exception, e:
-                            warn('Failed to remove: %s' % mountpoint)
+                        except OSError, e:
+                            warn('Failed to remove: %s: %s' % (mountpoint, e))
                 else:
                     ret = spawn(['umount', mountpoint])
                     if ret:
@@ -827,7 +844,7 @@ def do_client_scrub():
         # Now cleanup any snapshots still hanging around
 
         debug("Cleaning up remaining snapshots")
-        for (volume, group) in lvm_snap_information():
+        for (volume, group) in lvm_snap_list:
             device = os.path.join('/dev', group, volume)
             info("Removing snapshot %s" % device)
             ret = do_lvremove(device)
@@ -845,11 +862,18 @@ def do_client_scrub():
                     info("Removing rbind directory %s" % mountpoint)
                     try:
                         os.rmdir(mountpoint)
-                    except Exception, e:
-                        warn('Failed to remove: %s' % mountpoint)
+                    except OSError, e:
+                        warn('Failed to remove: %s: %s' % (mountpoint, e))
 
         if not scrubbed:
             info('No cleanup required')
+
+        # This has to be rerun to see if it has been successful
+        if lvm_snap_information():
+            return False
+        return True
+
+    return False
 
 def do_client():
     debug("Do client main loop")
@@ -914,7 +938,7 @@ def do_server_getanswer(cout):
             raise ClientException(line[5:].strip())
         elif line.startswith('TRACEBACK'):
             i = line.find('>>>')
-            raise ClientException(line[10:i].strip(), line[i+3:].replace('###', '\n'))
+            raise ClientException(line[10:i].strip(), line[i+3:].replace('###', '\n').rstrip())
         elif not line:
             raise Exception('client died unexpectedly')
         else:
@@ -1064,7 +1088,7 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
                 try:
                     os.makedirs(datadir)
                 except EnvironmentError, ex:
-                    raise Exception('Can not create data store dir: %s' % datadir)
+                    raise Exception('Can not create data store dir: %s: %s' % (datadir, ex))
 
             rdiff_logdir = os.path.join(datadir, 'rdiff-backup-data')
             if cfg['retention'] and os.path.isdir(rdiff_logdir) and not cleanup:
@@ -1098,8 +1122,6 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
                 cin.flush()
                 do_server_getanswer(cout)
                 bdir = '/'  # Fake directory for the rest of the cleanup
-                do_server_rdiff_cleanup(cfg)
-                cleaned_up = True
                 errs = 0
             else:
                 cin.write('SETUP\n')
@@ -1121,6 +1143,7 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
                     backup_marker = None
 
                 do_server_rdiff(cfg, bdir, nice, ionice, force)
+                cleaned_up = True
 
                 errs = 0
                 if os.path.isdir(rdiff_logdir):
@@ -1142,15 +1165,22 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
                 info('Server backup for client %s: OK (%d WARNINGS)' % (id, errs))
 
         except Exception, ex:
-            if cleanup and not cleaned_up:
+            if cleanup:
                 info('Client-side cleanup for client %s: FAILED' % id)
-                do_server_rdiff_cleanup(cfg)
             else:
 		if isinstance(ex, ClientException):
         	    error('Client %s: FAILED due to: %s' % (id, ex or ''))
-		    if ex.traceback: error(ex.traceback)
+		    if ex.traceback and verbosity_level > 2: error(ex.traceback)
 		else:
                     error('Server backup for client %s: FAILED' % id, ex)
+
+        # Shutdown client
+        cout.close()
+        cin.close()
+
+        if not cleaned_up:
+            do_server_rdiff_cleanup(cfg)
+            cleaned_up = True
 
     if output_done:
         info('------------------------------------------------------------------')
