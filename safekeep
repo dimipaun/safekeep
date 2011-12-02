@@ -19,7 +19,7 @@ from __future__ import generators
 import getopt, os, os.path, re, sys, fnmatch, stat, types
 import commands, tempfile, time, traceback
 import getpass, pwd, xml.dom.minidom
-import socket, smtplib
+import socket, smtplib, cStringIO
 
 try:
     import subprocess
@@ -128,7 +128,9 @@ def info_file(file, marker=None):
     return errs
 
 def stacktrace():
-    return "\n" + traceback.format_exc()
+    exc_file = cStringIO.StringIO()
+    traceback.print_exc(None, exc_file)
+    return "\n" + exc_file.getvalue()
 
 def debug(msg):
     log(msg, 'DBG')
@@ -171,7 +173,8 @@ def do_spawn(args, stdin=None, stdout=False):
         if _stderr:
             (child_in, child_out) = os.popen4(args)
         else:
-            (child_in, child_out) = os.popen3(args)
+            (child_in, child_out, child_err) = os.popen3(args)
+            child_err.close()
             
         if not stdin:
             child_in.close()
