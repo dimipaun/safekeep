@@ -649,13 +649,17 @@ def do_lvremove(device):
         lvmdev = device;
     else:
         lvmdev = '/dev/mapper/%s-%s' % (group, volume.replace('-', '--'))
-    for i in range(1,10):
-        ret = spawn(['sync'])
-        ret = spawn(['dmsetup', 'remove', lvmdev])
-        ret = spawn(['dmsetup', 'remove', lvmdev + '-cow'])
-        ret = spawn(['lvremove', '--force', device])
-        if not ret:
-            break
+    if os.path.exists(lvmdev):
+        for i in range(1,10):
+            ret = spawn(['sync'])
+            ret = spawn(['dmsetup', 'remove', lvmdev])
+            ret = spawn(['dmsetup', 'remove', lvmdev + '-cow'])
+            ret = spawn(['lvremove', '--force', device])
+            if not ret:
+                break
+    else:
+        warn('lvremove called for non-existent device: %s' % lvmdev)
+        ret = 0     # Equivalent to lvremove succeeding
     return ret
 
 def gather_snap_information(device, bdir):
@@ -798,8 +802,7 @@ def do_client_scrub():
 
         # Go through and see if any come from existing safekeep processes
         pattern = re.compile(r"_snap_safekeep-(\d+)-")
-        lvm_snap_list = lvm_snap_information()
-        for (volume, group) in lvm_snap_list:
+        for (volume, group) in lvm_snap_information():
             matches = pattern.search(volume)
             if matches is not None:
                 pid = matches.group(1)
@@ -847,7 +850,7 @@ def do_client_scrub():
         # Now cleanup any snapshots still hanging around
 
         debug("Cleaning up remaining snapshots")
-        for (volume, group) in lvm_snap_list:
+        for (volume, group) in lvm_snap_information():
             device = os.path.join('/dev', group, volume)
             info("Removing snapshot %s" % device)
             ret = do_lvremove(device)
@@ -1078,7 +1081,7 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
         info('Server backup starting for client %s' % id)
         output_done = True
 
-        cleaned_up = False
+        cleaned_up = True
         try:
             if cfg['host']:
                 if not os.path.isfile(cfg['key_ctrl']):
@@ -1121,6 +1124,7 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
             cin.flush()
             do_server_getanswer(cout)
             if cleanup:
+                cleaned_up = False
                 cin.write('SCRUB\n')
                 cin.flush()
                 do_server_getanswer(cout)
@@ -1145,6 +1149,7 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
                 else:
                     backup_marker = None
 
+                cleaned_up = False
                 do_server_rdiff(cfg, bdir, nice, ionice, force)
                 cleaned_up = True
 
