@@ -715,6 +715,33 @@ def do_client_snap_teardown(cfg, bdir):
         if ret:
             warn('Can not tear down snapshot: %s' % device)
 
+def mount_excluded(cfg, mountpoint):
+    debug("mount_excluded: %s" % mountpoint)
+    mountpoint = mountpoint + '/'
+    for clude in cfg['cludes']:
+        if clude['type'] == 'exclude' and clude['path']:
+            if mountpoint.startswith(clude['path']):
+                debug("mount_excluded: %s: matched %s" % (mountpoint, clude['path']))
+                return True
+    debug("mount_excluded: %s: no matches" % mountpoint)
+    return False
+
+def do_rbind(cfg, startpath, bdir):
+    for (device, mountpoint, mounttype, mountoptions) in mount_information(False):
+        debug("Testing %s on %s" % (mountpoint, device))
+        if mountpoint.startswith(startpath) and device.startswith('/'):
+            if not mount_excluded(cfg, mountpoint):
+                ret = spawn(['mount', '--bind', mountpoint, reroot(bdir, mountpoint)])
+                if ret:
+                    debug("mount --bind %s: failed: unwinding" % mountpoint)
+                    ret = spawn(['umount', '-l', reroot(bdir, startpath)])
+                    if ret:
+                        warn('Failed to unmount: %s' % reroot(bdir, startpath))
+                    return 1
+                spawn(['mount', '--make-unbindable', reroot(bdir, mountpoint)])
+
+    return 0
+
 ######################################################################
 # Client implementation
 ######################################################################
@@ -753,7 +780,7 @@ def do_client_setup(cfg):
         if ret:
             warn('modprobe dm-snapshot failed, continuing')
         bdir = tempfile.mkdtemp("-rbind", "safekeep-%d-" % current_pid, "/mnt")
-        ret = spawn(['mount', '--rbind', '/', bdir])
+        ret = do_rbind(cfg, '/', bdir)
         if ret:
             warn('mount --rbind failed, snapshotting will be disabled')
             try:
