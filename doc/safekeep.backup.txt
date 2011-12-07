@@ -22,50 +22,28 @@ The full set of supported elements and attributes looks as follows:
 ------------------------------------------------------------------------
 <backup id="my_workstation">
 
-  <!-- the client backup host, the user under which the servers will connect,
-       the SSH keys used for control and data transfer -->
-  <host
-    name="myhost" user="root" nice="10"
-    key-ctrl="/home/jdoe/.ssh/backup_id_dsa"
-    key-data="/home/jdoe/.ssh/backup2_id_dsa"
-  />
+  <!-- the client backup host, the user and keys for access -->
+  <host name="myhost" user="root" nice="10"
+        key-ctrl="/home/jdoe/.ssh/backup_id_dsa" 
+        key-data="/home/jdoe/.ssh/backup2_id_dsa" />
 
-  <!-- you can customize the bandwidth limit on a client basis,
-       for example to 50KB/s download/upload -->
+  <!-- rate limit bandwidth (kB/s) on a client basis -->
   <bandwidth overall="80" download="50" upload="50" />
 
-  <!-- location where the backups will be stored on the server
-       and for how long (D=days, W=weeks, M=months, or Y=years) -->
-  <repo path="./data" retention="10D"/>
+  <!-- where to stored the data on the server, and for now long -->
+  <repo path="./data" retention="10D" />
 
   <!-- settings for database dump and for volume snapshot -->
   <setup>
-    <!-- database type ("postgres" or "mysql"), and database name,
-         DB user with backup rights, location of the dump file on the client 
-         host, and flag to remove or not the dump file after the backup is done.
-         Databases can be dumped individually using a dump clause for each database. -->
-    <dump
-      type="postgres"
-      db="my_db"
-      dbuser="foobar"
-      options="--schema=public"
-      file="/var/backup/dumps/mydata"
-      cleanup="true"
-    />
+    <!-- databases can be dumbed before the backup -->
+    <dump type="postgres" db="my_db" dbuser="foobar" options="--schema=public"
+          file="/var/backup/dumps/mydata" cleanup="true" />
 
-    <!-- what volume is to be snapshot (device location) and the size
-         of the snapshot (free space must exist in the volume group) -->
-    <snapshot
-      device="/path/to/volume"
-      size="500M"
-    />
+    <!-- what volume is to be snapshot, and the size of the snapshot -->
+    <snapshot device="/path/to/volume" size="500M" />
 
-    <!-- location of a script to be executed on the client at different
-         stages of the run.  It is called with three arguments:
-         the step of the backup, backup id and the backup root directory -->
-    <script
-      path="/path/to/script"
-    />
+    <!-- location of a script to be executed at different stages of the run --> 
+    <script path="/path/to/script" />
 
   </setup>
 
