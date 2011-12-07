@@ -1,3 +1,7 @@
+:man source: safekeep
+:man version: {revnumber}
+:man manual: SafeKeep Client Configuration
+
 safekeep.backup(5)
 ================
 
@@ -377,3 +381,6 @@ SEE ALSO
 --------
 safekeep(1), safekeep.conf(5), rdiff-backup(1), lvcreate(8)
 
+AUTHOR
+------
+This man page was written by Dimi Paun <dimi@lattica.com>.

@@ -1,3 +1,7 @@
+:man source: safekeep
+:man version: {revnumber}
+:man manual: SafeKeep Manual
+
 safekeep(1)
 ==========
 
