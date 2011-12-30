@@ -724,7 +724,7 @@ def do_client_snap_teardown(cfg, bdir):
 
 def mount_excluded(cfg, mountpoint):
     debug("mount_excluded: %s" % mountpoint)
-    mountpoint = mountpoint + '/'
+    if not mountpoint.endswith('/'): mountpoint = mountpoint + '/'
     for clude in cfg['cludes']:
         if clude['type'] == 'exclude' and clude['path']:
             if mountpoint.startswith(clude['path']):
