@@ -47,7 +47,7 @@ The full set of supported elements and attributes looks as follows:
     <snapshot device="/path/to/volume" size="500M" />
 
     <!-- location of a script to be executed at different stages of the run --> 
-    <script path="/path/to/script" />
+    <script path="server:/path/to/script" />
 
   </setup>
 
@@ -248,15 +248,21 @@ are separated by '/', attributes are introduced by '@':
 	tag.
 	Optional for a `<snapshot>` element.
 
-/backup/setup/script/@path::
-       Execute the script specified path on the client at certain steps
-       of the backup process.
-       This script is executed with three arguments:
-       - Backup id (/backup/@id)
-       - Backup step
-       - Backup root directory (valid after creation of a snapshot)
-       See the `CLIENT SCRIPT` section for more information.
-       Mandatory for a `<script>` element.
+/backup/setup/script/@location::
+	Execute the script specified path on the client at certain steps
+	of the backup process.
+	This script is executed with three arguments:
+	- Backup id (/backup/@id)
+	- Backup step
+	- Backup root directory (valid after creation of a snapshot)
+	The `location` optionally consists of an optional `host` and
+	a mandatory `path`, separated by a ":", where the host part is
+	either "client" or "server".  If no host part is specified then
+	it is first looked for on the server, and if not found, then is
+	looked for on the client.  If it not found on either, then a
+	warning is raised.
+	See the `CLIENT SCRIPT` section for more information.
+	Mandatory for a `<script>` element.
 
 /backup/data/@exclude-devices::
        One of "true" or "false". If "true", the dump file will
@@ -342,6 +348,15 @@ CLIENT SCRIPT
 -------------
 `safekeep(1)` support the optional execution of a script or program
 on the client system at different steps during execution of the backup.
+
+The script may be located on either the server or the client.  If it is
+located on the server, then the file is copied to the client into a
+temporary directory before execution.  Note that this directory is located
+where ever the system normally creates temporary files, and it is possible
+that the execution of scripts are disallowed.  In that case it is recommended
+that a client based script is used.  In addition, the script is copied from
+the server on a line by line basis, and so it is not suitable to pass binary
+files.
 
 Note: specification of a script which does not exist is not considered an
 error, and is treated as the same as not specifying a script.  However, if

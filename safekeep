@@ -68,7 +68,7 @@ current_pid = os.getpid()
 default_bandwidth = {}
 cmd = "<Missing>"
 
-PROTOCOL = "1.1"
+PROTOCOL = "1.2"
 VERSION = "1.3.3"
 VEBOSITY_BY_CLASS = {'DBG': 3, 'INFO': 2, 'WARN': 1, 'ERR': 0}
 
@@ -431,6 +431,8 @@ def parse_config(backup_el, dflt_id):
         script_el = setup_el[0].getElementsByTagName('script')
         if len(script_el) == 1:
             script = script_el[0].getAttribute('path')
+            if not ':' in script and os.path.isfile(script):
+                script = 'server:' + script
         elif len(script_el) > 1:
             raise ConfigException('Can not have more than one setup script element')
 
@@ -771,6 +773,19 @@ def do_client_config_parse(cfgStr, dflt_id=None):
     finally:
         dom.unlink()
 
+def do_client_remote_script(script_file, cfg, cmd):
+    (cfg_cmd, server_file, cnt_str) = cmd.split(':', 2)
+    debug("do_client_remote_script: %s -> %s: cnt_str = %s" % (server_file, cfg['script'], cnt_str.strip()))
+    try:
+        for i in xrange(int(cnt_str)):
+            line = sys.stdin.readline()
+            if not line: raise Exception('Unexpected end of file')
+            script_file.write(line)
+    finally:
+        script_file.close()
+
+    os.chmod(cfg['script'], stat.S_IXUSR | stat.S_IRUSR)
+
 def do_client_setup(cfg):
     debug('Do setup of %s' % cfg['host'])
 
@@ -892,7 +907,7 @@ def do_client_scrub():
                 warn('Can not tear down snapshot: %s' % device)
             scrubbed = True
 
-        # Now cleanup any safekeep directories still hanging around
+        # Now cleanup any safekeep directories and script files still hanging around
 
         debug("Cleaning up remaining safekeep directories")
         if os.path.isdir('/mnt'):
@@ -904,6 +919,33 @@ def do_client_scrub():
                         os.rmdir(mountpoint)
                     except OSError, e:
                         warn('Failed to remove: %s: %s' % (mountpoint, e))
+
+        debug("Cleaning up remaining safekeep script files")
+        script_dir = tempfile.gettempdir()
+        if os.path.isdir(script_dir):
+            for ent in os.listdir(script_dir):
+                if fnmatch.fnmatch(ent, 'safekeep-[0-9][0-9]*-') and not fnmatch.fnmatch(ent, 'safekeep-%d-' % current_pid):
+                    script_file = '%s/%s' % (script_dir, ent)
+                    if os.path.isdir(script_file):
+                        temp_dir = script_file
+                        for ent in os.listdir(temp_dir):
+                            script_file = '%s/%s' % (temp_dir, ent)
+                            info("Removing script file %s" % script_file)
+                            try:
+                                os.remove('%s' % script_file)
+                            except OSError, e:
+                                warn('Failed to remove: %s: %s' % (script_file, e))
+                        info("Removing script directory %s" % temp_dir)
+                        try:
+                            os.rmdir(temp_dir)
+                        except OSError, e:
+                            warn('Failed to remove: %s: %s' % (temp_dir, e))
+                    else:
+                        info("Removing script file %s" % script_file)
+                        try:
+                            os.remove('%s' % script_file)
+                        except OSError, e:
+                            warn('Failed to remove: %s: %s' % (script_file, e))
 
         if not scrubbed:
             info('No cleanup required')
@@ -921,6 +963,8 @@ def do_client():
     bdir = '/'
     cfg = do_client_config_parse('<backup/>', 'def')
     ex = None
+    script_file = None
+    script_dir = None
     try:
         while True:
             try:
@@ -930,6 +974,29 @@ def do_client():
                     send('OK %s, %s' % (PROTOCOL, VERSION))
                 elif line.startswith('CONFIG'):
                     cfg = do_client_config(line)
+                    if ':' in cfg['script']:
+                        (script_loc, script) = cfg['script'].split(':', 1)
+                    else:
+                        (script_loc, script) = ('client', cfg['script'])
+                    if script_loc == 'server':
+                        if not script_dir:
+                            script_dir = tempfile.mkdtemp(prefix="safekeep-%d-" % current_pid)
+                        script = os.path.basename(script)
+                        (fd, cfg['script']) = tempfile.mkstemp(prefix="%s-" % script, dir=script_dir)
+                        script_file = os.fdopen(fd, 'w')
+                        send('OK %s' % cfg['script'])
+                    elif script_loc == 'client':
+                        cfg['script'] = script
+                        ret = client_side_script('STARTUP', cfg, bdir)
+                        if ret:
+                            send('ERROR Client-side setup script failed: %s' % ret)
+                        else:
+                            send('OK')
+                    else:
+                        warn('Unknown script location %s for script %s' % (script_loc, script))
+                        send('OK')
+                elif line.startswith('SCRIPT'):
+                    do_client_remote_script(script_file, cfg, line)
                     ret = client_side_script('STARTUP', cfg, bdir)
                     if ret:
                         send('ERROR Client-side setup script failed: %s' % ret)
@@ -961,6 +1028,14 @@ def do_client():
     finally:
         if should_cleanup:
             do_client_cleanup(cfg, bdir)
+        if script_file:
+            if not script_file.closed: script_file.close()
+            os.remove(cfg['script'])
+        if script_dir:
+            try:
+                os.rmdir(script_dir)
+            except OSError, e:
+                warn('Failed to remove: %s: %s' % (script_dir, e))
 
     if ex:
         send('TRACEBACK ' + str(ex)  + '>>>' + stacktrace().replace('\n', '###'))
@@ -1156,7 +1231,17 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
             cin.write('CONFIG: %d: %s\n' % (len(cfg['text'].splitlines()), id))
             cin.write(cfg['text'] + '\n')
             cin.flush()
-            do_server_getanswer(cout)
+            remote_script = do_server_getanswer(cout)
+            if cfg['script'].startswith('server:') and remote_script:
+                local_script = cfg['script'].split(':', 1)[1]
+                debug("Transferring script: %s -> %s" % (local_script, remote_script))
+                fscript = open(local_script)
+                lines = fscript.readlines()
+                fscript.close()
+                cin.write('SCRIPT: %s: %d\n' % (local_script, len(lines)))
+                cin.writelines(lines)
+                cin.flush()
+                do_server_getanswer(cout)
             if cleanup:
                 cleaned_up = False
                 cin.write('SCRUB\n')
