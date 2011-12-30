@@ -328,7 +328,8 @@ def parse_snap(snap_el):
     size = snap_el.getAttribute('size')
     if not size:
         raise ConfigException('Please specify the size for the snapshot')
-    return { 'device' : device, 'size' : size }
+    tag = snap_el.getAttribute('tag')
+    return { 'device' : device, 'size' : size, 'tag' : tag }
 
 def parse_clude(clude_el):
     path = clude_el.getAttribute('path')
@@ -681,8 +682,14 @@ def do_client_snap(cfg, bdir):
         if not snapmnt:
             warn('Cannot find the mountpoint for: %s' % device)
             continue
-        args = ['lvcreate', '--snapshot', '--size', snap['size'],
-                '--name', os.path.basename(snapdev), lvmdev]
+        tag = snap['tag']
+        if tag:
+            args = ['lvcreate', '--addtag', '@' + tag,
+                    '--snapshot', '--size', snap['size'],
+                    '--name', os.path.basename(snapdev), lvmdev]
+        else:
+            args = ['lvcreate', '--snapshot', '--size', snap['size'],
+                    '--name', os.path.basename(snapdev), lvmdev]
         ec = spawn(args)
         if ec:
             warn('Can not snapshot the device: %s' % device)

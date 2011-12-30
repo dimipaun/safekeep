@@ -242,6 +242,12 @@ are separated by '/', attributes are introduced by '@':
 	of the original device's size.
 	Mandatory for a `<snapshot>` element.
 
+/backup/setup/snapshot/@tag::
+	A tag to be added to the snapshot, with the `--addtag` argument
+	to `lvcreate`.  An `@` is automatically added to the generated
+	tag.
+	Optional for a `<snapshot>` element.
+
 /backup/setup/script/@path::
        Execute the script specified path on the client at certain steps
        of the backup process.
