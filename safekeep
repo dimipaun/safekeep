@@ -1725,7 +1725,14 @@ def main():
         base_dir = home_dir
 
     if len(cfglocs) > 0:
-        cfgs = parse_locs(cfglocs)
+        try:
+            cfgs = parse_locs(cfglocs)
+        except Exception, ex:
+            if isinstance(ex, ConfigException):
+                error('CONFIG ERROR: %s' % (ex or ''), ex)
+            else:
+                error('ERROR: %s' % (ex or ''), ex)
+            sys.exit(2)
     else:
         cfgs = {}
 
