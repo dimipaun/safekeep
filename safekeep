@@ -364,12 +364,15 @@ def parse_config(backup_el, dflt_id):
     host_el = backup_el.getElementsByTagName('host')
     if host_el:
         host = host_el[0].getAttribute('name')
+        port = host_el[0].getAttribute('port')
         user = host_el[0].getAttribute('user')
         nice = host_el[0].getAttribute('nice')
         key_ctrl = host_el[0].getAttribute('key-ctrl')
         key_data = host_el[0].getAttribute('key-data')
     else:
-        host = user = nice = key_ctrl = key_data = None
+        host = port = user = nice = key_ctrl = key_data = None
+    if host and port and not port.isdigit():
+        raise ConfigException('Host port must be a number: "%s"' % port)
     if host and not user:
         user = 'root'
     if host and not key_ctrl:
@@ -459,7 +462,7 @@ def parse_config(backup_el, dflt_id):
                          '/var/named/chroot/var/run', '/var/named/chroot/var/tmp' ]
         cludes = [{ 'type' : 'exclude', 'path' : path, 'glob' : None, 'regexp' : None } for path in path_xcludes]
 
-    return { 'id': id, 'host' : host, 'nice' : nice, 'user' : user, 'key_ctrl' : key_ctrl, 'key_data' : key_data,
+    return { 'id': id, 'host' : host, 'port' : port, 'nice' : nice, 'user' : user, 'key_ctrl' : key_ctrl, 'key_data' : key_data,
              'dir' : dir, 'retention' : retention, 'dumps' : dumps, 'snaps' : snaps, 'script' : script,
              'cludes' : cludes, 'data_options' : data_options, 'options' : options, 'bw' : bw}
 
@@ -1110,7 +1113,9 @@ def do_server_rdiff(cfg, bdir, nice, ionice, force):
     args.extend(['rdiff-backup'])
 
     if cfg['host']:
-        schema = 'ssh %s -i %s %%s rdiff-backup --server' % (verbosity_ssh, cfg['key_data'])
+        basessh = 'ssh'
+        if cfg['port']: basessh += ' -p %s' % cfg['port']
+        schema = '%s %s -i %s %%s rdiff-backup --server' % (basessh, verbosity_ssh, cfg['key_data'])
         args.extend(['--remote-schema', schema])
 
     if force:
@@ -1213,6 +1218,7 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
             if cfg['host']:
                 cmd.extend(['ssh'])
 		if verbosity_ssh: cmd.extend([verbosity_ssh])
+                if cfg['port']: cmd.extend(['-p', cfg['port']])
 		cmd.extend(['-T', '-i', cfg['key_ctrl'], '-l', cfg['user'], cfg['host']])
             cmd.extend(['safekeep', '--client'])
    
@@ -1409,6 +1415,7 @@ def do_keys(cfgs, ids, nice_rem, identity, status, dump, deploy):
             print output
 
         basessh = 'ssh'
+        if cfg['port']: basessh += ' -p %s' % cfg['port']
         if identity: basessh += ' -i %s' % (commands.mkarg(identity))
 
         if status or deploy:

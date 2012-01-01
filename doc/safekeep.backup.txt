@@ -88,6 +88,12 @@ are separated by '/', attributes are introduced by '@':
 	This is different from leaving it blank, as it will establish a
 	SSH session and use the user specified by `/backup/host/@user`.
 	Optional, defaults to local access.
+          
+/backup/host/@port::
+	The network port to use when connecting to the client.  This must
+	be a number and is passed to the network connection agent, usually
+	SSH.
+	Optional, default to not passing any port specification.
 
 /backup/host/@user::
 	The user name to use when connecting to the client. This user
