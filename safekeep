@@ -434,8 +434,12 @@ def parse_config(backup_el, dflt_id):
         script_el = setup_el[0].getElementsByTagName('script')
         if len(script_el) == 1:
             script = script_el[0].getAttribute('path')
-            if not ':' in script and os.path.isfile(script):
-                script = 'server:' + script
+            if not ':' in script:
+                if is_client and os.path.isfile(script):
+                    warn('Assuming client based script: %s' % script)
+                    script = 'client:' + script
+                else:
+                    script = 'server:' + script
         elif len(script_el) > 1:
             raise ConfigException('Can not have more than one setup script element')
 
@@ -779,15 +783,22 @@ def do_client_config_parse(cfgStr, dflt_id=None):
 def do_client_remote_script(script_file, cfg, cmd):
     (cfg_cmd, server_file, cnt_str) = cmd.split(':', 2)
     debug("do_client_remote_script: %s -> %s: cnt_str = %s" % (server_file, cfg['script'], cnt_str.strip()))
-    try:
-        for i in xrange(int(cnt_str)):
-            line = sys.stdin.readline()
-            if not line: raise Exception('Unexpected end of file')
-            script_file.write(line)
-    finally:
-        script_file.close()
+    if int(cnt_str) > 0:
+        try:
+            for i in xrange(int(cnt_str)):
+                line = sys.stdin.readline()
+                if not line: raise Exception('Unexpected end of file')
+                script_file.write(line)
+        finally:
+            script_file.close()
 
-    os.chmod(cfg['script'], stat.S_IXUSR | stat.S_IRUSR)
+        os.chmod(cfg['script'], stat.S_IXUSR | stat.S_IRUSR)
+        return True
+    else:
+        script_file.close()
+        os.remove(cfg['script'])
+
+    return False
 
 def do_client_setup(cfg):
     debug('Do setup of %s' % cfg['host'])
@@ -999,11 +1010,14 @@ def do_client():
                         warn('Unknown script location %s for script %s' % (script_loc, script))
                         send('OK')
                 elif line.startswith('SCRIPT'):
-                    do_client_remote_script(script_file, cfg, line)
-                    ret = client_side_script('STARTUP', cfg, bdir)
-                    if ret:
-                        send('ERROR Client-side setup script failed: %s' % ret)
+                    if do_client_remote_script(script_file, cfg, line):
+                        ret = client_side_script('STARTUP', cfg, bdir)
+                        if ret:
+                            send('ERROR Client-side setup script failed: %s' % ret)
+                        else:
+                            send('OK')
                     else:
+                        cfg['script'] = None
                         send('OK')
                 elif line.startswith('SETUP'):
                     client_side_script('PRE-SETUP', cfg, bdir)
@@ -1240,12 +1254,21 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
             remote_script = do_server_getanswer(cout)
             if cfg['script'].startswith('server:') and remote_script:
                 local_script = cfg['script'].split(':', 1)[1]
-                debug("Transferring script: %s -> %s" % (local_script, remote_script))
-                fscript = open(local_script)
-                lines = fscript.readlines()
-                fscript.close()
-                cin.write('SCRIPT: %s: %d\n' % (local_script, len(lines)))
-                cin.writelines(lines)
+                if os.path.isfile(local_script):
+                    ret = check_script_permissions(local_script)
+                    if not ret:
+                        debug("Transferring script: %s -> %s" % (local_script, remote_script))
+                        fscript = open(local_script)
+                        lines = fscript.readlines()
+                        fscript.close()
+                        cin.write('SCRIPT: %s: %d\n' % (local_script, len(lines)))
+                        cin.writelines(lines)
+                    else:
+                        error('Illegal script specified: %s: %s' % (local_script, ret))
+                        cin.write('SCRIPT: %s: %d\n' % ('-', 0))
+                else:
+                    warn('No server based script found: %s' % local_script)
+                    cin.write('SCRIPT: %s: %d\n' % ('-', 0))
                 cin.flush()
                 do_server_getanswer(cout)
             if cleanup:

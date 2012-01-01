@@ -264,8 +264,8 @@ are separated by '/', attributes are introduced by '@':
 	The `location` optionally consists of an optional `host` and
 	a mandatory `path`, separated by a ":", where the host part is
 	either "client" or "server".  If no host part is specified then
-	it is first looked for on the server, and if not found, then is
-	looked for on the client.  If it not found on either, then a
+	it is first looked for on the client, and if not found, then is
+	looked for on the server.  If it not found on either, then a
 	warning is raised.
 	See the `CLIENT SCRIPT` section for more information.
 	Mandatory for a `<script>` element.
