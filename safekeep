@@ -1556,6 +1556,8 @@ def main():
         usage(2)
 
     global backup_user, home_dir, base_dir
+    global verbosity_level
+
     mode = None
     email = []
     email_from = None
@@ -1726,6 +1728,7 @@ def main():
 
     if len(cfglocs) > 0:
         try:
+            verbosity_level = 1 + verbosity
             cfgs = parse_locs(cfglocs)
         except Exception, ex:
             if isinstance(ex, ConfigException):
@@ -1749,7 +1752,7 @@ def main():
         if not ok: sys.exit(2)
 
     try:
-        global is_client, verbosity_level, verbosity_ssh, verbosity_trickle
+        global is_client, verbosity_ssh, verbosity_trickle
 
         if verbosity > 2:
             verbosity_trickle = verbosity_ssh = '-' + (verbosity-2) * 'v'
