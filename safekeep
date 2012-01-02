@@ -1119,7 +1119,7 @@ def do_server_rdiff(cfg, bdir, nice, ionice, force):
         if limit_ul:
             trickle.extend(['-u', str(limit_ul)])
     if len(trickle):
-        if try_to_run([trickle_cmd, '-V']) is not None:
+        if try_to_run([trickle_cmd, '-V']) is None:
 	    warn('Trickle not available, bandwidth limiting disabled')
 	    trickle = []
     args.extend(trickle)
