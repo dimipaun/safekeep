@@ -2,6 +2,6 @@
 
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
 
-if ls /etc/safekeep/backup.d/*.backup 2>&1 1>/dev/null; then
+if ls /etc/safekeep/backup.d/*.backup 1>/dev/null 2>&1; then
     safekeep -v --server
 fi
