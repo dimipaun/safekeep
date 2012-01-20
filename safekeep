@@ -334,7 +334,7 @@ def parse_snap(snap_el):
             if tag:
                 if not tag.startswith('@'): tag = '@' + tag.lstrip()
                 tags.append(tag.strip())
-            else:
+            elif not is_client:
                 warn('Device: %s: empty tag in taglist: %s' % (device, tag_el))
     return { 'device' : device, 'size' : size, 'tags' : tags }
 
