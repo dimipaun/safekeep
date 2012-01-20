@@ -327,8 +327,16 @@ def parse_snap(snap_el):
     size = snap_el.getAttribute('size')
     if not size:
         raise ConfigException('Please specify the size for the snapshot')
-    tag = snap_el.getAttribute('tag')
-    return { 'device' : device, 'size' : size, 'tag' : tag }
+    tags = []
+    tag_el = snap_el.getAttribute('tag')
+    if tag_el:
+        for tag in tag_el.split(','):
+            if tag:
+                if not tag.startswith('@'): tag = '@' + tag.lstrip()
+                tags.append(tag.strip())
+            else:
+                warn('Device: %s: empty tag in taglist: %s' % (device, tag_el))
+    return { 'device' : device, 'size' : size, 'tags' : tags }
 
 def parse_clude(clude_el):
     path = clude_el.getAttribute('path')
@@ -690,14 +698,12 @@ def do_client_snap(cfg, bdir):
         if not snapmnt:
             warn('Cannot find the mountpoint for: %s' % device)
             continue
-        tag = snap['tag']
-        if tag:
-            args = ['lvcreate', '--addtag', '@' + tag,
-                    '--snapshot', '--size', snap['size'],
-                    '--name', os.path.basename(snapdev), lvmdev]
-        else:
-            args = ['lvcreate', '--snapshot', '--size', snap['size'],
-                    '--name', os.path.basename(snapdev), lvmdev]
+        args = ['lvcreate']
+        if snap['tags']:
+            for tag in snap['tags']:
+                args.extend(['--addtag', tag.strip()])
+        args.extend(['--snapshot', '--size', snap['size'],
+            '--name', os.path.basename(snapdev), lvmdev])
         ec = spawn(args)
         if ec:
             warn('Can not snapshot the device: %s' % device)
