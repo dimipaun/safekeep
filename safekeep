@@ -70,7 +70,7 @@ current_pid = os.getpid()
 default_bandwidth = {}
 
 PROTOCOL = "1.2"
-VERSION = "1.3.3"
+VERSION = "1.4.0"
 VEBOSITY_BY_CLASS = {'DBG': 3, 'INFO': 2, 'WARN': 1, 'ERR': 0}
 
 ######################################################################
