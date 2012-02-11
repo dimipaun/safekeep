@@ -34,8 +34,10 @@ except:
 # Python 2.2 compatibility
 ######################################################################
 # There is no guarantee that we'll continue supporting Python 2.2
-# indefinitely, but we make a reasonable effor to do so as long as
+# indefinitely, but we make a reasonable effort to do so as long as
 # it doesn't result in major complication/ugliness.
+# Note that some features related to scripting, snapshots and DB backups
+# already require Python 2.3.
 
 try:
     True, False
