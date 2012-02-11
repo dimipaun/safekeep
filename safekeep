@@ -34,10 +34,8 @@ except:
 # Python 2.2 compatibility
 ######################################################################
 # There is no guarantee that we'll continue supporting Python 2.2
-# indefinitely, but we make a reasonable effort to do so as long as
+# indefinitely, but we make a reasonable effor to do so as long as
 # it doesn't result in major complication/ugliness.
-# Note that some features related to scripting, snapshots and DB backups
-# already require Python 2.3.
 
 try:
     True, False
@@ -995,26 +993,29 @@ def do_client():
                     send('OK %s, %s' % (PROTOCOL, VERSION))
                 elif line.startswith('CONFIG'):
                     cfg = do_client_config(line)
-                    if ':' in cfg['script']:
-                        (script_loc, script) = cfg['script'].split(':', 1)
-                    else:
-                        (script_loc, script) = ('client', cfg['script'])
-                    if script_loc == 'server':
-                        if not script_dir:
-                            script_dir = tempfile.mkdtemp(prefix="safekeep-%d-" % current_pid)
-                        script = os.path.basename(script)
-                        (fd, cfg['script']) = tempfile.mkstemp(prefix="%s-" % script, dir=script_dir)
-                        script_file = os.fdopen(fd, 'w')
-                        send('OK %s' % cfg['script'])
-                    elif script_loc == 'client':
-                        cfg['script'] = script
-                        ret = client_side_script('STARTUP', cfg, bdir)
-                        if ret:
-                            send('ERROR Client-side setup script failed: %s' % ret)
+                    if cfg['script']:
+                        if ':' in cfg['script']:
+                            (script_loc, script) = cfg['script'].split(':', 1)
                         else:
+                            (script_loc, script) = ('client', cfg['script'])
+                        if script_loc == 'server':
+                            if not script_dir:
+                                script_dir = tempfile.mkdtemp(prefix="safekeep-%d-" % current_pid)
+                            script = os.path.basename(script)
+                            (fd, cfg['script']) = tempfile.mkstemp(prefix="%s-" % script, dir=script_dir)
+                            script_file = os.fdopen(fd, 'w')
+                            send('OK %s' % cfg['script'])
+                        elif script_loc == 'client':
+                            cfg['script'] = script
+                            ret = client_side_script('STARTUP', cfg, bdir)
+                            if ret:
+                                send('ERROR Client-side setup script failed: %s' % ret)
+                            else:
+                                send('OK')
+                        else:
+                            warn('Unknown script location %s for script %s' % (script_loc, script))
                             send('OK')
                     else:
-                        warn('Unknown script location %s for script %s' % (script_loc, script))
                         send('OK')
                 elif line.startswith('SCRIPT'):
                     if do_client_remote_script(script_file, cfg, line):
@@ -1259,7 +1260,7 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
             cin.write(cfg['text'] + '\n')
             cin.flush()
             remote_script = do_server_getanswer(cout)
-            if cfg['script'].startswith('server:') and remote_script:
+            if cfg['script'] and cfg['script'].startswith('server:') and remote_script:
                 local_script = cfg['script'].split(':', 1)[1]
                 if os.path.isfile(local_script):
                     ret = check_script_permissions(local_script)
