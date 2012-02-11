@@ -1,3 +1,173 @@
+2012-02-11 07:51 +0000 [r800]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/safekeep: Readded note about Python 2.2/2.3
+	  support
+
+2012-02-11 07:39 +0000 [r799]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/safekeep: Fixup up final testing failure
+
+2012-02-11 06:07 +0000 [r798]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/safekeep: Update version for new release
+
+2012-02-11 06:05 +0000 [r797]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/safekeep.spec.in, safekeep/trunk/ANNOUNCE:
+	  Prepared for 1.4.0 release
+
+2012-02-11 05:57 +0000 [r796]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/TODO: Updated TODO with latest ideas
+
+2012-02-11 05:38 +0000 [r795]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/safekeep: Added note about Python 2.2/2.3 support
+
+2012-01-21 03:10 +0000 [r794]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/safekeep: Tie message to specific backup
+	  configuration
+
+2012-01-20 13:21 +0000 [r793]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/safekeep: Suppress duplicate message from client
+
+2012-01-20 12:25 +0000 [r792]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/doc/safekeep.backup.txt, safekeep/trunk/safekeep:
+	  Allow snapshot tag item to take a comma separated list of tags
+
+2012-01-13 11:47 +0000 [r791]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/safekeep: Clean up simple coding issues reported
+	  by pylint
+
+2012-01-08 00:01 +0000 [r790]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/safekeep.cron: Correctly suppress any error
+	  message
+
+2012-01-02 03:17 +0000 [r789]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/safekeep: Corrected test for usable trickle as
+	  reported by Ken Bass
+
+2012-01-01 07:59 +0000 [r788]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/doc/safekeep.backup.txt, safekeep/trunk/safekeep:
+	  Improved coding for script location, including change of default
+	  location to be client first and then server, test of permissions
+	  on server based script and notification of errors and missing
+	  file on the server side.
+
+2012-01-01 04:58 +0000 [r787]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/safekeep: Fix up verbosity_level to allow debug
+	  messages within configuration parsing
+
+2012-01-01 03:31 +0000 [r786]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/safekeep: Better reporting of server configuration
+	  errors, similar to other exception handling
+
+2012-01-01 03:28 +0000 [r785]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/doc/safekeep.backup.txt, safekeep/trunk/safekeep:
+	  Added option to set SSH port for each host as requested by Ken
+	  Bass
+
+2011-12-30 09:27 +0000 [r784]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/doc/safekeep.backup.txt, safekeep/trunk/safekeep:
+	  Add the ability to have the script file on either the client or
+	  the server. Note that it is still only run on the client, just
+	  that for a server located one, a temporary copy is sent to the
+	  client to run. At present, it is designed around passing scripts,
+	  not binaries, as it passes the file line by line. The protocol
+	  version has been bumped to 1.2, due to an addition to rund the
+	  script after it is copied.
+
+2011-12-30 08:50 +0000 [r783]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/safekeep: Only add trailing slash on directory if
+	  it is not already present
+
+2011-12-30 08:43 +0000 [r782]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/doc/safekeep.backup.txt, safekeep/trunk/safekeep:
+	  Added LVM snapshot LV tagging support as requested by Andres
+	  Toomsalu
+
+2011-12-25 13:40 +0000 [r781]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/safekeep.cron: Alexander List <alex@list.priv.at>
+	  Typo in safekeep.cron creates file "1" instead of redirecting
+	  stderr to stdout.
+
+2011-12-07 15:18 +0000 [r780]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.backup.txt,
+	  safekeep/trunk/doc/safekeep.conf.txt,
+	  safekeep/trunk/doc/safekeep.txt: Appease ASCIIDOC, provide the
+	  required metadata.
+
+2011-12-07 03:38 +0000 [r779]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.backup.txt: Simpler, less
+	  overwhelming documentation
+
+2011-12-06 12:04 +0000 [r778]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/safekeep: Patch that will correct issues with
+	  performing "mount --rbind / /mnt/safekeep...". Instead of
+	  recursively binding the entire tree it only binds filesystems
+	  that are mounted on "real" devices (i.e. have a device in the
+	  filesystem) and that are not in the exclude list for the backup.
+
+2011-12-03 02:36 +0000 [r777]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/safekeep: Futher updates to cleanup code for
+	  failed backups
+
+2011-12-02 12:51 +0000 [r776]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/safekeep: Joe Steele <joe@madewell.net> Maintain
+	  compatibility with Python 2.2
+
+2011-11-28 12:38 +0000 [r775]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/safekeep: - includes the PID of the creating
+	  safekeep in the snapshot names, - handles the client side
+	  cleanup, if snapshots are left around, - cleans up the backup
+	  files if the client fails, - intentionally block run a "safekeep
+	  --client --cleanup" when other safekeep is running. - clean up of
+	  messages and some control flow, - suppress tracebacks, only
+	  printing them on debug requests, - ensure that the client is
+	  closed before starting some possibly long running server
+	  processes.
+
+2011-11-28 12:38 +0000 [r774]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/Makefile: Changes to work with recent release
+
+2011-11-20 07:01 +0000 [r769]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/doc/users: Add Frank Crawford to list
+
+2011-11-20 06:25 +0000 [r768]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/ChangeLog: Update ChangeLog
+
+2011-11-20 05:56 +0000 [r767]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/safekeep.spec.in, safekeep/trunk/ANNOUNCE,
+	  safekeep/trunk/doc/users: Prep release 1.3.3
+
+2011-11-20 05:35 +0000 [r766]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/safekeep: Update version
+
 2011-10-20 14:42 +0000 [r765]  Dimi Paun <dimi@lattica.com>
 
 	* safekeep/trunk/safekeep: Frank Crawford
