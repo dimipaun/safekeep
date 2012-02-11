@@ -3,9 +3,9 @@ Next release:
   * Test the sendmail delivery method
   * Add tests db dumps
   * Avoid snapshotting snapshots
-  * Don't snapshot a device if a snapshot is already present
-  * Protect against multiple safekeep instance running at once
-  * Do not include fifos and sockets by default
+  * Don't snapshot a device if a snapshot is already present (Partially DONE)
+  * Protect against multiple safekeep instance running at once (DONE)
+  * Do not include fifos and sockets by default (DONE)
 
 Feedback from users:
   * Øyvind Skaar <os@opoint.no>: FreeBSD have snapshot capabilities
@@ -19,9 +19,15 @@ Future (post 1.0):
   * Decide how big the snapshot size should be automagically
   * Fully automatic shapshotting mode
   * Configuration inheritance
-  * Transactional ops on server side, and automagic recovery from errors
+  * Transactional ops on server side, and automagic recovery from errors (Partially DONE)
   * Windows support for the client
   * Write SE Linux rules to limit access rights (akin to the httpd ones)
   * Run the server in a chroot-jail
   * Compare mirroring with a straight rsync(1)
 
+Future (post 1.4.0):
+  * Server-side scripting
+  * In-line scripts
+  * Automatic compression of DB dumps
+  * Preprocessing of configuration prior to client processing
+  * Multi-threading and concurrent backups
