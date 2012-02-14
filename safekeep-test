@@ -227,7 +227,11 @@ def createKey(user, host, keyname, comment):
     rcmd(cmd, user, host, 'create %s on server' % keyname)
     return key
 
-def packageAndUpload(pkgroot, repodirs, user, host):
+#TODO: this is just old code, we need to change it
+#      so that it builds the RPM on the host it will run on
+def packageRPM(tar, user, host):
+    pkgroot='/tmp/safekeep-test-XXX'   #TODO: replace XXX with curr timestamp
+
     rpmmacros = """
 %%packager          safekeep Tester Package Builder
 %%_topdir           %s
@@ -235,33 +239,23 @@ def packageAndUpload(pkgroot, repodirs, user, host):
 
 %%_signature         gpg
 """ % (pkgroot)
+
     writefile(os.path.join(pkgroot, '.rpmmacros'), rpmmacros)
 
     # and the directories needed by rpmbuild
     for dir in ('BUILD', 'RPMS/noarch', 'SOURCES', 'SPECS', 'SRPMS'):
         os.makedirs(os.path.join(pkgroot, dir))
 
-    cmd = 'make tar'
+    cmd = '%s %s %s@%s:%s' % \
+          (mkssh('scp'), tar, user, host, pkgroot)
+    print cmd
     if os.system(cmd):
-        raise TestFailure('Failed to build the tar snapshot')
-    files = os.listdir('.')
-    mytar = None
-    for file in files:
-        if file.startswith('safekeep-') and file.endswith('.tar.gz'):
-            if file > mytar:
-                mytar = file # last one wins
-    if not mytar:
-        raise TestFailure('Failed to determine the tar name')
+         raise TestFailure('Failed to copy %s to the RPM host %s' % (tar, host)) 
 
     cmd = 'HOME=%s rpmbuild -ta %s' % (pkgroot, mytar)
     print cmd
     if os.system(cmd):
         raise TestFailure('Failed to build the .rpm')
-
-    cmd = 'rm %s' % (mytar)
-    print cmd
-    if os.system(cmd):
-        raise TestFailure('Failed to nuke the tar')
 
     ver = mytar[len('safekeep-'):-len('.tar.gz')]
     binrpm_list = glob.glob(os.path.join(pkgroot, 'RPMS/noarch', 'safekeep-*-' + ver + '-*.noarch.rpm'))
@@ -274,27 +268,32 @@ def packageAndUpload(pkgroot, repodirs, user, host):
         if not os.path.isfile(binrpm):
             raise TestFailure('Failed to find binary rpm: %s' % binrpm)
 
-    for repodir in repodirs:
-        cmd = '%s %s %s@%s:%s/noarch' % \
-              (mkssh('scp'), ' '.join(binrpm_list), user, host, repodir)
-        print cmd
-        if os.system(cmd):
-            raise TestFailure('Failed to copy safekee-*-%s-%s.noarch.rpm to the repository' % (ver, rel)) 
-    
-        cmd = 'createrepo %s' % mkarg(repodir)
-        rcmd(cmd, user, host, 'update repo metadata')
+def packageAndUpload(user, rpmhost):
+    cmd = 'make tar'
+    if os.system(cmd):
+        raise TestFailure('Failed to build the tar snapshot')
+    files = os.listdir('.')
+    mytar = None
+    for file in files:
+        if file.startswith('safekeep-') and file.endswith('.tar.gz'):
+            if file > mytar:
+                mytar = file # last one wins
+    if not mytar:
+        raise TestFailure('Failed to determine the tar name')
+
+    if rpmhost:
+        pacakgeRPM(mytar, user, rpmhost)
+
+    cmd = 'rm %s' % (mytar)
+    print cmd
+    if os.system(cmd):
+        raise TestFailure('Failed to nuke the tar')
 
     return ver + '-' + rel
 
 def remoteTest(tmproot, client, server):
-    # build and upload the .rpm
-    repodirs = [
-        '/var/www/repos/lattica/devel/fedora/6',
-        '/var/www/repos/lattica/devel/fedora/7',
-        '/var/www/repos/lattica/devel/centos/4',
-        '/var/www/repos/lattica/devel/centos/5',
-    ]
-    verrel = packageAndUpload(tmproot, repodirs, 'root', 'ulysses')
+    # build and upload 
+    verrel = packageAndUpload('root', 'ulysses')
 
     takeOver(client, 'client', verrel)
     takeOver(server, 'server', verrel)
