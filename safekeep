@@ -474,6 +474,9 @@ def parse_config(backup_el, dflt_id):
                          '/var/named/chroot/dev', '/var/named/chroot/proc', 
                          '/var/named/chroot/var/run', '/var/named/chroot/var/tmp' ]
         cludes = [{ 'type' : 'exclude', 'path' : path, 'glob' : None, 'regexp' : None } for path in path_xcludes]
+    
+    for dump in dumps:
+        cludes.insert(0, { 'type' : 'include', 'path' : dump['file'], 'glob' : None, 'regexp' : None })
 
     return { 'id': cfg_id, 'host' : host, 'port' : port, 'nice' : nice, 'user' : user, 'key_ctrl' : key_ctrl, 'key_data' : key_data,
              'dir' : repo_dir, 'retention' : retention, 'dumps' : dumps, 'snaps' : snaps, 'script' : script,
