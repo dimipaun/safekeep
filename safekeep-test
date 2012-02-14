@@ -186,8 +186,6 @@ def takeOver(host, role, verrel):
         cmd = 'umask 077; test -d .ssh || mkdir .ssh; cat >> .ssh/authorized_keys'
         rcmdin(cmd, ssh_id_file_keys[1], 'root', host)
 
-    cmd = 'rpm --import http://lattica.com/keys/RPM-GPG-KEY-lattica-devel'
-    rcmd(cmd, 'root', host, 'install Lattica Devel Key')
     cmd = 'cat /etc/redhat-release'
     release = rcmdout(cmd, 'root', host, 'fetch the release')
     res = re.match('\s*(.*) release (.*) \(.*\)\s*', release)
