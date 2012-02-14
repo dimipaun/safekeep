@@ -171,7 +171,7 @@ def localTest(tmproot):
         shutil.rmtree(dir)
         time.sleep(1) 
 
-def takeOver(host, role, verrel):
+def takeOver(host, role, ver):
     cmd = 'ssh -o PasswordAuthentication=no root@%s true' % (host)
     if os.system(cmd): 
         print 'The box %s does not appear to have been initialized' % (host)
@@ -218,7 +218,7 @@ def takeOver(host, role, verrel):
             yum install -y safekeep-%(role)s-%(verrel)s;
         fi;
         rpm -q safekeep-%(role)s | grep %(verrel)s
-    """  % { 'role': role, 'verrel': verrel }
+    """  % { 'role': role, 'verrel': ver + '-1' }
     rcmd(cmd, 'root', host, 'install safekeep')
 
 def createKey(user, host, keyname, comment):
@@ -296,14 +296,14 @@ def packageAndUpload(user, rpmhost, debhost):
     if os.system(cmd):
         raise TestFailure('Failed to nuke the tar')
 
-    return ver + '-' + rel
+    return ver
 
 def remoteTest(tmproot, client, server):
     # build and upload 
-    verrel = packageAndUpload('root', 'ulysses', None)
+    ver = packageAndUpload('root', 'ulysses', None)
 
-    takeOver(client, 'client', verrel)
-    takeOver(server, 'server', verrel)
+    takeOver(client, 'client', ver)
+    takeOver(server, 'server', ver)
 
     # setup the server
     cmd = 'chsh -s /bin/bash safekeep --server'
