@@ -296,6 +296,7 @@ def packageAndUpload(user, rpmhost, debhost):
     if os.system(cmd):
         raise TestFailure('Failed to nuke the tar')
 
+    ver = mytar[len('safekeep-'):-len('.tar.gz')]
     return ver
 
 def remoteTest(tmproot, client, server):
