@@ -227,7 +227,7 @@ def createKey(user, host, keyname, comment):
     rcmd(cmd, user, host, 'create %s on server' % keyname)
     return key
 
-def packageAndUpload(pkgroot, keyname, repodirs, user, host):
+def packageAndUpload(pkgroot, repodirs, user, host):
     rpmmacros = """
 %%packager          safekeep Tester Package Builder
 %%_topdir           %s
@@ -294,7 +294,7 @@ def remoteTest(tmproot, client, server):
         '/var/www/repos/lattica/devel/centos/4',
         '/var/www/repos/lattica/devel/centos/5',
     ]
-    verrel = packageAndUpload(tmproot, 'Lattica, Inc. (Devel Key) <devel@lattica.com>', repodirs, 'root', 'ulysses')
+    verrel = packageAndUpload(tmproot, repodirs, 'root', 'ulysses')
 
     takeOver(client, 'client', verrel)
     takeOver(server, 'server', verrel)
