@@ -229,7 +229,7 @@ def createKey(user, host, keyname, comment):
 
 #TODO: this is just old code, we need to change it
 #      so that it builds the RPM on the host it will run on
-def packageRPM(tar, user, host):
+def packageAndDeployRPM(tar, user, host):
     pkgroot='/tmp/safekeep-test-XXX'   #TODO: replace XXX with curr timestamp
 
     rpmmacros = """
@@ -268,7 +268,11 @@ def packageRPM(tar, user, host):
         if not os.path.isfile(binrpm):
             raise TestFailure('Failed to find binary rpm: %s' % binrpm)
 
-def packageAndUpload(user, rpmhost):
+def packageAndDeployDEB(tar, user, host):
+    # TODO: we need to implement this
+    pass
+
+def packageAndUpload(user, rpmhost, debhost):
     cmd = 'make tar'
     if os.system(cmd):
         raise TestFailure('Failed to build the tar snapshot')
@@ -282,7 +286,10 @@ def packageAndUpload(user, rpmhost):
         raise TestFailure('Failed to determine the tar name')
 
     if rpmhost:
-        pacakgeRPM(mytar, user, rpmhost)
+        pacakgeAndDeployRPM(mytar, user, rpmhost)
+
+    if debhost:
+        packageAndDeployDEB(mytar, user, debhost)
 
     cmd = 'rm %s' % (mytar)
     print cmd
@@ -293,7 +300,7 @@ def packageAndUpload(user, rpmhost):
 
 def remoteTest(tmproot, client, server):
     # build and upload 
-    verrel = packageAndUpload('root', 'ulysses')
+    verrel = packageAndUpload('root', 'ulysses', None)
 
     takeOver(client, 'client', verrel)
     takeOver(server, 'server', verrel)
