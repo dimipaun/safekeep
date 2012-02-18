@@ -31,6 +31,17 @@ Sources and binaries are available from the following locations:
   http://prdownloads.sourceforge.net/safekeep/safekeep-1.4.0.tar.gz
   http://prdownloads.sourceforge.net/safekeep/safekeep-1.4.0-1.src.rpm
 
+The GPG Signing Key can be found in the following location:
+
+  http://prdownloads.sourceforge.net/safekeep/RPM-GPG-KEY-SafeKeep
+
+with fingerprint:
+
+pub   1024D/4E1CD0E5 2012-02-17
+      Key fingerprint = B051 E099 25D1 CE50 54DF  227D 96FC 24AC 4E1C D0E5
+uid                  SafeKeep (Signing Key) <safekeep-devel@lists.sourceforge.net>
+sub   1024g/6AA3270F 2012-02-17
+
 NOTE: The minimum version of Python now supported is Python 2.3.  If you
 require support of an older version of Python, then you should select an
 earlier release of Safekeep.
