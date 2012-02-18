@@ -9,7 +9,7 @@ releasename := $(name)-$(version)
 snapshotname:= $(name)-$(version).$(version_ts)
 tagname     := $(shell echo Release-$(releasename) | tr . _)
 dirname     := $(shell basename $(PWD))
-rpmroot     := $(shell grep '%_topdir' ~/.rpmmacros 2>/dev/null | sed 's/^[^ \t]*[ \t]*//')
+rpmroot     := $(shell grep '^%_topdir' ~/.rpmmacros 2>/dev/null | sed -e 's/^[^ \t]*[ \t]*//' -e 's/%/$$/g')
 svnroot     := $(shell LANG=C svn info 2>/dev/null | grep Root | cut -c 18-)
 deb_box	    := 192.168.3.202
 rpm_box     := 192.168.3.242
