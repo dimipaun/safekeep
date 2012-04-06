@@ -255,6 +255,11 @@ are separated by '/', attributes are introduced by '@':
 	An `@` is automatically added to each generated tag.
 	Optional for a `<snapshot>` element.
 
+/backup/setup/snapshot/@mountoptions::
+	Mount options to be used with the snapshot device.  This is normally
+	not required, as the default options should suit routine usage.
+	Optional for a `<snapshot>` element.
+
 /backup/setup/script/@location::
 	Execute the script specified path on the client at certain steps
 	of the backup process.
