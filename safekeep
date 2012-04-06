@@ -68,6 +68,7 @@ home_dir = None
 base_dir = None
 current_pid = os.getpid()
 default_bandwidth = {}
+default_mountoptions = { 'xfs' : 'nouuid' }
 
 PROTOCOL = "1.2"
 VERSION = "1.4.0"
@@ -196,7 +197,6 @@ def do_spawn(args, stdin=None, stdout=False):
         return (proc.wait(), lines)
     else:
         return (0, lines)
-        
 
 def _spawn(args, stdin=None, stdout=False):
     if isinstance(args, types.StringTypes):
@@ -338,7 +338,8 @@ def parse_snap(snap_el):
                 tags.append(tag.strip())
             elif is_client:
                 warn('Device: %s: empty tag in taglist: %s' % (device, tag_el))
-    return { 'device' : device, 'size' : size, 'tags' : tags }
+    mountoptions = snap_el.getAttribute('mount-options')
+    return { 'device' : device, 'size' : size, 'tags' : tags, 'mountoptions' : mountoptions }
 
 def parse_clude(clude_el):
     path = clude_el.getAttribute('path')
@@ -474,7 +475,7 @@ def parse_config(backup_el, dflt_id):
                          '/var/named/chroot/dev', '/var/named/chroot/proc', 
                          '/var/named/chroot/var/run', '/var/named/chroot/var/tmp' ]
         cludes = [{ 'type' : 'exclude', 'path' : path, 'glob' : None, 'regexp' : None } for path in path_xcludes]
-    
+
     return { 'id': cfg_id, 'host' : host, 'port' : port, 'nice' : nice, 'user' : user, 'key_ctrl' : key_ctrl, 'key_data' : key_data,
              'dir' : repo_dir, 'retention' : retention, 'dumps' : dumps, 'snaps' : snaps, 'script' : script,
              'cludes' : cludes, 'data_options' : data_options, 'options' : options, 'bw' : bw}
@@ -574,7 +575,7 @@ def do_client_dbdump(cfg):
             if dump['dbpasswd']:
                 (fd, passwdfile) = tempfile.mkstemp()
                 f = os.fdopen(fd, 'w')
-                f.write(dump['dbpasswd'])
+                f.write('*:*:*:*:%s' % dump['dbpasswd'])
                 f.close()                
 
         elif dbtype in ('mysql'):
@@ -598,7 +599,6 @@ def do_client_dbdump(cfg):
             args = [ 'su', '-c', cmd, '-', dump['user'] ]
         cmd = ' '.join([commands.mkarg(arg) for arg in args])
         cmd = '%s > %s' % (cmd, commands.mkarg(dump['file']))
-
 
         if passwdfile:
             os.environ['PGPASSFILE'] = passwdfile
@@ -711,7 +711,12 @@ def do_client_snap(cfg, bdir):
             warn('Can not snapshot the device: %s' % device)
             continue
         # no need to mkdir since the mountpoint already exists
-        args = ['mount', '-t', snaptyp, snapdev, snapmnt]
+        args = ['mount', '-t', snaptyp]
+        if snap['mountoptions']:
+            args.extend(['-o', snap['mountoptions']])
+        elif snaptyp in default_mountoptions:
+            args.extend(['-o', default_mountoptions[snaptyp]])
+        args.extend([snapdev, snapmnt])
         ec = spawn(args)
         if ec:
             warn('Can not mount the snapshot: %s' % device)
@@ -822,7 +827,7 @@ def do_client_setup(cfg):
         ret = spawn(['modprobe', 'dm-snapshot'])
         if ret:
             warn('modprobe dm-snapshot failed, continuing')
-        bdir = tempfile.mkdtemp("-rbind", "safekeep-%d-" % current_pid, "/mnt")
+        bdir = tempfile.mkdtemp(suffix="-rbind", prefix="safekeep-%d-" % current_pid, dir="/mnt")
         ret = do_rbind(cfg, '/', bdir)
         if ret:
             warn('mount --rbind failed, snapshotting will be disabled')
@@ -1003,6 +1008,7 @@ def do_client():
                         if script_loc == 'server':
                             if not script_dir:
                                 script_dir = tempfile.mkdtemp(prefix="safekeep-%d-" % current_pid)
+                                tempfile.tempdir = script_dir
                             script = os.path.basename(script)
                             (fd, cfg['script']) = tempfile.mkstemp(prefix="%s-" % script, dir=script_dir)
                             script_file = os.fdopen(fd, 'w')
@@ -1059,6 +1065,7 @@ def do_client():
             if not script_file.closed: script_file.close()
             os.remove(cfg['script'])
         if script_dir:
+            tempfile.tempdir = None
             try:
                 os.rmdir(script_dir)
             except OSError, e:
