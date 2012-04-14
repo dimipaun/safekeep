@@ -68,7 +68,10 @@ home_dir = None
 base_dir = None
 current_pid = os.getpid()
 default_bandwidth = {}
-default_mountoptions = { 'xfs' : 'nouuid' }
+# Default mount options, overridden elsewhere:
+# Key is a file system type, or 'snapshot' for default for snapshot mount
+# or 'bind' for a bind mount (check mount for details)
+default_mountoptions = { 'xfs' : 'ro,nouuid', 'snapshot' : 'ro', 'bind' : 'ro' }
 
 PROTOCOL = "1.2"
 VERSION = "1.4.0"
@@ -644,9 +647,11 @@ def mount_information(reverse = False):
             mounts.append(matches.groups())
     return mounts
 
+def normalise_lvm_device(device):
+    return device.replace('/mapper','').replace('-','/').replace('//', '-')
+
 def map_lvm_device(device):
-    device = device.replace('/mapper','').replace('-','/').replace('//', '-')
-    return device.split('/')[-2:]
+    return normalise_lvm_device(device).split('/')[-2:]
 
 def check_lvm_information(device):
     (group, volume) = map_lvm_device(device)
@@ -654,13 +659,6 @@ def check_lvm_information(device):
         if lvm_group == group and lvm_volume.startswith(volume):
             return True
     return False
-
-def gather_lvm_information(device):
-    (group, volume) = map_lvm_device(device)
-    for (device, mountpoint, mounttype, mountoptions) in mount_information(False):
-        if [group, volume] == map_lvm_device(device):
-            return (group, volume, mountpoint, mounttype)
-    return (None, None, None, None)
 
 def do_lvremove(device):
     (group, volume) = device.split('/')[-2:]
@@ -681,9 +679,9 @@ def do_lvremove(device):
         ret = 0     # Equivalent to lvremove succeeding
     return ret
 
-def gather_snap_information(device, bdir):
-    (group, volume, mountpoint, mounttype) = gather_lvm_information(device)
-    if not mountpoint: return (None, None, None, None)
+def generate_snap_information(device, bdir, mountpoint, mounttype):
+    assert os.path.ismount(mountpoint)
+    (group, volume) = map_lvm_device(device)
     lvmdev =  os.path.join('/dev', group, volume)
     if bdir[-1] == '/': bdir = bdir[:-1]
     snapname = '%s_snap_%s' % (volume, os.path.basename(bdir))
@@ -691,38 +689,47 @@ def gather_snap_information(device, bdir):
     if os.path.isabs(mountpoint[0]): mountpoint = mountpoint[1:]
     return (lvmdev, snapdev, os.path.join(bdir, mountpoint), mounttype)
 
-def do_client_snap(cfg, bdir):
+def do_client_snap_device(snap, bdir, mountpoint, mounttype):
     assert is_temp_root(bdir)
-    debug('Doing FS snapshots')
-    for snap in cfg['snaps']:
-        device = snap['device']
-        (lvmdev, snapdev, snapmnt, snaptyp) = gather_snap_information(device, bdir)
-        if not snapmnt:
-            warn('Cannot find the mountpoint for: %s' % device)
-            continue
-        args = ['lvcreate']
-        if snap['tags']:
-            for tag in snap['tags']:
-                args.extend(['--addtag', tag.strip()])
-        args.extend(['--snapshot', '--size', snap['size'],
-            '--name', os.path.basename(snapdev), lvmdev])
-        ec = spawn(args)
-        if ec:
-            warn('Can not snapshot the device: %s' % device)
-            continue
-        # no need to mkdir since the mountpoint already exists
-        args = ['mount', '-t', snaptyp]
-        if snap['mountoptions']:
-            args.extend(['-o', snap['mountoptions']])
-        elif snaptyp in default_mountoptions:
-            args.extend(['-o', default_mountoptions[snaptyp]])
-        args.extend([snapdev, snapmnt])
-        ec = spawn(args)
-        if ec:
-            warn('Can not mount the snapshot: %s' % device)
-            ret = do_lvremove(snapdev)
-            if ret:
-                warn('Can not tear down snapshot: %s' % device)
+    device = snap['device']
+    debug('Doing FS snapshot for %s' % device)
+    (lvmdev, snapdev, snapmnt, snaptyp) = generate_snap_information(device, bdir, mountpoint, mounttype)
+    if not os.path.isdir(snapmnt):
+        warn('Cannot find the mountpoint %s for %s' % (snapmnt, device))
+        return False
+    if 'snapdevice' in snap:
+        warn('bind mount of snapshot not currently supported: %s' % mountpoint)
+        return True     # Should be False, but this will still do a good backup
+    args = ['lvcreate']
+    if snap['tags']:
+        for tag in snap['tags']:
+            args.extend(['--addtag', tag.strip()])
+    args.extend(['--snapshot', '--size', snap['size'],
+        '--name', os.path.basename(snapdev), lvmdev])
+    ec = spawn(args)
+    if ec:
+        warn('Can not snapshot the device: %s' % device)
+        return False
+
+    # no need to mkdir since the mountpoint already exists
+    args = ['mount', '-t', snaptyp]
+    if snap['mountoptions']:
+        args.extend(['-o', snap['mountoptions']])
+    elif snaptyp in default_mountoptions:
+        args.extend(['-o', default_mountoptions[snaptyp]])
+    elif 'snapshot' in default_mountoptions:
+        args.extend(['-o', default_mountoptions['snapshot']])
+    args.extend([snapdev, snapmnt])
+    ec = spawn(args)
+    if ec:
+        warn('Can not mount the snapshot: %s' % device)
+        ret = do_lvremove(snapdev)
+        if ret:
+            warn('Can not tear down snapshot: %s' % device)
+        return False
+    snap['snapdevice'] = snapdev
+    snap['mountpoint'] = snapmnt
+    return True
 
 def do_client_snap_teardown(cfg, bdir):
     assert is_temp_root(bdir)
@@ -730,18 +737,28 @@ def do_client_snap_teardown(cfg, bdir):
     snaps = list(cfg['snaps'])
     snaps.reverse()
     for snap in snaps:
+        if 'mountpoint' in snap: del snap['mountpoint']
         device = snap['device']
-        (lvmdev, snapdev, snapmnt, snaptyp) = gather_snap_information(device, bdir)
-        if not snapmnt:
-            warn('Can not find the mountpoint for: %s' % device)
+        if not 'snapdevice' in snap:
+            warn('No snapdevice for device teardown: %s' % device)
             continue
-        ret = spawn(['umount', snapmnt])
-        if ret:
-            warn('Can not umount the snapshot: %s' % snapmnt)
+
+        snapdev = snap['snapdevice']
+        debug('Tear down FS snapshot dump for %s -> %s' % (snapdev, device))
 
         ret = do_lvremove(snapdev)
         if ret:
             warn('Can not tear down snapshot: %s' % device)
+            continue
+        del snap['snapdevice']
+
+def find_snapshot(cfg, device):
+    for snap in cfg['snaps']:
+        if normalise_lvm_device(snap['device']) == normalise_lvm_device(device):
+            debug('find_snapshot device matched: %s' % device)
+            return snap
+    debug('find_snapshot device no matched for %s' % device)
+    return None
 
 def mount_excluded(cfg, mountpoint):
     debug("mount_excluded: %s" % mountpoint)
@@ -754,19 +771,42 @@ def mount_excluded(cfg, mountpoint):
     debug("mount_excluded: %s: no matches" % mountpoint)
     return False
 
+def do_umount_all(bdir):
+    assert is_temp_root(bdir)
+    total_ret = 0
+    for (device, mountpoint, mounttype, mountoptions) in mount_information(True):
+        if mountpoint.startswith(bdir):
+            debug("Removing mount %s" % mountpoint)
+            ret = spawn(['umount', mountpoint])
+            if ret:
+                warn('Can not unmount snapshot: %s' % mountpoint)
+                total_ret += ret
+    return total_ret
+
 def do_rbind(cfg, startpath, bdir):
     for (device, mountpoint, mounttype, mountoptions) in mount_information(False):
         debug("Testing %s on %s" % (mountpoint, device))
         if mountpoint.startswith(startpath) and device.startswith('/'):
             if not mount_excluded(cfg, mountpoint):
-                ret = spawn(['mount', '--bind', mountpoint, reroot(bdir, mountpoint)])
+                snap = find_snapshot(cfg, device)
+                if snap:
+                    ret = not do_client_snap_device(snap, bdir, mountpoint, mounttype)
+                else:
+                    ret = spawn(['mount', '--bind', mountpoint, reroot(bdir, mountpoint)])
+                    if ret:
+                        debug("mount --bind %s: failed: unwinding" % mountpoint)
+                    else:
+                        spawn(['mount', '--make-unbindable', reroot(bdir, mountpoint)])
+                        if 'bind' in default_mountoptions:
+                            spawn(['mount' , '-o',
+                                ('remount,%s,bind' % default_mountoptions['bind']),
+                                mountpoint, reroot(bdir, mountpoint)])
                 if ret:
-                    debug("mount --bind %s: failed: unwinding" % mountpoint)
-                    ret = spawn(['umount', '-l', reroot(bdir, startpath)])
+                    ret = spawn(['umount', reroot(bdir, startpath)])
                     if ret:
                         warn('Failed to unmount: %s' % reroot(bdir, startpath))
+                    do_client_snap_teardown(cfg, bdir)
                     return 1
-                spawn(['mount', '--make-unbindable', reroot(bdir, mountpoint)])
 
     return 0
 
@@ -822,7 +862,7 @@ def do_client_setup(cfg):
         for snap in cfg['snaps']:
             device = snap['device']
             if check_lvm_information(device) and not do_client_scrub():
-                raise Exception("Previous snapshots found for %s and automatic correction failed: run 'safekeep --server --cleanup' to correct" % device)
+                raise Exception("Previous snapshots found for %s and automatic correction failed: run 'safekeep --server --cleanup %s' to correct" % (device, cfg['host']))
 
         ret = spawn(['modprobe', 'dm-snapshot'])
         if ret:
@@ -836,8 +876,6 @@ def do_client_setup(cfg):
             except OSError, e:
                 warn('Failed to remove: %s: %s' % (bdir, e))
             bdir = '/'
-        else:
-            do_client_snap(cfg, bdir)
     else:
         bdir = '/'
     debug('Working root is %s' % bdir)
@@ -847,16 +885,16 @@ def do_client_setup(cfg):
 def do_client_cleanup(cfg, bdir):
     debug('Do cleanup of %s in %s' % (cfg['host'], bdir))
     if is_temp_root(bdir):
-        do_client_snap_teardown(cfg, bdir)
-
-        ret = spawn(['umount', '-l', bdir])
+        ret = do_umount_all(bdir)
         if ret:
-            warn('Failed to unmount: %s' % bdir)
+            warn('Failed to unmount tree: %s' % bdir)
         else:
             try:
                 os.rmdir(bdir)
             except OSError, e:
                 warn('Unable to remove: %s: %s' % (bdir, e))
+
+        do_client_snap_teardown(cfg, bdir)
 
     do_client_dbdump_teardown(cfg)
 
@@ -903,9 +941,9 @@ def do_client_scrub():
                 info("Removing mount %s" % mountpoint)
                 if device == '/' and 'bind' in mountoptions.split(','):
                     info("Removing rbind directory %s" % mountpoint)
-                    ret = spawn(['umount', '-l', mountpoint])
+                    ret = do_umount_all(mountpoint)
                     if ret:
-                        warn('Failed to unmount: %s' % mountpoint)
+                        warn('Failed to unmount tree: %s' % mountpoint)
                     else:
                         try:
                             os.rmdir(mountpoint)
