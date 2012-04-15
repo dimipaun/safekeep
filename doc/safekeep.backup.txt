@@ -260,7 +260,7 @@ are separated by '/', attributes are introduced by '@':
 	not required, as the default options should suit routine usage.
 	Optional for a `<snapshot>` element.
 
-/backup/setup/script/@location::
+/backup/setup/script/@path::
 	Execute the script specified path on the client at certain steps
 	of the backup process.
 	This script is executed with three arguments:
