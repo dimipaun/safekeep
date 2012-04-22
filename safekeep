@@ -788,6 +788,9 @@ def do_rbind(cfg, startpath, bdir):
         debug("Testing %s on %s" % (mountpoint, device))
         if mountpoint.startswith(startpath) and device.startswith('/'):
             if not mount_excluded(cfg, mountpoint):
+                if 'bind' in mountoptions.split(','):
+                    warn('bind mount of snapshot not currently supported: %s' % mountpoint)
+                    continue
                 snap = find_snapshot(cfg, device)
                 if snap:
                     ret = not do_client_snap_device(snap, bdir, mountpoint, mounttype)
