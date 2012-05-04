@@ -183,6 +183,15 @@ are separated by '/', attributes are introduced by '@':
        This is planned to be specific to the current rdiff-backup, and
        different options will be made available for other backends.
 
+/backup/setup/@writable::
+	A boolean (i.e. "true" or "false") to set mount as writable or not,
+	including snapshots and bind mounts.
+	This is normally not required, and, if set, overrides the system
+	default, but is overridden by a snapshot option.
+	In general the system default is to create non-writable mount for
+	both snapshots and bind mounts.
+	Optional for a `<setup>` element.
+
 /backup/setup/dump/@type::
 	One of "postgres" or "mysql".
 	Mandatory for a `<dump>` element.
@@ -258,6 +267,13 @@ are separated by '/', attributes are introduced by '@':
 /backup/setup/snapshot/@mountoptions::
 	Mount options to be used with the snapshot device.  This is normally
 	not required, as the default options should suit routine usage.
+	Optional for a `<snapshot>` element.
+
+/backup/setup/snapshot/@writable::
+	A boolean (i.e. "true" or "false") to set if snapshot mount is
+	writable or not.
+	This is normally not required, and, if set, overrides other
+	settings from the setup option or the system default.
 	Optional for a `<snapshot>` element.
 
 /backup/setup/script/@path::
