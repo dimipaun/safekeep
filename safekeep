@@ -304,6 +304,14 @@ class ConfigException (Exception):
     def __str__(self):
         return repr(self.value)
 
+def parse_true_false(el, attr, default = None):
+    true_false = el.getAttribute(attr).lower()
+    if true_false and not true_false in ('true', 'false'):
+        raise ConfigException('Option needs to be true or false: attr %s: value %s' % (attr, el.getAttribute(attr)))
+    if not true_false:
+        true_false = default
+    return true_false
+
 def parse_dump(dump_el):
     dbtype = dump_el.getAttribute('type')
     if not dbtype:
@@ -319,7 +327,7 @@ def parse_dump(dump_el):
     dbfile = dump_el.getAttribute('file')
     if not dbfile:
         raise ConfigException('You need to specify where the database should be dumped')
-    cleanup = dump_el.getAttribute('cleanup')
+    cleanup = parse_true_false(dump_el, 'cleanup')
     return { 'type' : dbtype, 'db' : db, 'user' : user, 'dbuser' : dbuser, 'dbpasswd': dbpasswd,
              'opts' : opts, 'file' : dbfile, 'cleanup' : cleanup }
 
@@ -342,7 +350,8 @@ def parse_snap(snap_el):
             elif is_client:
                 warn('Device: %s: empty tag in taglist: %s' % (device, tag_el))
     mountoptions = snap_el.getAttribute('mount-options')
-    return { 'device' : device, 'size' : size, 'tags' : tags, 'mountoptions' : mountoptions }
+    writable = parse_true_false(snap_el, 'writable')
+    return { 'device' : device, 'size' : size, 'tags' : tags, 'mountoptions' : mountoptions, 'snap_writable' : writable }
 
 def parse_clude(clude_el):
     path = clude_el.getAttribute('path')
@@ -363,9 +372,9 @@ def parse_bandwidth(bw_el):
 
 def parse_data_attributes(data_el):
     return {
-        'exclude-devices': (data_el.getAttribute('exclude-devices') or 'false'),
-        'exclude-sockets': (data_el.getAttribute('exclude-sockets') or 'false'),
-        'exclude-fifos': (data_el.getAttribute('exclude-fifos') or 'false')
+        'exclude-devices': parse_true_false(data_el, 'exclude-devices', 'false'),
+        'exclude-sockets': parse_true_false(data_el, 'exclude-sockets', 'false'),
+        'exclude-fifos': parse_true_false(data_el, 'exclude-fifos', 'false')
     }
 
 def parse_config(backup_el, dflt_id):
@@ -434,10 +443,12 @@ def parse_config(backup_el, dflt_id):
                 raise ConfigException('Unknown option "%s"' % option)
 
     setup_el = backup_el.getElementsByTagName('setup')
+    writable = None
     dumps = []
     snaps = []
     script = None
     if len(setup_el) > 0:
+        writable = parse_true_false(setup_el[0], 'writable')
         dump_els = setup_el[0].getElementsByTagName('dump')
         for dump_el in dump_els:
             dumps.append(parse_dump(dump_el))
@@ -480,7 +491,7 @@ def parse_config(backup_el, dflt_id):
         cludes = [{ 'type' : 'exclude', 'path' : path, 'glob' : None, 'regexp' : None } for path in path_xcludes]
 
     return { 'id': cfg_id, 'host' : host, 'port' : port, 'nice' : nice, 'user' : user, 'key_ctrl' : key_ctrl, 'key_data' : key_data,
-             'dir' : repo_dir, 'retention' : retention, 'dumps' : dumps, 'snaps' : snaps, 'script' : script,
+             'dir' : repo_dir, 'retention' : retention, 'dumps' : dumps, 'snaps' : snaps, 'script' : script, 'mount_writable' : writable,
              'cludes' : cludes, 'data_options' : data_options, 'options' : options, 'bw' : bw}
 
 def parse_locs(cfglocs):
@@ -617,7 +628,7 @@ def do_client_dbdump(cfg):
 def do_client_dbdump_teardown(cfg):
     debug('Tear down DB dumps')
     for dump in cfg['dumps']:
-        if dump['cleanup'].lower() != 'true':
+        if dump['cleanup'] != 'true':
             continue
         try:
             os.remove(dump['file'])
@@ -689,7 +700,21 @@ def generate_snap_information(device, bdir, mountpoint, mounttype):
     if os.path.isabs(mountpoint[0]): mountpoint = mountpoint[1:]
     return (lvmdev, snapdev, os.path.join(bdir, mountpoint), mounttype)
 
-def do_client_snap_device(snap, bdir, mountpoint, mounttype):
+def update_mountoptions(mountoptions, writable):
+    if writable == 'true':
+        sub = 'rw'
+    else:
+        sub = 'ro'
+    mod = False
+    options = mountoptions.split(',')
+    for i in range(len(options)):
+        if options[i] in ('rw', 'ro'):
+            options[i] = sub
+            mod = True
+    if not mod: options.append(sub)
+    return ','.join(options)
+
+def do_client_snap_device(snap, bdir, mountpoint, mounttype, writable):
     assert is_temp_root(bdir)
     device = snap['device']
     debug('Doing FS snapshot for %s' % device)
@@ -714,11 +739,17 @@ def do_client_snap_device(snap, bdir, mountpoint, mounttype):
     # no need to mkdir since the mountpoint already exists
     args = ['mount', '-t', snaptyp]
     if snap['mountoptions']:
-        args.extend(['-o', snap['mountoptions']])
+        mountoptions = snap['mountoptions']
     elif snaptyp in default_mountoptions:
-        args.extend(['-o', default_mountoptions[snaptyp]])
+        mountoptions = default_mountoptions[snaptyp]
     elif 'snapshot' in default_mountoptions:
-        args.extend(['-o', default_mountoptions['snapshot']])
+        mountoptions = default_mountoptions['snapshot']
+    if snap['snap_writable']:
+        writable = snap['snap_writable']
+    if writable:
+        mountoptions = update_mountoptions(mountoptions, writable)
+    if mountoptions:
+        args.extend(['-o', mountoptions])
     args.extend([snapdev, snapmnt])
     ec = spawn(args)
     if ec:
@@ -793,7 +824,7 @@ def do_rbind(cfg, startpath, bdir):
                     continue
                 snap = find_snapshot(cfg, device)
                 if snap:
-                    ret = not do_client_snap_device(snap, bdir, mountpoint, mounttype)
+                    ret = not do_client_snap_device(snap, bdir, mountpoint, mounttype, cfg['mount_writable'])
                 else:
                     ret = spawn(['mount', '--bind', mountpoint, reroot(bdir, mountpoint)])
                     if ret:
@@ -801,8 +832,12 @@ def do_rbind(cfg, startpath, bdir):
                     else:
                         spawn(['mount', '--make-unbindable', reroot(bdir, mountpoint)])
                         if 'bind' in default_mountoptions:
+                            mountoptions = default_mountoptions['bind']
+                        if cfg['mount_writable']:
+                            mountoptions = update_mountoptions(mountoptions, cfg['mount_writable'])
+                        if mountoptions:
                             spawn(['mount' , '-o',
-                                ('remount,%s,bind' % default_mountoptions['bind']),
+                                ('remount,%s,bind' % mountoptions),
                                 mountpoint, reroot(bdir, mountpoint)])
                 if ret:
                     ret = spawn(['umount', reroot(bdir, startpath)])
@@ -942,20 +977,9 @@ def do_client_scrub():
         for (device, mountpoint, mounttype, mountoptions) in mount_information(True):
             if mountpoint.startswith('/mnt/safekeep-'):
                 info("Removing mount %s" % mountpoint)
-                if device == '/' and 'bind' in mountoptions.split(','):
-                    info("Removing rbind directory %s" % mountpoint)
-                    ret = do_umount_all(mountpoint)
-                    if ret:
-                        warn('Failed to unmount tree: %s' % mountpoint)
-                    else:
-                        try:
-                            os.rmdir(mountpoint)
-                        except OSError, e:
-                            warn('Failed to remove: %s: %s' % (mountpoint, e))
-                else:
-                    ret = spawn(['umount', mountpoint])
-                    if ret:
-                        warn('Can not unmount the snapshot: %s' % mountpoint)
+                ret = spawn(['umount', mountpoint])
+                if ret:
+                    warn('Can not unmount the snapshot: %s' % mountpoint)
                 if fnmatch.fnmatch(device, '*_snap_safekeep-*'):
                     info("Removing snapshot %s" % device)
                     ret = do_lvremove(device)
@@ -1196,11 +1220,11 @@ def do_server_rdiff(cfg, bdir, nice, ionice, force):
     options_append = []
 
     special_files = []
-    if cfg['data_options'].get('exclude-devices').lower() == 'true':
+    if cfg['data_options'].get('exclude-devices') == 'true':
         special_files.extend(['--exclude-device-files'])
-    if cfg['data_options'].get('exclude-sockets').lower() == 'true':
+    if cfg['data_options'].get('exclude-sockets') == 'true':
         special_files.extend(['--exclude-sockets'])
-    if cfg['data_options'].get('exclude-fifos').lower() == 'true':
+    if cfg['data_options'].get('exclude-fifos') == 'true':
         special_files.extend(['--exclude-fifos'])
 
     for option in cfg['options']:
@@ -1740,7 +1764,7 @@ def main():
     if mode != 'server' and (email or smtp):
         usage(2)
 
-    if not mode in ['server', 'client'] and cleanup:
+    if not mode in ('server', 'client') and cleanup:
         usage(2)
 
     if mode == 'client' and cfglocs:
