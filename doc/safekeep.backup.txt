@@ -99,7 +99,8 @@ are separated by '/', attributes are introduced by '@':
 	The user name to use when connecting to the client. This user
 	must have read permissions for the files that will be backed up,
 	so it most likely needs to be 'root'.
-	Optional, defaults to 'root'.
+	Optional, defaults to the value given by `client.user` in
+	`safekeep.conf`.
 
 /backup/host/@nice::
 	The nice adjustment for the client. This settings is normally

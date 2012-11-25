@@ -64,6 +64,7 @@ verbosity_ssh = ''
 verbosity_trickle = ''
 work_user = getpass.getuser()
 backup_user = None
+client_user = 'root'
 home_dir = None
 base_dir = None
 current_pid = os.getpid()
@@ -396,7 +397,7 @@ def parse_config(backup_el, dflt_id):
     if host and port and not port.isdigit():
         raise ConfigException('Host port must be a number: "%s"' % port)
     if host and not user:
-        user = 'root'
+        user = client_user
     if host and not key_ctrl:
         key_ctrl = os.path.join('.ssh', 'safekeep-server-ctrl-key')
     if host and not key_data:
@@ -1660,7 +1661,7 @@ def main():
     except getopt.GetoptError:
         usage(2)
 
-    global backup_user, home_dir, base_dir
+    global backup_user, client_user, home_dir, base_dir
     global verbosity_level
 
     mode = None
@@ -1792,6 +1793,8 @@ def main():
             backup_user = props['backup.user']
         if 'base.dir' in props:
             base_dir = props['base.dir']
+        if 'client.user' in props:
+            client_user = props['client.user']
         if 'email.smtp.server' in props:
             smtp = props['email.smtp.server']
         if 'email.to' in props:
