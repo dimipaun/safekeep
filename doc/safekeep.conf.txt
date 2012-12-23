@@ -41,6 +41,13 @@ client.user::
 	file.
 	If not specified, it defaults to `root`.
 
+email.format::
+	If specified generate multipart MIME email messages.
+	If not specified then a non-MIME message is created.
+	The format options are 'text' or 'html' to generate parts of
+	that type.
+	NB: The log of `safekeep` is always sent as 'text'.
+
 email.from::
 	The email address to be used as sender when sending the logs.
 	If not specified `safekeep` will use SafeKeep@<hostname fqdn>.
@@ -58,6 +65,13 @@ email.smtp.server::
 	if the `email.to` specifies any recipients.
 	If not specified, `safekeep` will just use
 	`/usr/sbin/sendmail` to deliver the mail.
+
+email.summary::
+	Generate a summary part at the start of the email.
+	Possible options are 'true', 'yes' or '1'.  Anything elses
+	as taken as 'false'.
+	NB: This requires 'email.format' set and currently only used
+	for 'server' run type.
 
 nice.adjustment::
 	The default nice level adjustment for safekeep.

@@ -69,6 +69,7 @@ home_dir = None
 base_dir = None
 current_pid = os.getpid()
 default_bandwidth = {}
+statistics = []
 # Default mount options, overridden elsewhere:
 # Key is a file system type, or 'snapshot' for default for snapshot mount
 # or 'bind' for a bind mount (check mount for details)
@@ -116,7 +117,7 @@ def log(msg, cls=None):
         else:
             print >> sys.stderr, msg.encode('utf-8')
 
-def info_file(filename, marker=None):
+def info_file(filename, marker=None, stats=None):
     info('# File: ' + filename)
     errs = 0
     fin = open(filename, 'r')
@@ -129,6 +130,13 @@ def info_file(filename, marker=None):
             if line.startswith("Errors "):
                 errs = int(line[6:])
             info(line.rstrip())
+            if stats:
+                vals = line.rstrip().split(None, 2)
+                key = vals.pop(0)
+                if len(vals) == 2:
+                    stats[key] = vals[1][1:-1]
+                else:
+                    stats[key] = vals[0]
     finally:
         fin.close()
     return errs
@@ -251,20 +259,130 @@ def try_to_run(args):
         return None
     return out or ''
 
-def send_notification(email_from, email, smtp):
+def print_stats_table_list_text(stats):
+    result = '|{:<8}|{:<8}'.format(stats['id'], stats['state'])
+    if (len(stats) > 2):
+        result += '|{:>6}|{:<24}|{:<24}|{:>24}|{:>12}|{:>12}|{:>13}|'.format(
+                            stats['Errors'],
+                            stats['StartTime'],
+                            stats['EndTime'],
+                            stats['ElapsedTime'],
+                            stats['SourceFileSize'],
+                            stats['MirrorFileSize'],
+                            stats['TotalDestinationSizeChange'])
+    else:
+        result += '|{0:>6}|{0:<24}|{0:<24}|{0:>24}|{0:>12}|{0:>12}|{0:>13}|'.format('')
+    return result
+
+def print_stats_table_list_html(stats):
+    if (stats.get('state') == 'OK'):
+        color = ' bgcolor="#81F7BE"'
+    else:
+        color = ' bgcolor="#F78181"'
+    result = '<tr' + color + '><td>' + stats['id'] + '</td><td>' + stats['state'] + '</td>'
+    if (len(stats) > 2):
+        result += '<td align="right">' + stats['Errors'] + '</td>' + \
+                  '<td>' + stats['StartTime'] + '</td>' + \
+                  '<td>' + stats['EndTime']  + '</td>' + \
+                  '<td align="right">' + stats['ElapsedTime'] + '</td>' + \
+                  '<td align="right">' + stats['SourceFileSize'] + '</td>' + \
+                  '<td align="right">' + stats['MirrorFileSize'] + '</td>' + \
+                  '<td align="right">' + stats['TotalDestinationSizeChange'] + '</td>'
+    else:
+        result += '<td align="right"></td>' + \
+                  '<td></td>' + \
+                  '<td></td>' + \
+                  '<td align="right"></td>' + \
+                  '<td align="right"></td>' + \
+                  '<td align="right"></td>' + \
+                  '<td align="right"></td>'
+    result += '</tr>'
+    return result
+
+def stats_to_table_server_text():
+    result = ['-' * 141 + '\r\n', 
+              '|{:<8}|{:<8}|{:<6}|{:<24}|{:<24}|{:<24}|{:<12}|{:<12}|{:<13}|'.format(
+                  'Name',
+                  'State',
+                  'Errors',
+                  'Start time',
+                  'End time',
+                  'Elapsed time',
+                  'Source size',
+                  'Mirror size',
+                  'Total changed') + \
+              '\r\n',
+              '-' * 141 + '\r\n'];
+
+    for stats in statistics:
+        result.append(print_stats_table_list_text(stats) + '\r\n' + '-' * 141 + '\r\n')
+
+    return result
+
+def stats_to_table_server_html():
+    result = ['<html><body><table border="1"><tr>'
+              '<th>Name</th>'
+              '<th>State</th>'
+              '<th>Errors</th>'
+              '<th>Start time</th>'
+              '<th>End time</th>'
+              '<th>Elapsed time</th>'
+              '<th>Source size</th>'
+              '<th>Mirror size</th>'
+              '<th>Total changed</th>'
+              '</tr>'];
+
+    for stats in statistics:
+        result.append(print_stats_table_list_html(stats))
+
+    result.append('</table></html>')
+    return result
+
+def stats_to_table(mode, fmt):
+    if not mode in ('server'): return 'Mode: %s: not currently supported' % mode
+    if not fmt in ('html', 'text'): return 'Format: %s: not currently supported' % fmt
+    if len(statistics) == 0: return 'No statistics available'
+
+    try:
+        result = eval('stats_to_table_' + mode + '_' + fmt + '()')
+    except NameError, ex:
+        error('ERROR: %s' % (ex or ''), ex)
+        result = 'Internal error: no statistics available'
+
+    return result
+
+def send_notification(email, mode):
     global logbuf
     if not logbuf: return
-    info('Sending email to %s via %s' % (','.join(email), smtp))
+    email_to = email.get('to')
+    info('Sending email to %s via %s' % (','.join(email_to), email.get('smtp', 'Local')))
     hostname = socket.getfqdn()
-    if not email_from:
+    if 'from' in email:
+        email_from = email['from']
+    else:
         email_from = 'SafeKeep@' + hostname
-    msg = 'From: ' + email_from + \
-          '\r\nTo: ' + ', '.join(email) + \
-          '\r\nSubject: SafeKeep results for ' + hostname + \
-          '\r\n\r\n' + '\r\n'.join(logbuf)
-    if smtp:
-        server = smtplib.SMTP(smtp)
-        server.sendmail(email_from, email, msg)
+    msg = 'From: ' + email_from + '\r\n' + \
+          'To: ' + ', '.join(email_to) + '\r\n' + \
+          'Subject: SafeKeep results for ' + hostname + '\r\n'
+    if 'format' not in email:
+        msg += '\r\n' + '\r\n'.join(logbuf) + '\r\n'
+    else:
+        msg += 'Content-Type: multipart/mixed;boundary=safebounder001\r\n'
+        if 'summary' in email and mode in ('server'):
+            msg += '\r\n--safebounder001\r\n'
+            if email['format'] == 'text':
+                msg += 'Content-type: text/plain;charset=utf-8\r\n'
+            else:
+                msg += 'Content-type: text/html;charset=utf-8\r\n'
+            msg += '\r\n' + ''.join(stats_to_table(mode, email['format'])) + \
+                   '\r\n'
+        msg += '\r\n--safebounder001\r\n' + \
+               'Content-type: text/plain;charset=utf-8\r\n' + \
+               '\r\n' + '\r\n'.join(logbuf) + '\r\n' + \
+               '\r\n--safebounder001--\r\n'
+    if 'smtp' in email:
+        server = smtplib.SMTP(email['smtp'])
+        server.sendmail(email_from, email_to, msg)
         server.quit()
     else:
         cmd = ['/usr/sbin/sendmail', '-t', '-f', email_from]
@@ -1283,13 +1401,16 @@ def do_server_compat(client_versions):
         warn('Protocol mismatch: %s <> %s' % (PROTOCOL, client_protocol))
 
 def do_server(cfgs, ids, nice, ionice, force, cleanup):
+    global statistics
     debug("Do server main loop")
     output_done = False
     for cfg in cfgs.itervalues():
         cfg_id = cfg['id']
         if ids and cfg_id not in ids: continue
         info('------------------------------------------------------------------')
+        stats = {}
         info('Server backup starting for client %s' % cfg_id)
+        stats['id'] = cfg_id
         output_done = True
 
         cleaned_up = True
@@ -1386,13 +1507,17 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
 
                 errs = 0
                 if os.path.isdir(rdiff_logdir):
-                    info_file(backup_log, backup_marker)
+                    info_file(backup_log, backup_marker, None)
                     rdiff_logpost = os.listdir(rdiff_logdir)
                     for lfn in rdiff_logpost:
                         if lfn.startswith('session_statistics.') and lfn.endswith('.data') and lfn not in rdiff_logpre:
-                            errs += info_file(os.path.join(rdiff_logdir, lfn))
+                            errs += info_file(os.path.join(rdiff_logdir, lfn), None, stats)
+                            stats['state'] = 'OK'
+                            statistics.append(stats)
                 else:
                     warn('Log dir does not exist.')
+                    stats['state'] = 'MISSING'
+                    statistics.append(stats)
 
             cin.write('CLEANUP %s\n' % bdir)
             cin.flush()
@@ -1412,6 +1537,8 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
                     if ex.traceback and verbosity_level > 2: error(ex.traceback)
                 else:
                     error('Server backup for client %s: FAILED' % cfg_id, ex)
+            stats['state'] = 'FAILED'
+            statistics.append(stats)
 
         # Shutdown client
         cout.close()
@@ -1665,9 +1792,7 @@ def main():
     global verbosity_level
 
     mode = None
-    email = []
-    email_from = None
-    smtp = None
+    email = {}
     cfgfile = None
     cfglocs = []
     verbosity = 0
@@ -1696,13 +1821,16 @@ def main():
         elif o in ('-e', '--email'):
             warn('The -e/--email options are deprecated and will be removed in the future')
             warn('Please use the /etc/safekeep/safekeep.conf file instead')
-            email.append(a)
+            if 'to' in email:
+                email['to'].append(a)
+            else:
+                email['to'] = a
         elif o in ('-h', '--help'):
             usage(0)
         elif o in ('-s', '--smtp'):
             warn('The -s/--smtp options are deprecated and will be removed in the future')
             warn('Please use the /etc/safekeep/safekeep.conf file instead')
-            smtp = a
+            email['smtp'] = a
         elif o in ('--server', ):
             if mode: usage(2)
             mode = 'server'
@@ -1762,7 +1890,7 @@ def main():
     if mode != 'list' and (list_type or list_date or list_parsable):
         usage(2)
 
-    if mode != 'server' and (email or smtp):
+    if mode != 'server' and ('to' in email or 'smtp' in email):
         usage(2)
 
     if not mode in ('server', 'client') and cleanup:
@@ -1795,12 +1923,19 @@ def main():
             base_dir = props['base.dir']
         if 'client.user' in props:
             client_user = props['client.user']
-        if 'email.smtp.server' in props:
-            smtp = props['email.smtp.server']
-        if 'email.to' in props:
-            email = props['email.to'].split(',')
-        if 'email.from' in props:
-            email_from = props['email.from']
+        for prop in [prop for prop in props if prop.startswith('email.')]:
+            if prop == 'email.to':
+                email['to'] = props[prop].split(',')
+            elif prop == 'email.format':
+                email['format'] = props[prop]
+                if email['format'] not in ('text', 'html'):
+                    error('CONFIG ERROR: invalid email format type: %s' % email['format'])
+                    sys.exit(2)
+            elif prop == 'email.summary':
+                if props[prop].lower() in ('true', 'yes', 1):
+                    email['summary'] = props[prop]
+            else:
+                email[prop.split('.')[1]] = props[prop]
         nice_def = get_int('nice.adjustment')
         if nice_def is None: nice_def = 10
         nice_srv = get_int('nice.adjustment.server') or nice_def
@@ -1894,8 +2029,8 @@ def main():
     except Exception, ex:
         error('ERROR: %s' % (ex or ''), ex)
 
-    if email and not noemail:
-        send_notification(email_from, email, smtp)
+    if 'to' in email and not noemail:
+        send_notification(email, mode)
 
 if __name__ == '__main__':
     main()
