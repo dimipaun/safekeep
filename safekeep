@@ -1931,19 +1931,22 @@ def main():
             base_dir = props['base.dir']
         if 'client.user' in props:
             client_user = props['client.user']
-        for prop in [prop for prop in props if prop.startswith('email.')]:
-            if not noemail and prop == 'email.to':
-                email['to'] = props[prop].split(',')
-            elif prop == 'email.format':
-                email['format'] = props[prop]
-                if email['format'] not in ('text', 'html'):
-                    error('CONFIG ERROR: invalid email format type: %s' % email['format'])
-                    sys.exit(2)
-            elif prop == 'email.summary':
-                if props[prop].lower() in ('true', 'yes', 1):
-                    email['summary'] = props[prop]
-            else:
-                email[prop.split('.')[1]] = props[prop]
+        if not noemail:
+            for prop in [prop for prop in props if prop.startswith('email.')]:
+                if not noemail and prop == 'email.to':
+                    email['to'] = props[prop].split(',')
+                elif prop == 'email.format':
+                    email['format'] = props[prop]
+                    if email['format'] not in ('text', 'html'):
+                        error('CONFIG ERROR: invalid email format type: %s' % email['format'])
+                        sys.exit(2)
+                elif prop == 'email.summary':
+                    if props[prop].lower() in ('true', 'yes', 1):
+                        email['summary'] = props[prop]
+                else:
+                    email[prop.split('.')[1]] = props[prop]
+        else:
+            email = {}
         nice_def = get_int('nice.adjustment')
         if nice_def is None: nice_def = 10
         nice_srv = get_int('nice.adjustment.server') or nice_def
