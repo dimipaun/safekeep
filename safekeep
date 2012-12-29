@@ -92,7 +92,10 @@ class ClientException(Exception):
         return repr(self.value)
 
 def send(msg):
-    print msg.encode('utf-8')
+    try:
+        print msg.encode('utf-8', 'backslashreplace')
+    except UnicodeDecodeError:
+        print str(msg).encode('string_escape')
     sys.stdout.flush()
 
 def log(msg, cls=None):
@@ -111,11 +114,15 @@ def log(msg, cls=None):
     cutoff = VEBOSITY_BY_CLASS.get(cls.upper())
     if cutoff is None: cutoff = 3
     if is_client or verbosity_level >= cutoff:
-        logbuf.append(msg)
+        try:
+            str_msg = msg.encode('utf-8', 'backslashreplace')
+        except UnicodeDecodeError:
+            str_msg = str(msg).encode('string_escape')
+        logbuf.append(str_msg)
         if is_client:
-            send(msg)
+            send(str_msg)
         else:
-            print >> sys.stderr, msg.encode('utf-8')
+            print >> sys.stderr, str_msg
 
 def info_file(filename, marker=None, stats=None):
     info('# File: ' + filename)
@@ -312,7 +319,7 @@ def stats_to_table_server_text():
                   'Mirror size',
                   'Total changed') + \
               '\r\n',
-              '-' * 141 + '\r\n'];
+              '-' * 141 + '\r\n']
 
     for stats in statistics:
         result.append(print_stats_table_list_text(stats) + '\r\n' + '-' * 141 + '\r\n')
@@ -330,7 +337,7 @@ def stats_to_table_server_html():
               '<th>Source size</th>'
               '<th>Mirror size</th>'
               '<th>Total changed</th>'
-              '</tr>'];
+              '</tr>']
 
     for stats in statistics:
         result.append(print_stats_table_list_html(stats))
