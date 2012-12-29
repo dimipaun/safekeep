@@ -1828,7 +1828,7 @@ def main():
                 sys.exit(2)
         elif o in ('-e', '--email'):
             warn('The -e/--email options are deprecated and will be removed in the future')
-            warn('Please use the /etc/safekeep/safekeep.conf file instead')
+            warn('Please use the %s instead' % (config_file))
             if 'to' in email:
                 email['to'].append(a)
             else:
@@ -1837,7 +1837,7 @@ def main():
             usage(0)
         elif o in ('-s', '--smtp'):
             warn('The -s/--smtp options are deprecated and will be removed in the future')
-            warn('Please use the /etc/safekeep/safekeep.conf file instead')
+            warn('Please use the %s instead' % (config_file))
             email['smtp'] = a
         elif o in ('--server', ):
             if mode: usage(2)
