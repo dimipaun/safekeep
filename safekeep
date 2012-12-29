@@ -362,6 +362,7 @@ def send_notification(email, mode):
     global logbuf
     if not logbuf: return
     email_to = email.get('to')
+    if not email_to: return
     info('Sending email to %s via %s' % (','.join(email_to), email.get('smtp', 'Local')))
     hostname = socket.getfqdn()
     if 'from' in email:
@@ -1931,7 +1932,7 @@ def main():
         if 'client.user' in props:
             client_user = props['client.user']
         for prop in [prop for prop in props if prop.startswith('email.')]:
-            if prop == 'email.to':
+            if not noemail and prop == 'email.to':
                 email['to'] = props[prop].split(',')
             elif prop == 'email.format':
                 email['format'] = props[prop]
@@ -1985,6 +1986,7 @@ def main():
                 error('CONFIG ERROR: %s' % (ex or ''), ex)
             else:
                 error('ERROR: %s' % (ex or ''), ex)
+            send_notification(email, mode)
             sys.exit(2)
     else:
         cfgs = {}
@@ -1999,7 +2001,9 @@ def main():
             if os.path.isfile(arg):
                 error('It appears to be a file, configuration files are passed via the -c/--conf switch.')
             ok = False
-        if not ok: sys.exit(2)
+        if not ok:
+            send_notification(email, mode)
+            sys.exit(2)
 
     try:
         global is_client, verbosity_ssh, verbosity_trickle
@@ -2036,8 +2040,7 @@ def main():
     except Exception, ex:
         error('ERROR: %s' % (ex or ''), ex)
 
-    if 'to' in email and not noemail:
-        send_notification(email, mode)
+    send_notification(email, mode)
 
 if __name__ == '__main__':
     main()
