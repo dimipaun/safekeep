@@ -1089,7 +1089,10 @@ def do_client_scrub():
                 proc_file = "/proc/" + pid + "/cmdline"
                 if pid != current_pid and os.path.exists(proc_file):
                     fin = open(proc_file, "r")
-                    (cmd, arg0, args) = fin.read().split('\0', 2)
+                    try:
+                        (cmd, arg0, args) = fin.read().split('\0', 2)
+                    except:
+                        arg0 = ''
                     fin.close()
                     if os.path.basename(arg0) == "safekeep":
                         raise Exception('another safekeep process running: pid %s' % pid)
