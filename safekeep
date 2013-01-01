@@ -67,6 +67,7 @@ backup_user = None
 client_user = 'root'
 home_dir = None
 base_dir = None
+client_defaults = []
 current_pid = os.getpid()
 default_bandwidth = {}
 statistics = []
@@ -75,7 +76,7 @@ statistics = []
 # or 'bind' for a bind mount (check mount for details)
 default_mountoptions = { 'xfs' : 'ro,nouuid', 'snapshot' : 'ro', 'bind' : 'ro' }
 
-PROTOCOL = "1.2"
+PROTOCOL = "1.3"
 VERSION = "1.4.0"
 VEBOSITY_BY_CLASS = {'DBG': 3, 'INFO': 2, 'WARN': 1, 'ERR': 0}
 
@@ -1194,6 +1195,13 @@ def do_client():
                 if line.startswith('ALOHA'):
                     do_client_compat(line.strip().split(':', 1)[1])
                     send('OK %s, %s' % (PROTOCOL, VERSION))
+                elif line.startswith('DEFAULT'):
+                    for opts in line.strip().split(':', 1)[1].split(','):
+                        opt, val = opts.strip().split('=')
+                        if opt == 'snapshot.size':
+                            global default_snapshot
+                            default_snapshot = val
+                    send('OK')
                 elif line.startswith('CONFIG'):
                     cfg = do_client_config(line)
                     if cfg['script']:
@@ -1409,11 +1417,12 @@ def do_server_compat(client_versions):
     (server_major, server_minor) = PROTOCOL.split('.')
     if server_major != client_major:
         raise Exception('Incompatible protocols: %s <> %s' % (PROTOCOL, client_protocol))
-    elif server_minor > client_minor:
+    elif int(server_minor) > int(client_minor):
         warn('Protocol mismatch: %s <> %s' % (PROTOCOL, client_protocol))
+    return (int(server_minor) - int(client_minor))
 
 def do_server(cfgs, ids, nice, ionice, force, cleanup):
-    global statistics
+    global statistics, client_defaults
     debug("Do server main loop")
     output_done = False
     for cfg in cfgs.itervalues():
@@ -1462,7 +1471,13 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
             cin.write('ALOHA: %s, %s\n' % (PROTOCOL, VERSION))
             cin.flush()
             client_versions = do_server_getanswer(cout)
-            do_server_compat(client_versions)
+            compat = do_server_compat(client_versions)
+
+            # This test will need to be improved for later PROTOCOL versions.
+            if compat <= 0 and len(client_defaults):
+                cin.write('DEFAULT: %s\n' % (','.join(client_defaults)))
+                cin.flush()
+                do_server_getanswer(cout)
 
             cin.write('CONFIG: %d: %s\n' % (len(cfg['text'].splitlines()), cfg_id))
             cin.write(cfg['text'] + '\n')
@@ -1937,7 +1952,7 @@ def main():
             client_user = props['client.user']
         if not noemail:
             for prop in [prop for prop in props if prop.startswith('email.')]:
-                if not noemail and prop == 'email.to':
+                if prop == 'email.to':
                     email['to'] = props[prop].split(',')
                 elif prop == 'email.format':
                     email['format'] = props[prop]
