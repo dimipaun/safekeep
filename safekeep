@@ -70,6 +70,7 @@ base_dir = None
 client_defaults = []
 current_pid = os.getpid()
 default_bandwidth = {}
+default_snapshot = None
 statistics = []
 # Default mount options, overridden elsewhere:
 # Key is a file system type, or 'snapshot' for default for snapshot mount
@@ -461,12 +462,13 @@ def parse_dump(dump_el):
              'opts' : opts, 'file' : dbfile, 'cleanup' : cleanup }
 
 def parse_snap(snap_el):
+    global default_snapshot
     device = snap_el.getAttribute('device')
     if not device:
         raise ConfigException('Please specify the device to be snapshot')
     if device.rfind('/') == -1 or device.endswith('/'):
         raise ConfigException('The device name seems incorrect: ' + device)
-    size = snap_el.getAttribute('size')
+    size = snap_el.getAttribute('size') or default_snapshot
     if not size:
         raise ConfigException('Please specify the size for the snapshot')
     tags = []
@@ -858,8 +860,13 @@ def do_client_snap_device(snap, bdir, mountpoint, mounttype, writable):
     if snap['tags']:
         for tag in snap['tags']:
             args.extend(['--addtag', tag.strip()])
-    args.extend(['--snapshot', '--size', snap['size'],
-        '--name', os.path.basename(snapdev), lvmdev])
+    size = snap['size']
+    if size.count('%'):
+        if size.endswith('%'): size += 'ORIGIN'
+        args.extend(['--snapshot', '--extents', size])
+    else:
+        args.extend(['--snapshot', '--size', size])
+    args.extend(['--name', os.path.basename(snapdev), lvmdev])
     ec = spawn(args)
     if ec:
         warn('Can not snapshot the device: %s' % device)
@@ -1978,6 +1985,13 @@ def main():
         default_bandwidth['overall'] = get_int('bandwidth.limit') or 0
         default_bandwidth['download'] = get_int('bandwidth.limit.download') or 0
         default_bandwidth['upload'] = get_int('bandwidth.limit.upload') or 0
+
+        global default_snapshot, client_defaults
+        default_snapshot = props.get('snapshot.size')
+        if default_snapshot:
+            if default_snapshot.endswith('%'):
+                default_snapshot += 'FREE'
+            client_defaults.append('snapshot.size=%s' % default_snapshot)
 
         if len(cfglocs) == 0: 
             locs = os.path.join(os.path.dirname(cfgfile), 'backup.d')

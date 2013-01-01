@@ -255,12 +255,16 @@ are separated by '/', attributes are introduced by '@':
 /backup/setup/snapshot/@size::
 	The size of the snapshot. Unallocated space must exist on
 	the volume group. It is recommended that it is about 15-20%
-	of the original device's size.
-	Mandatory for a `<snapshot>` element.
+	of the original device's size.  This can be specified as a
+	percentage, e.g. `20%`, which is equivalent to 20% of the
+	logical volume.  Other values as listed for `lvcreate(8)`
+	can also be given.
+	Mandatory for a `<snapshot>` element, unless a default value
+	has been specified in `safekeep.conf`.
 
 /backup/setup/snapshot/@tag::
 	A list of tags to be added to the snapshot, with the `--addtag`
-	argument to `lvcreate`.  The @tag entry consists of a `,`
+	argument to `lvcreate(8)`.  The @tag entry consists of a `,`
 	separated list of tags.
 	An `@` is automatically added to each generated tag.
 	Optional for a `<snapshot>` element.

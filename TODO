@@ -16,7 +16,7 @@ Feedback from users:
 
 Future (post 1.0):
   * Modify the test to not rely on Lattica's servers
-  * Decide how big the snapshot size should be automagically
+  * Decide how big the snapshot size should be automagically (Partially DONE)
   * Fully automatic shapshotting mode
   * Configuration inheritance
   * Transactional ops on server side, and automagic recovery from errors (Partially DONE)
