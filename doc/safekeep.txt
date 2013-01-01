@@ -88,7 +88,8 @@ GENERAL OPTIONS
 -c, --conf=FILE::
 	Specifies the configuration file location.
         If not specified at all, SafeKeep will default to
-	`/etc/safekeep/safekeep.conf` if it exists.
+	`/etc/safekeep/safekeep.conf`, or optionally in
+	`~/.safekeep/safekeep.conf` for non-root users, if it exists.
         Simply using this default is the recommended usage.
 
 -h, --help::
@@ -194,7 +195,8 @@ CONFIGURATION
 -------------
 
 Normally the configuration files are placed in the `/etc/safekeep/backup.d/` 
-directory from where they will get picked up automatically by SafeKeep. 
+directory, or optionally in `~/.safekeep/backup.d/` for non-root users,
+from where they will get picked up automatically by SafeKeep. 
 Each backup client is described by a configuration file in XML format. 
 The minimum configuration file is:
 ------------------------------------------------------------------------

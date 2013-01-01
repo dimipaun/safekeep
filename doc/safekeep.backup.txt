@@ -11,7 +11,8 @@ safekeep.backup - Configuration file for a 'safekeep(1)' client
 
 SYNOPSIS
 --------
-These files are usually placed in `/etc/safekeep/backup.d/` to be picked
+These files are usually placed in `/etc/safekeep/backup.d/`, or optionally
+in `~/.safekeep/backup.d/` for non-root users, to be picked
 up automatically by 'safekeep(1)'. They must have a `.backup` extension.
 
 DESCRIPTION
@@ -430,6 +431,7 @@ directories.
 FILES
 -----
     /etc/safekeep/backup.d/
+    ~/.safekeep/backup.d/
 
 SEE ALSO
 --------

@@ -1822,7 +1822,7 @@ def main():
     except getopt.GetoptError:
         usage(2)
 
-    global backup_user, client_user, home_dir, base_dir
+    global backup_user, client_user, home_dir, base_dir, config_file
     global verbosity_level
 
     mode = None
@@ -1842,6 +1842,12 @@ def main():
     keys_print = False
     keys_deploy = False
     nice_srv = None
+
+    if os.getuid():
+        user_path = os.path.expanduser('~/.safekeep')
+        if os.path.exists(user_path) and os.path.isdir(user_path):
+            config_file = user_path + '/safekeep.conf'
+           
     for o, a in opts:
         if o in ('-c', '--conf'):
             if os.path.isdir(a) or a.endswith(config_ext):

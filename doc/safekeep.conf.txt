@@ -11,7 +11,8 @@ safekeep.conf - Configuration file for 'safekeep(1)'
 
 SYNOPSIS
 --------
-This file resides in `/etc/safekeep/` from where it
+This file resides in `/etc/safekeep/`, or optionally in
+`~/.safekeep/` for non-root users, from where it
 will be automatically picked up by 'safekeep(1)'.
 
 DESCRIPTION
@@ -148,6 +149,7 @@ basis (see `safekeep.backup(5)` for more information).
 FILES
 -----
     /etc/safekeep/safekeep.conf
+    ~/.safekeep/safekeep.conf
 
 SEE ALSO
 --------
