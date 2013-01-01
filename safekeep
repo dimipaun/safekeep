@@ -371,7 +371,8 @@ def send_notification(email, mode):
         email_from = 'SafeKeep@' + hostname
     msg = 'From: ' + email_from + '\r\n' + \
           'To: ' + ', '.join(email_to) + '\r\n' + \
-          'Subject: SafeKeep results for ' + hostname + '\r\n'
+          'Subject: SafeKeep results for ' + hostname + '\r\n' + \
+          'Date: ' + time.strftime("%a, %d %b %Y %H:%M:%S %z") + '\r\n'
     if 'format' not in email:
         msg += '\r\n' + '\r\n'.join(logbuf) + '\r\n'
     else:
