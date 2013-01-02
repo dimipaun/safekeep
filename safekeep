@@ -1425,7 +1425,7 @@ def do_server_compat(client_versions):
     if server_major != client_major:
         raise Exception('Incompatible protocols: %s <> %s' % (PROTOCOL, client_protocol))
     elif int(server_minor) > int(client_minor):
-        warn('Protocol mismatch: %s <> %s' % (PROTOCOL, client_protocol))
+        info('Protocol mismatch, but compatible: %s <> %s' % (PROTOCOL, client_protocol))
     return (int(server_minor) - int(client_minor))
 
 def do_server(cfgs, ids, nice, ionice, force, cleanup):
