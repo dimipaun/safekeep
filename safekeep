@@ -1418,15 +1418,35 @@ def do_server_data_cleanup(cfg):
     if ret:
         warn('Failed to cleanup old data, please fix the problem manually')
 
+def get_protocol_info(protocol, is_client):
+    (major_s, minor_s) = protocol.strip().split('.')
+    major = int(major_s)
+    minor = int(minor_s)
+    
+    caps = []
+    if major == 1:
+        if minor >= 3:
+            caps.append('DEFAULT')
+
+    return { 
+        'version': (major, minor), 
+        'caps': caps 
+    } 
+
+
 def do_server_compat(client_versions):
     (client_protocol, client_version) = client_versions.split(',')
-    (client_major, client_minor) = client_protocol.strip().split('.')
+    compat = { 
+        'client': get_protocol_info(client_protocol, True), 
+        'server': get_protocol_info(PROTOCOL, False) 
+    }
+
     (server_major, server_minor) = PROTOCOL.split('.')
-    if server_major != client_major:
+    if compat['server']['version'][0] != compat['client']['version'][0]:
         raise Exception('Incompatible protocols: %s <> %s' % (PROTOCOL, client_protocol))
-    elif int(server_minor) > int(client_minor):
+    elif compat['server']['version'][1] > compat['client']['version'][1]:
         info('Protocol mismatch, but compatible: %s <> %s' % (PROTOCOL, client_protocol))
-    return (int(server_minor) - int(client_minor))
+    return compat
 
 def do_server(cfgs, ids, nice, ionice, force, cleanup):
     global statistics, client_defaults
@@ -1481,7 +1501,7 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
             compat = do_server_compat(client_versions)
 
             # This test will need to be improved for later PROTOCOL versions.
-            if compat <= 0 and len(client_defaults):
+            if ('DEFAULT' in compat['client']['caps']) and len(client_defaults):
                 cin.write('DEFAULT: %s\n' % (','.join(client_defaults)))
                 cin.flush()
                 do_server_getanswer(cout)
