@@ -260,8 +260,7 @@ are separated by '/', attributes are introduced by '@':
 	percentage, e.g. `20%`, which is equivalent to 20% of the
 	logical volume.  Other values as listed for `lvcreate(8)`
 	can also be given.
-	Mandatory for a `<snapshot>` element, unless a default value
-	has been specified in `safekeep.conf`.
+	Optional, defaults to 'snapshot.size' as specified in `safekeep.conf`.
 
 /backup/setup/snapshot/@tag::
 	A list of tags to be added to the snapshot, with the `--addtag`

@@ -70,7 +70,7 @@ base_dir = None
 client_defaults = []
 current_pid = os.getpid()
 default_bandwidth = {}
-default_snapshot = None
+default_snapshot = '20%FREE'
 statistics = []
 # Default mount options, overridden elsewhere:
 # Key is a file system type, or 'snapshot' for default for snapshot mount

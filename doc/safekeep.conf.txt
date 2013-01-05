@@ -129,7 +129,7 @@ snapshot.size::
 	a percentage (`%`).  If not otherwise specified, the percentage is
 	based on unallocated space (i.e. LVM2 `%FREE'), which is different
 	to the interpretation within the `<snapshot>` option.
-	This value is optional and there is no default.
+	This value is optional, it defaults to '20%FREE'.
 
 NOTES
 -----
