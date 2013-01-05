@@ -208,9 +208,8 @@ def do_spawn(args, stdin=None, stdout=False):
 
     lines = []
     for line in child_out:
-        if stdout:
-            lines.append(line)
-        else:
+        lines.append(line)
+        if not stdout:
             info(line.rstrip())
     child_out.close()
 
@@ -250,7 +249,7 @@ def spawn(args):
     rc, out = _spawn(args)
     return rc
 
-# this spawans an external program (optionally through a shell),
+# this spawns an external program (optionally through a shell),
 # feeds it any input via stdin, captures the output and returns it.
 # if it fails it returns None, otherwise it returns the output
 def call(args, stdin=None):
@@ -268,7 +267,10 @@ def try_to_run(args):
         return None
     return out or ''
 
-def print_stats_table_list_text(stats):
+#
+# Statistics format routines for the "server" type
+#
+def print_stats_table_server_text(stats):
     result = '|{:<8}|{:<8}'.format(stats['id'], stats['state'])
     if (len(stats) > 2):
         result += '|{:>6}|{:<24}|{:<24}|{:>24}|{:>12}|{:>12}|{:>13}|'.format(
@@ -283,7 +285,7 @@ def print_stats_table_list_text(stats):
         result += '|{0:>6}|{0:<24}|{0:<24}|{0:>24}|{0:>12}|{0:>12}|{0:>13}|'.format('')
     return result
 
-def print_stats_table_list_html(stats):
+def print_stats_table_server_html(stats):
     if (stats.get('state') == 'OK'):
         color = ' bgcolor="#81F7BE"'
     else:
@@ -324,7 +326,7 @@ def stats_to_table_server_text():
               '-' * 141 + '\r\n']
 
     for stats in statistics:
-        result.append(print_stats_table_list_text(stats) + '\r\n' + '-' * 141 + '\r\n')
+        result.append(print_stats_table_server_text(stats) + '\r\n' + '-' * 141 + '\r\n')
 
     return result
 
@@ -342,13 +344,78 @@ def stats_to_table_server_html():
               '</tr>']
 
     for stats in statistics:
+        result.append(print_stats_table_server_html(stats))
+
+    result.append('</table></html>')
+    return result
+
+#
+# Statistics format routines for the "list" type
+#
+def print_stats_table_list_text(stats):
+    result = '|{:<8}|{:<8}'.format(stats['id'], stats['state'])
+    if (len(stats) > 2):
+        result += '|{:<24}|{:<24}|{:>10}|'.format(
+                            stats['CurrentMirror'],
+                            stats['OldestIncrement'],
+                            stats['Increments'])
+    else:
+        result += '|{0:<24}|{0:<24}|{0:>10}|'.format('')
+    return result
+
+def print_stats_table_list_html(stats):
+    if (stats.get('state') == 'OK'):
+        color = ' bgcolor="#81F7BE"'
+    else:
+        color = ' bgcolor="#F78181"'
+    result = '<tr' + color + '><td>' + stats['id'] + '</td><td>' + stats['state'] + '</td>'
+    if (len(stats) > 2):
+        result += '<td>' + stats['CurrentMirror'] + '</td>' + \
+                  '<td>' + stats['OldestIncrement']  + '</td>' + \
+                  '<td align="right">' + stats['Increments'] + '</td>'
+    else:
+        result += '<td></td>' + \
+                  '<td></td>' + \
+                  '<td align="right"></td>'
+    result += '</tr>'
+    return result
+
+def stats_to_table_list_text():
+    result = ['-' * 80 + '\r\n', 
+              '|{:<8}|{:<8}|{:<24}|{:<24}|{:<10}|'.format(
+                  'Name',
+                  'State',
+                  'Current Mirror',
+                  'Oldest Increment',
+                  'Increments') + \
+              '\r\n',
+              '-' * 80 + '\r\n']
+
+    for stats in statistics:
+        result.append(print_stats_table_list_text(stats) + '\r\n' + '-' * 80 + '\r\n')
+
+    return result
+
+def stats_to_table_list_html():
+    result = ['<html><body><table border="1"><tr>'
+              '<th>Name</th>'
+              '<th>State</th>'
+              '<th>Current Mirror</th>'
+              '<th>Oldest Increment</th>'
+              '<th>Increments</th>'
+              '</tr>']
+
+    for stats in statistics:
         result.append(print_stats_table_list_html(stats))
 
     result.append('</table></html>')
     return result
 
+#
+# Main statistics printing functions
+#
 def stats_to_table(mode, fmt):
-    if not mode in ('server'): return 'Mode: %s: not currently supported' % mode
+    if not mode in ('server', 'list'): return 'Mode: %s: not currently supported' % mode
     if not fmt in ('html', 'text'): return 'Format: %s: not currently supported' % fmt
     if len(statistics) == 0: return 'No statistics available'
 
@@ -379,7 +446,7 @@ def send_notification(email, mode):
         msg += '\r\n' + '\r\n'.join(logbuf) + '\r\n'
     else:
         msg += 'Content-Type: multipart/mixed;boundary=safebounder001\r\n'
-        if 'summary' in email and mode in ('server'):
+        if 'summary' in email and mode in ('server', 'list'):
             msg += '\r\n--safebounder001\r\n'
             if email['format'] == 'text':
                 msg += 'Content-type: text/plain;charset=utf-8\r\n'
@@ -1607,16 +1674,19 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
     debug('Server backup done')
 
 def do_list(cfgs, ids, list_type, list_date, list_parsable):
+    global statistics
     debug("Do server listing main loop")
     output_done = False
     for cfg in cfgs.itervalues():
         cfg_id = cfg['id']
         if ids and cfg_id not in ids: continue
+        stats = {}
         if list_parsable:
             info('Client: %s' % cfg_id)
         else:
             info('------------------------------------------------------------------')
             info('Server listing for client %s' % cfg_id)
+        stats['id'] = cfg_id
         output_done = True
 
         args = ['rdiff-backup']
@@ -1636,9 +1706,30 @@ def do_list(cfgs, ids, list_type, list_date, list_parsable):
             args.extend(['--parsable-output'])
 
         args.extend([cfg['dir']])
-        ret = spawn(args)
+        # Call a low level routine to get the data back as well.
+        ret, lines = _spawn(args)
         if ret:
             error('Failed to run rdiff-backup')
+            stats['state'] = 'FAILED'
+        else:
+            stats['state'] = 'OK'
+            if list_type == 'increments':
+                if list_parsable:
+                    stats['Increments'] = str(len(lines) - 1)
+                    date_time = lines[len(lines) - 1].split(None, 1)[0]
+                    stats['CurrentMirror'] = time.ctime(int(date_time))
+                    date_time = lines[0].split(None, 1)[0]
+                    stats['OldestIncrement'] = time.ctime(int(date_time))
+                else:
+                    stats['Increments'] = str(len(lines) - 2)
+                    stats['CurrentMirror'] = lines[len(lines) - 1].strip().split(None, 2)[2]
+                    stats['OldestIncrement'] = lines[1].strip().split(None, 1)[1]
+            elif list_type == 'sizes':
+                stats['Increments'] = str(len(lines) - 3)
+                stats['CurrentMirror'] = lines[2].split('   ', 1)[0]
+                stats['OldestIncrement'] = lines[len(lines) - 1].split('   ', 1)[0]
+
+        statistics.append(stats)
 
     if output_done and not list_parsable:
         info('------------------------------------------------------------------')

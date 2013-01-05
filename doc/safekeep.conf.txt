@@ -72,7 +72,7 @@ email.summary::
 	Possible options are 'true', 'yes' or '1'.  Anything elses
 	as taken as 'false'.
 	NB: This requires 'email.format' set and currently only used
-	for 'server' run type.
+	for 'server' and 'list' run types.
 
 nice.adjustment::
 	The default nice level adjustment for safekeep.
