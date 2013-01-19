@@ -10,7 +10,7 @@ snapshotname:= $(name)-$(version).$(version_ts)
 tagname     := $(shell echo Release-$(releasename) | tr . _)
 dirname     := $(shell basename $(PWD))
 rpmroot     := $(shell grep '^%_topdir' ~/.rpmmacros 2>/dev/null | sed -e 's/^[^ \t]*[ \t]*//' -e 's/%/$$/g')
-svnroot     := $(shell LANG=C svn info 2>/dev/null | grep Root | cut -c 18-)
+svnroot     := $(shell LANG=C svn info 2>/dev/null | grep 'Root:' | cut -d: -f 2-)
 deb_box	    := 192.168.3.202
 rpm_box     := 192.168.3.242
 SF_USER     := $(shell whoami)
@@ -95,7 +95,7 @@ man: $(DOC_MAN)
 $(DOC_HTML) $(DOC_MAN): doc/asciidoc.conf
 
 changelog:
-	svn log -v --xml | svn2log.py -D 0 -u doc/users
+	svn log -v --xml -r HEAD:1 | svn2log.py -D 0 -u doc/users
 
 install:
 	install -d -m 755 "$(DESTDIR)/usr/bin/"
