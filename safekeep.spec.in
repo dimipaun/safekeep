@@ -107,6 +107,14 @@ id %{name} >/dev/null 2>&1 || \
 %doc samples/sample.backup
 
 %changelog
+* Sat Jan 19 2013 Frank Crawford <frank@crawford.emu.id.au> 1.4.1-1
+  - A major rework of LVM snapshot handling.
+  - Generate MIME emails with summary reports.
+  - Better handling of PostgreSQL passwords.
+  - Added ability to use LVM snapshots with XFS filesystems.
+  - Allow use of ~/.safekeep for non-root users.
+  - Allow default and automatic snapshot sizes.
+
 * Sun Feb 12 2012 Frank Crawford <frank@crawford.emu.id.au> 1.4.0-1
   - Add the ability to store script files on either client or server.
   - Rewritten snapshot creation to remove use of "rbind".

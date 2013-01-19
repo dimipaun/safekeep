@@ -1,35 +1,35 @@
-This is release 1.4.0 of SafeKeep, a centralized and easy to use 
+This is release 1.4.1 of SafeKeep, a centralized and easy to use 
 backup application that combines the best features of a mirror 
 and an incremental backup.
 
 What's new in this release:
-  - Add the ability to store script files on either client or server.
-  - Rewritten snapshot creation to remove use of "rbind".
-  - Automatic cleanup on next run after an abort.
-  - Support of LVM tagging for snapshots.
-  - Better handling of messages and tracebacks.
-  - A number of other code cleanups and bug fixes.
-  - Updated minimum Python support to Python 2.3.
+  - A major rework of LVM snapshot handling.
+  - Generate MIME emails with summary reports.
+  - Better handling of PostgreSQL passwords.
+  - Added ability to use LVM snapshots with XFS filesystems.
+  - Allow use of ~/.safekeep for non-root users.
+  - Allow default and automatic snapshot sizes.
 
-Many thanks to Andres Toomsalu, Ken Bass, Joe Steele and Alexander List
-for the fixes that made this release possible, and to Dimi Paun for his
-continual work with SafeKeep.
+Many thanks to Andres Toomsalu, Marco Bozzolan, Robert Jordan, Alexander
+'Leo' Bergolth, Bryan Talbot, Riley Revels, Walery Wysotsky and Raúl
+Wegmann for the suggestions and fixes that made this release possible,
+and to Dimi Paun for his continual work with SafeKeep.
 
 Sources and binaries are available from the following locations:
 
-  - RedHat EL/CentOS 4,5,6 Fedora 8,9,10,11,12,13,14,15,16:
-  http://prdownloads.sourceforge.net/safekeep/safekeep-common-1.4.0-1.noarch.rpm
-  http://prdownloads.sourceforge.net/safekeep/safekeep-client-1.4.0-1.noarch.rpm
-  http://prdownloads.sourceforge.net/safekeep/safekeep-server-1.4.0-1.noarch.rpm
+  - RedHat EL/CentOS 4,5,6 Fedora 8,9,10,11,12,13,14,15,16,17,18:
+  http://prdownloads.sourceforge.net/safekeep/safekeep-common-1.4.1-1.noarch.rpm
+  http://prdownloads.sourceforge.net/safekeep/safekeep-client-1.4.1-1.noarch.rpm
+  http://prdownloads.sourceforge.net/safekeep/safekeep-server-1.4.1-1.noarch.rpm
  
   - Ubuntu Dapper, Breezy, Hardy, Lucid, Maverick, Natty, Oneiric and Precise:
-  http://prdownloads.sourceforge.net/safekeep/safekeep-common_1.4.0_all.deb
-  http://prdownloads.sourceforge.net/safekeep/safekeep-client_1.4.0_all.deb
-  http://prdownloads.sourceforge.net/safekeep/safekeep-server_1.4.0_all.deb
+  http://prdownloads.sourceforge.net/safekeep/safekeep-common_1.4.1_all.deb
+  http://prdownloads.sourceforge.net/safekeep/safekeep-client_1.4.1_all.deb
+  http://prdownloads.sourceforge.net/safekeep/safekeep-server_1.4.1_all.deb
 
   - Source:
-  http://prdownloads.sourceforge.net/safekeep/safekeep-1.4.0.tar.gz
-  http://prdownloads.sourceforge.net/safekeep/safekeep-1.4.0-1.src.rpm
+  http://prdownloads.sourceforge.net/safekeep/safekeep-1.4.1.tar.gz
+  http://prdownloads.sourceforge.net/safekeep/safekeep-1.4.1-1.src.rpm
 
 The GPG Signing Key can be found in the following location:
 
@@ -42,7 +42,7 @@ pub   1024D/4E1CD0E5 2012-02-17
 uid                  SafeKeep (Signing Key) <safekeep-devel@lists.sourceforge.net>
 sub   1024g/6AA3270F 2012-02-17
 
-NOTE: The minimum version of Python now supported is Python 2.3.  If you
+NOTE: The minimum version of Python supported is Python 2.3.  If you
 require support of an older version of Python, then you should select an
 earlier release of Safekeep.
 
