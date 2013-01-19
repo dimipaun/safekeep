@@ -1,3 +1,200 @@
+2013-01-19 10:27 +0000 [r842]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/safekeep: Update version for new release
+
+2013-01-19 10:10 +0000 [r841]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/safekeep.spec.in, safekeep/trunk/ANNOUNCE:
+	  Prepared for 1.4.1 release
+
+2013-01-19 10:09 +0000 [r840]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/TODO: Aligned with 1.4.1 changes
+
+2013-01-05 18:23 +0000 [r839]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.backup.txt,
+	  safekeep/trunk/doc/safekeep.conf.txt, safekeep/trunk/safekeep:
+	  Specify a default size for a snapshot (set to 20% of the free
+	  space)
+
+2013-01-05 01:38 +0000 [r838]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/doc/safekeep.conf.txt, safekeep/trunk/safekeep:
+	  Generate a summary for a 'list' mode run
+
+2013-01-02 19:48 +0000 [r837]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Add flexible capability test
+
+2013-01-02 19:31 +0000 [r836]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Better message
+
+2013-01-01 10:35 +0000 [r835]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/safekeep, safekeep/trunk/doc/safekeep.txt,
+	  safekeep/trunk/doc/safekeep.backup.txt,
+	  safekeep/trunk/doc/safekeep.conf.txt: Use ~/.safekeep/ for
+	  non-root user if it exists
+
+2013-01-01 08:03 +0000 [r834]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/safekeep.conf,
+	  safekeep/trunk/doc/safekeep.backup.txt,
+	  safekeep/trunk/doc/safekeep.conf.txt, safekeep/trunk/safekeep,
+	  safekeep/trunk/TODO: - Allow default snapshot size to be set in
+	  safekeep.conf. - Enable all lvcreate(8) size options, including
+	  %age to be given.
+
+2013-01-01 07:04 +0000 [r833]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/safekeep: Added new PROTOCOL option for passing
+	  default options.
+
+2013-01-01 06:11 +0000 [r832]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/safekeep: Protect against simple process names and
+	  entries.
+
+2013-01-01 05:53 +0000 [r831]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/safekeep: Added Date header in email as requested
+	  by Raúl Wegmann <raul.wegmann@qrr.es>
+
+2012-12-29 13:57 +0000 [r830]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Don't hardcode the config file more than
+	  once
+
+2012-12-29 09:33 +0000 [r829]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/safekeep: Better handling of noemail option.
+
+2012-12-29 08:41 +0000 [r828]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/safekeep: Arrange for email to be sent on
+	  configuration failures where possible.
+
+2012-12-29 04:29 +0000 [r827]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/safekeep: Handle issues with random characters in
+	  log messages.
+
+2012-12-23 08:11 +0000 [r826]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/safekeep, safekeep/trunk/safekeep.conf,
+	  safekeep/trunk/doc/safekeep.conf.txt: - Generate a summary email
+	  report for server mode based on a patch from Walery Wysotsky
+	  <wwalery@gmail.com>. - Reworked email configuration options. -
+	  Generate multipart MIME email when required. - Keep statistics on
+	  server runs.
+
+2012-11-25 07:14 +0000 [r825]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/safekeep, safekeep/trunk/safekeep.conf,
+	  safekeep/trunk/doc/safekeep.backup.txt,
+	  safekeep/trunk/doc/safekeep.conf.txt: Added configuration for
+	  client user from patch by Riley Revels <riley.revels@gmail.com>
+
+2012-05-04 13:14 +0000 [r824]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/doc/safekeep.backup.txt: Document writable options
+	  for snapshot and bind mounts
+
+2012-05-04 13:06 +0000 [r823]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/safekeep: Add writable options for snapshot and
+	  bind mounts
+
+2012-04-22 09:13 +0000 [r822]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/safekeep: Patch for bind mount issue as reported
+	  by Andres Toomsalu <andres@active.ee>
+
+2012-04-15 16:01 +0000 [r821]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/doc/safekeep.backup.txt: Fix attribute name
+
+2012-04-14 11:17 +0000 [r820]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/safekeep: Major rework of snapshot mounting
+
+2012-04-06 13:22 +0000 [r819]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/doc/safekeep.backup.txt: added attribute to supply
+	  mount options for snapshots
+
+2012-04-06 13:21 +0000 [r818]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/safekeep: - generate a working "password file" for
+	  PostgreSQL by Marco Bozzolan <mailbox@s19n.net> - set "nouuid"
+	  mount option for snapshots based on XFS filesystems from code by
+	  Robert Jordan <rjordan@notampering.com> and Alexander 'Leo'
+	  Bergolth <leo@strike.wu.ac.at> - added attribute to supply mount
+	  options for snapshots as suggested by Bryan Talbot
+	  <btalbot@aeriagames.com> - cleaned up coding for tempfile
+
+2012-02-18 13:26 +0000 [r817]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/Makefile: Correct lookup of rpmroot
+
+2012-02-18 13:24 +0000 [r816]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/README_SF_Top (added): Added SourceForge top-level
+	  README to SVN
+
+2012-02-18 13:23 +0000 [r815]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/RPM-GPG-KEY-SafeKeep (added): Added GPG Key to SVN
+
+2012-02-18 13:18 +0000 [r814]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/ANNOUNCE: Added information about new GPG Key
+
+2012-02-14 21:18 +0000 [r811]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Extract the version
+
+2012-02-14 21:17 +0000 [r810]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Release is too rpm specific, we can
+	  hardcoded
+
+2012-02-14 21:15 +0000 [r809]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Setup the generic skeleton
+
+2012-02-14 21:12 +0000 [r808]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Separate out the building of the
+	  RPM (WIP). Give up going through the YUM repos.
+
+2012-02-14 20:43 +0000 [r807]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: Remove unused parameter
+
+2012-02-14 20:41 +0000 [r806]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep-test: We no longer need to install the
+	  Lattica key
+
+2012-02-14 20:40 +0000 [r805]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep: Oops, this got checked in by mistake,
+	  revert
+
+2012-02-14 20:38 +0000 [r804]  Dimi Paun <dimi@lattica.com>
+
+	* safekeep/trunk/safekeep, safekeep/trunk/safekeep-test: Get rid of
+	  the package signing, it's not the proper place here. This
+	  complicates the test unnecessarily, making it more likely that it
+	  will bitrot.
+
+2012-02-11 08:06 +0000 [r801]  Frank Crawford <frank@crawford.emu.id.au>
+
+	* safekeep/trunk/ChangeLog: Update ChangeLog
+
 2012-02-11 07:51 +0000 [r800]  Frank Crawford <frank@crawford.emu.id.au>
 
 	* safekeep/trunk/safekeep: Readded note about Python 2.2/2.3
@@ -13,7 +210,7 @@
 
 2012-02-11 06:05 +0000 [r797]  Frank Crawford <frank@crawford.emu.id.au>
 
-	* safekeep/trunk/safekeep.spec.in, safekeep/trunk/ANNOUNCE:
+	* safekeep/trunk/ANNOUNCE, safekeep/trunk/safekeep.spec.in:
 	  Prepared for 1.4.0 release
 
 2012-02-11 05:57 +0000 [r796]  Frank Crawford <frank@crawford.emu.id.au>
@@ -35,7 +232,7 @@
 
 2012-01-20 12:25 +0000 [r792]  Frank Crawford <frank@crawford.emu.id.au>
 
-	* safekeep/trunk/doc/safekeep.backup.txt, safekeep/trunk/safekeep:
+	* safekeep/trunk/safekeep, safekeep/trunk/doc/safekeep.backup.txt:
 	  Allow snapshot tag item to take a comma separated list of tags
 
 2012-01-13 11:47 +0000 [r791]  Frank Crawford <frank@crawford.emu.id.au>
@@ -95,7 +292,7 @@
 
 2011-12-30 08:43 +0000 [r782]  Frank Crawford <frank@crawford.emu.id.au>
 
-	* safekeep/trunk/doc/safekeep.backup.txt, safekeep/trunk/safekeep:
+	* safekeep/trunk/safekeep, safekeep/trunk/doc/safekeep.backup.txt:
 	  Added LVM snapshot LV tagging support as requested by Andres
 	  Toomsalu
 
@@ -107,10 +304,10 @@
 
 2011-12-07 15:18 +0000 [r780]  Dimi Paun <dimi@lattica.com>
 
-	* safekeep/trunk/doc/safekeep.backup.txt,
-	  safekeep/trunk/doc/safekeep.conf.txt,
-	  safekeep/trunk/doc/safekeep.txt: Appease ASCIIDOC, provide the
-	  required metadata.
+	* safekeep/trunk/doc/safekeep.txt,
+	  safekeep/trunk/doc/safekeep.backup.txt,
+	  safekeep/trunk/doc/safekeep.conf.txt: Appease ASCIIDOC, provide
+	  the required metadata.
 
 2011-12-07 03:38 +0000 [r779]  Dimi Paun <dimi@lattica.com>
 
@@ -161,8 +358,8 @@
 
 2011-11-20 05:56 +0000 [r767]  Frank Crawford <frank@crawford.emu.id.au>
 
-	* safekeep/trunk/safekeep.spec.in, safekeep/trunk/ANNOUNCE,
-	  safekeep/trunk/doc/users: Prep release 1.3.3
+	* safekeep/trunk/ANNOUNCE, safekeep/trunk/doc/users,
+	  safekeep/trunk/safekeep.spec.in: Prep release 1.3.3
 
 2011-11-20 05:35 +0000 [r766]  Frank Crawford <frank@crawford.emu.id.au>
 
@@ -210,10 +407,10 @@
 
 2011-08-31 13:02 +0000 [r759]  Dimi Paun <dimi@lattica.com>
 
-	* safekeep/trunk/doc/safekeep.conf.txt, safekeep/trunk/safekeep,
-	  safekeep/trunk/safekeep.conf: Marco Bozzolan <mailbox@s19n.net>
-	  Allow to specify a sender address for the log messages sent via
-	  e-mail.
+	* safekeep/trunk/safekeep, safekeep/trunk/safekeep.conf,
+	  safekeep/trunk/doc/safekeep.conf.txt: Marco Bozzolan
+	  <mailbox@s19n.net> Allow to specify a sender address for the log
+	  messages sent via e-mail.
 
 2011-06-11 16:14 +0000 [r758]  Dimi Paun <dimi@lattica.com>
 
@@ -254,7 +451,7 @@
 
 2011-03-06 18:01 +0000 [r749]  Dimi Paun <dimi@lattica.com>
 
-	* safekeep/trunk/safekeep.spec.in, safekeep/trunk/ANNOUNCE: Prep
+	* safekeep/trunk/ANNOUNCE, safekeep/trunk/safekeep.spec.in: Prep
 	  release 1.3.2
 
 2011-03-06 17:50 +0000 [r748]  Dimi Paun <dimi@lattica.com>
@@ -268,9 +465,9 @@
 
 2011-03-06 17:39 +0000 [r746]  Dimi Paun <dimi@lattica.com>
 
-	* safekeep/trunk/Makefile, safekeep/trunk/safekeep.spec.in,
-	  safekeep/trunk/INSTALL: Make the 'make install' behave more like
-	  the package install
+	* safekeep/trunk/INSTALL, safekeep/trunk/Makefile,
+	  safekeep/trunk/safekeep.spec.in: Make the 'make install' behave
+	  more like the package install
 
 2011-03-06 17:23 +0000 [r745]  Dimi Paun <dimi@lattica.com>
 
@@ -279,7 +476,7 @@
 
 2011-03-06 17:20 +0000 [r744]  Dimi Paun <dimi@lattica.com>
 
-	* safekeep/trunk/README, safekeep/trunk/INSTALL: Move most
+	* safekeep/trunk/INSTALL, safekeep/trunk/README: Move most
 	  installation related info to the INSTALL file
 
 2011-03-06 17:18 +0000 [r743]  Dimi Paun <dimi@lattica.com>
@@ -448,13 +645,14 @@
 
 2010-11-21 19:09 +0000 [r704]  Dimi Paun <dimi@lattica.com>
 
-	* safekeep/trunk/doc/safekeep.conf.txt, safekeep/trunk/safekeep,
-	  safekeep/trunk/safekeep.conf: Add support for ionice(1)
+	* safekeep/trunk/safekeep, safekeep/trunk/safekeep.conf,
+	  safekeep/trunk/doc/safekeep.conf.txt: Add support for ionice(1)
 
 2010-11-19 22:05 +0000 [r703]  Dimi Paun <dimi@lattica.com>
 
-	* safekeep/trunk/doc/safekeep.conf.txt, safekeep/trunk/safekeep,
-	  safekeep/trunk/safekeep.conf: By default, run safekeep as niced
+	* safekeep/trunk/safekeep, safekeep/trunk/safekeep.conf,
+	  safekeep/trunk/doc/safekeep.conf.txt: By default, run safekeep as
+	  niced
 
 2010-11-19 19:16 +0000 [r702]  Dimi Paun <dimi@lattica.com>
 
@@ -560,7 +758,7 @@
 
 2010-11-19 07:14 +0000 [r678]  Dimi Paun <dimi@lattica.com>
 
-	* safekeep/trunk/safekeep.spec.in, safekeep/trunk/safekeep: Prep
+	* safekeep/trunk/safekeep, safekeep/trunk/safekeep.spec.in: Prep
 	  release
 
 2010-11-19 07:02 +0000 [r677]  Dimi Paun <dimi@lattica.com>
@@ -569,14 +767,14 @@
 
 2010-11-19 06:55 +0000 [r676]  Dimi Paun <dimi@lattica.com>
 
-	* safekeep/trunk/doc/safekeep.backup.txt,
+	* safekeep/trunk/samples/sample.backup,
+	  safekeep/trunk/doc/safekeep.backup.txt,
 	  safekeep/trunk/doc/safekeep.conf.txt, safekeep/trunk/safekeep,
-	  safekeep/trunk/safekeep.conf,
-	  safekeep/trunk/samples/sample.backup: Add precise control of nice
-	  values for both server and client side of things. By default,
-	  safekeep will run now as nice +10 on both sides. However,
-	  existing installs will have to redeploy keys to get this running
-	  on the client side.
+	  safekeep/trunk/safekeep.conf: Add precise control of nice values
+	  for both server and client side of things. By default, safekeep
+	  will run now as nice +10 on both sides. However, existing
+	  installs will have to redeploy keys to get this running on the
+	  client side.
 
 2010-11-19 05:58 +0000 [r675]  Dimi Paun <dimi@lattica.com>
 
@@ -715,8 +913,8 @@
 
 2009-03-16 15:05 +0000 [r637]  Dimi Paun <dimi@lattica.com>
 
-	* safekeep/trunk/doc/safekeep.backup.txt, safekeep/trunk/safekeep,
-	  safekeep/trunk/samples/sample.backup: Frank Crawford
+	* safekeep/trunk/safekeep, safekeep/trunk/samples/sample.backup,
+	  safekeep/trunk/doc/safekeep.backup.txt: Frank Crawford
 	  <frank@crawford.emu.id.au> Rework the handling of device files,
 	  fifos and sockets as data attributes. Now special files are by
 	  default included, unless explicitely excluded. A bunch of
@@ -730,12 +928,12 @@
 
 2009-03-15 14:50 +0000 [r635]  Dimi Paun <dimi@lattica.com>
 
-	* safekeep/trunk/samples/client-script-sample.sh (added),
-	  safekeep/trunk/doc/client-script-sample.sh (removed),
-	  safekeep/trunk/safekeep.spec.in, safekeep/trunk/samples (added),
+	* safekeep/trunk/safekeep.spec.in, safekeep/trunk/samples (added),
 	  safekeep/trunk/sample.backup (removed),
-	  safekeep/trunk/samples/sample.backup (added): Move the samples to
-	  a separate directory.
+	  safekeep/trunk/samples/sample.backup (added),
+	  safekeep/trunk/samples/client-script-sample.sh (added),
+	  safekeep/trunk/doc/client-script-sample.sh (removed): Move the
+	  samples to a separate directory.
 
 2009-03-14 21:17 +0000 [r634]  Dimi Paun <dimi@lattica.com>
 
@@ -774,10 +972,10 @@
 
 2008-11-19 20:42 +0000 [r628]  Dimi Paun <dimi@lattica.com>
 
-	* safekeep/trunk/doc/safekeep.backup.txt,
-	  safekeep/trunk/doc/safekeep.conf.txt,
-	  safekeep/trunk/safekeep.conf: Document the new bandwidth limiting
-	  feature.
+	* safekeep/trunk/safekeep.conf,
+	  safekeep/trunk/doc/safekeep.backup.txt,
+	  safekeep/trunk/doc/safekeep.conf.txt: Document the new bandwidth
+	  limiting feature.
 
 2008-11-19 19:33 +0000 [r627]  Dimi Paun <dimi@lattica.com>
 
@@ -812,15 +1010,15 @@
 
 2008-11-19 16:39 +0000 [r621]  Dimi Paun <dimi@lattica.com>
 
-	* safekeep/trunk/safekeep.spec.in, safekeep/trunk/safekeep.conf: By
+	* safekeep/trunk/safekeep.conf, safekeep/trunk/safekeep.spec.in: By
 	  default, run safekeep with nice +10 on the server side
 
 2008-11-19 16:37 +0000 [r620]  Dimi Paun <dimi@lattica.com>
 
-	* safekeep/trunk/doc/safekeep.conf.txt,
-	  safekeep/trunk/safekeep.spec.in, safekeep/trunk/safekeep,
-	  safekeep/trunk/TODO: Run ssh/rdiff through nice so we can control
-	  the load better on the server.
+	* safekeep/trunk/safekeep.spec.in, safekeep/trunk/safekeep,
+	  safekeep/trunk/TODO, safekeep/trunk/doc/safekeep.conf.txt: Run
+	  ssh/rdiff through nice so we can control the load better on the
+	  server.
 
 2008-11-19 15:05 +0000 [r619]  Dimi Paun <dimi@lattica.com>
 
@@ -886,7 +1084,7 @@
 
 2008-10-07 04:40 +0000 [r599]  Dimi Paun <dimi@lattica.com>
 
-	* safekeep/trunk/doc/safekeep.backup.txt, safekeep/trunk/safekeep:
+	* safekeep/trunk/safekeep, safekeep/trunk/doc/safekeep.backup.txt:
 	  Add support for providing the password for the DB user used for
 	  the dump.
 
@@ -903,7 +1101,7 @@
 
 2008-07-17 18:52 +0000 [r596]  Dimi Paun <dimi@lattica.com>
 
-	* safekeep/trunk/doc/safekeep.backup.txt, safekeep/trunk/safekeep:
+	* safekeep/trunk/safekeep, safekeep/trunk/doc/safekeep.backup.txt:
 	  Frank Crawford <frank@crawford.emu.id.au> * Added options block
 	  in backup configuration file. * Added option to include
 	  special-files, i.e. device files, fifos and sockets. Default is
@@ -975,7 +1173,7 @@
 
 2008-02-25 00:57 +0000 [r577]  Dimi Paun <dimi@lattica.com>
 
-	* safekeep/trunk/doc/safekeep.backup.txt, safekeep/trunk/TODO:
+	* safekeep/trunk/TODO, safekeep/trunk/doc/safekeep.backup.txt:
 	  Clarify snapshot usage.
 
 2008-02-24 16:53 +0000 [r576]  Dimi Paun <dimi@lattica.com>
@@ -986,12 +1184,12 @@
 
 2008-02-24 16:49 +0000 [r575]  Dimi Paun <dimi@lattica.com>
 
-	* safekeep/trunk/doc/safekeep.backup.txt, safekeep/trunk/safekeep,
-	  safekeep/trunk/doc/safekeep.txt: Frank Crawford
-	  <frank@crawford.emu.id.au> This adds the mode --list, and options
-	  which correspond with rdiff-backup options, i.e. --increments
-	  (equiv --list-increments) - the default, --sizes (equiv
-	  --list-increment-sizes), --changed=DATE (equiv
+	* safekeep/trunk/doc/safekeep.txt,
+	  safekeep/trunk/doc/safekeep.backup.txt, safekeep/trunk/safekeep:
+	  Frank Crawford <frank@crawford.emu.id.au> This adds the mode
+	  --list, and options which correspond with rdiff-backup options,
+	  i.e. --increments (equiv --list-increments) - the default,
+	  --sizes (equiv --list-increment-sizes), --changed=DATE (equiv
 	  --list-changed-since), and --at-time=DATE (equiv --list-at-time).
 	  It also adds an option which disables email (--noemail) as when
 	  used interactively it isn't worth generating email messages.
@@ -1050,9 +1248,9 @@
 
 2007-11-07 14:36 +0000 [r564]  Dimi Paun <dimi@lattica.com>
 
-	* safekeep/trunk/safekeep, safekeep/trunk/TODO,
-	  safekeep/trunk/doc/safekeep.txt: Always require specification of
-	  the operation mode, based on suggestion from Gert
+	* safekeep/trunk/doc/safekeep.txt, safekeep/trunk/safekeep,
+	  safekeep/trunk/TODO: Always require specification of the
+	  operation mode, based on suggestion from Gert
 	  <gert.vrebos@tactics.be>.
 
 2007-11-07 14:21 +0000 [r563]  Dimi Paun <dimi@lattica.com>
@@ -1083,7 +1281,7 @@
 
 2007-10-19 16:50 +0000 [r554]  Dimi Paun <dimi@lattica.com>
 
-	* safekeep/trunk/safekeep.spec.in, safekeep/trunk/ChangeLog: Update
+	* safekeep/trunk/ChangeLog, safekeep/trunk/safekeep.spec.in: Update
 	  ChangeLog
 
 2007-10-19 16:47 +0000 [r553]  Dimi Paun <dimi@lattica.com>
@@ -1248,10 +1446,10 @@
 
 2007-05-28 15:46 +0000 [r513]  Dimi Paun <dimi@lattica.com>
 
-	* safekeep/trunk/debian/safekeep-server.postinst,
-	  safekeep/trunk/safekeep.spec.in: We no longer need to have a
-	  working shell for the safekeep user. Better from a security
-	  perspective.
+	* safekeep/trunk/safekeep.spec.in,
+	  safekeep/trunk/debian/safekeep-server.postinst: We no longer need
+	  to have a working shell for the safekeep user. Better from a
+	  security perspective.
 
 2007-05-28 15:39 +0000 [r512]  Dimi Paun <dimi@lattica.com>
 
@@ -1345,13 +1543,13 @@
 
 2007-04-27 04:48 +0000 [r486]  Dimi Paun <dimi@lattica.com>
 
-	* safekeep/trunk/doc/safekeep.backup.txt,
-	  safekeep/trunk/doc/safekeep.txt: A few more doc tweaks
+	* safekeep/trunk/doc/safekeep.txt,
+	  safekeep/trunk/doc/safekeep.backup.txt: A few more doc tweaks
 
 2007-04-27 04:44 +0000 [r485]  Dimi Paun <dimi@lattica.com>
 
-	* safekeep/trunk/doc/safekeep.backup.txt,
-	  safekeep/trunk/doc/safekeep.txt: Eduard Malinschi
+	* safekeep/trunk/doc/safekeep.txt,
+	  safekeep/trunk/doc/safekeep.backup.txt: Eduard Malinschi
 	  <ed@lattica.com> Clarify the docs for database dumps.
 
 2007-04-25 07:51 +0000 [r484]  Stelian Pop <stelian@lattica.com>
@@ -1371,14 +1569,13 @@
 
 2007-04-21 15:19 +0000 [r481]  Dimi Paun <dimi@lattica.com>
 
-	* safekeep/trunk/debian/safekeep-server.postinst,
-	  safekeep/trunk/safekeep.spec.in, safekeep/trunk/debian/control:
-	  Switch the default shell for the 'safekeep' account to /bin/bash.
-	  We need it to be able to execute commands as 'safekeep' via
-	  su(1). Also, to help people upgrading, force the shell of already
-	  existing 'safekeep' users to /bin/bash. We can remove this in the
-	  future once we know all old users have upgraded to 0.9.3 or
-	  later.
+	* safekeep/trunk/safekeep.spec.in, safekeep/trunk/debian/control,
+	  safekeep/trunk/debian/safekeep-server.postinst: Switch the
+	  default shell for the 'safekeep' account to /bin/bash. We need it
+	  to be able to execute commands as 'safekeep' via su(1). Also, to
+	  help people upgrading, force the shell of already existing
+	  'safekeep' users to /bin/bash. We can remove this in the future
+	  once we know all old users have upgraded to 0.9.3 or later.
 
 2007-03-20 20:40 +0000 [r479]  Dimi Paun <dimi@lattica.com>
 
@@ -1450,13 +1647,14 @@
 
 2007-03-09 15:28 +0000 [r456]  Dimi Paun <dimi@lattica.com>
 
-	* safekeep/trunk/doc/safekeep.backup.txt,
+	* safekeep/trunk/doc/safekeep.txt,
+	  safekeep/trunk/debian/safekeep-server.dirs,
+	  safekeep/trunk/doc/safekeep.backup.txt,
 	  safekeep/trunk/debian/safekeep-server.postinst,
 	  safekeep/trunk/debian/rules, safekeep/trunk/Makefile,
 	  safekeep/trunk/safekeep-test, safekeep/trunk/safekeep.spec.in,
-	  safekeep/trunk/safekeep, safekeep/trunk/doc/safekeep.txt,
-	  safekeep/trunk/debian/safekeep-server.dirs: Rename
-	  /etc/safekeep/clients.d to /etc/safekeep/backup.d
+	  safekeep/trunk/safekeep: Rename /etc/safekeep/clients.d to
+	  /etc/safekeep/backup.d
 
 2007-03-09 02:35 +0000 [r455]  Dimi Paun <dimi@lattica.com>
 
@@ -1473,9 +1671,9 @@
 
 2007-03-09 01:03 +0000 [r452]  Dimi Paun <dimi@lattica.com>
 
-	* safekeep/trunk/safekeep.spec.in,
-	  safekeep/trunk/debian/safekeep-server.dirs: Fix the packages to
-	  include the clients.d dir as well
+	* safekeep/trunk/debian/safekeep-server.dirs,
+	  safekeep/trunk/safekeep.spec.in: Fix the packages to include the
+	  clients.d dir as well
 
 2007-03-09 00:33 +0000 [r451]  Dimi Paun <dimi@lattica.com>
 
@@ -1511,27 +1709,27 @@
 
 2007-03-08 20:35 +0000 [r445]  Dimi Paun <dimi@lattica.com>
 
-	* safekeep/trunk/doc/safekeep.conf.txt, safekeep/trunk/safekeep,
-	  safekeep/trunk/sample.conf: Add property that controls the data
-	  repo base dir
+	* safekeep/trunk/safekeep, safekeep/trunk/sample.conf,
+	  safekeep/trunk/doc/safekeep.conf.txt: Add property that controls
+	  the data repo base dir
 
 2007-03-08 20:27 +0000 [r444]  Dimi Paun <dimi@lattica.com>
 
-	* safekeep/trunk/doc/safekeep.conf.txt, safekeep/trunk/safekeep,
-	  safekeep/trunk/sample.conf: Instrument the --keys mode to work
-	  with a different backup user. Rename the property to
+	* safekeep/trunk/safekeep, safekeep/trunk/sample.conf,
+	  safekeep/trunk/doc/safekeep.conf.txt: Instrument the --keys mode
+	  to work with a different backup user. Rename the property to
 	  'backup.user' instead of just 'user'.
 
 2007-03-08 03:44 +0000 [r443]  Dimi Paun <dimi@lattica.com>
 
-	* safekeep/trunk/doc/safekeep.conf.txt, safekeep/trunk/safekeep,
-	  safekeep/trunk/sample.conf: Teach safekeep to switch to a given
-	  user in server mode. Controlled via the 'user' property in
-	  /etc/safekeep/safekeep.conf
+	* safekeep/trunk/safekeep, safekeep/trunk/sample.conf,
+	  safekeep/trunk/doc/safekeep.conf.txt: Teach safekeep to switch to
+	  a given user in server mode. Controlled via the 'user' property
+	  in /etc/safekeep/safekeep.conf
 
 2007-03-07 22:40 +0000 [r442]  Dimi Paun <dimi@lattica.com>
 
-	* safekeep/trunk/safekeep, safekeep/trunk/doc/safekeep.txt: Allow
+	* safekeep/trunk/doc/safekeep.txt, safekeep/trunk/safekeep: Allow
 	  for the explicit spcification of an identity file during key
 	  management
 
@@ -1582,10 +1780,10 @@
 
 2007-03-06 21:15 +0000 [r433]  Dimi Paun <dimi@lattica.com>
 
-	* safekeep/trunk/doc/safekeep.backup.txt (added),
-	  safekeep/trunk/doc/safekeep.conf.txt (removed),
-	  safekeep/trunk/doc/safekeep.txt: Rename the man page
-	  safekeep.conf to safekeep.backup to match the new naming
+	* safekeep/trunk/doc/safekeep.txt,
+	  safekeep/trunk/doc/safekeep.backup.txt (added),
+	  safekeep/trunk/doc/safekeep.conf.txt (removed): Rename the man
+	  page safekeep.conf to safekeep.backup to match the new naming
 	  convention. Adjust the docs to the new directory structure.
 
 2007-03-06 21:07 +0000 [r432]  Dimi Paun <dimi@lattica.com>
@@ -1611,10 +1809,10 @@
 
 2007-03-04 20:13 +0000 [r428]  Dimi Paun <dimi@lattica.com>
 
-	* safekeep/trunk/debian/safekeep-server.postinst,
-	  safekeep/trunk/debian/rules, safekeep/trunk/safekeep.spec.in,
+	* safekeep/trunk/debian/rules, safekeep/trunk/safekeep.spec.in,
 	  safekeep/trunk/safekeep,
-	  safekeep/trunk/debian/safekeep-server.dirs: Move the client
+	  safekeep/trunk/debian/safekeep-server.dirs,
+	  safekeep/trunk/debian/safekeep-server.postinst: Move the client
 	  configuration files in /etc/safekeep/clients.d Change the
 	  extension of client config files to .backup from .client. Provide
 	  automatic migration code for DEB and RPM packages.
@@ -1659,8 +1857,8 @@
 
 2007-02-12 04:30 +0000 [r414]  Dimi Paun <dimi@lattica.com>
 
-	* safekeep/trunk/Makefile, safekeep/trunk/README,
-	  safekeep/trunk/TODO: Add a way to install SafeKeep from source.
+	* safekeep/trunk/TODO, safekeep/trunk/Makefile,
+	  safekeep/trunk/README: Add a way to install SafeKeep from source.
 
 2007-02-12 00:40 +0000 [r413]  Dimi Paun <dimi@lattica.com>
 
@@ -1820,7 +2018,9 @@
 
 2007-01-31 23:28 +0000 [r348]  Stelian Pop <stelian@lattica.com>
 
-	* safekeep/trunk/debian/docs (removed),
+	* safekeep/trunk/debian/safekeep-client.docs (added),
+	  safekeep/trunk/debian/safekeep-server.dirs (added),
+	  safekeep/trunk/debian/docs (removed),
 	  safekeep/trunk/debian/safekeep-common.dirs (added),
 	  safekeep/trunk/debian/safekeep-server.postinst (added),
 	  safekeep/trunk/debian/rules,
@@ -1828,12 +2028,9 @@
 	  safekeep/trunk/debian/safekeep-server.docs (added),
 	  safekeep/trunk/debian/control,
 	  safekeep/trunk/debian/safekeep-common.docs (added),
-	  safekeep/trunk/debian/dirs (removed),
-	  safekeep/trunk/debian/safekeep-client.docs (added),
-	  safekeep/trunk/debian/safekeep-server.dirs (added): Update the
-	  DEB packaging: - split into -server, -client, -common subpackages
-	  - create the 'safekeep' user for the server - install a daily
-	  cron task - etc.
+	  safekeep/trunk/debian/dirs (removed): Update the DEB packaging: -
+	  split into -server, -client, -common subpackages - create the
+	  'safekeep' user for the server - install a daily cron task - etc.
 
 2007-01-31 20:57 +0000 [r347]  Stelian Pop <stelian@lattica.com>
 
@@ -1866,8 +2063,9 @@
 
 2007-01-31 15:21 +0000 [r341]  Dimi Paun <dimi@lattica.com>
 
-	* safekeep/trunk/safekeep.spec.in, safekeep/trunk/safekeep.cron
-	  (added): Install a daily cron task for safekeep
+	* safekeep/trunk/safekeep.cron (added),
+	  safekeep/trunk/safekeep.spec.in: Install a daily cron task for
+	  safekeep
 
 2007-01-30 19:31 +0000 [r340]  Dimi Paun <dimi@lattica.com>
 
@@ -1965,14 +2163,14 @@
 
 2007-01-27 18:13 +0000 [r321]  Dimi Paun <dimi@lattica.com>
 
-	* safekeep/trunk/safekeep, safekeep/trunk/doc/safekeep.txt: Remove
+	* safekeep/trunk/doc/safekeep.txt, safekeep/trunk/safekeep: Remove
 	  the --client mode from the online help screen, this is an
 	  internal-only mode, and it just makes the output more confusing
 	  and difficult to read.
 
 2007-01-27 18:10 +0000 [r320]  Dimi Paun <dimi@lattica.com>
 
-	* safekeep/trunk/safekeep, safekeep/trunk/doc/safekeep.txt: We need
+	* safekeep/trunk/doc/safekeep.txt, safekeep/trunk/safekeep: We need
 	  to support the -c/--conf in --keys mode too
 
 2007-01-27 17:11 +0000 [r319]  Dimi Paun <dimi@lattica.com>
@@ -2005,11 +2203,12 @@
 
 2007-01-26 22:02 +0000 [r313]  Dimi Paun <dimi@lattica.com>
 
-	* safekeep/trunk/debian/docs, safekeep/trunk/sample.cfg (removed),
+	* safekeep/trunk/sample.conf (added),
+	  safekeep/trunk/doc/safekeep.txt, safekeep/trunk/debian/docs,
+	  safekeep/trunk/sample.cfg (removed),
 	  safekeep/trunk/safekeep-test, safekeep/trunk/safekeep.spec.in,
-	  safekeep/trunk/safekeep, safekeep/trunk/sample.conf (added),
-	  safekeep/trunk/doc/safekeep.txt: Rename the .cfg extension to
-	  .conf, and the --cfg option to --conf
+	  safekeep/trunk/safekeep: Rename the .cfg extension to .conf, and
+	  the --cfg option to --conf
 
 2007-01-26 21:46 +0000 [r312]  Dimi Paun <dimi@lattica.com>
 
@@ -2023,7 +2222,7 @@
 
 2007-01-26 21:13 +0000 [r310]  Dimi Paun <dimi@lattica.com>
 
-	* safekeep/trunk/Makefile, safekeep/trunk/doc/Makefile (removed):
+	* safekeep/trunk/doc/Makefile (removed), safekeep/trunk/Makefile:
 	  Merge the doc Makefile into the main Makefile. It makes it easier
 	  if everything is in one place.
 	  http://members.canb.auug.org.au/~millerp/rmch/recu-make-cons-harm.html
@@ -2169,14 +2368,14 @@
 
 2007-01-12 11:45 +0000 [r280]  Stelian Pop <stelian@lattica.com>
 
-	* safekeep/trunk/debian/rules, safekeep/trunk/Makefile,
+	* safekeep/trunk/doc (added), safekeep/trunk/doc/safekeep.txt
+	  (added), safekeep/trunk/doc/asciidoc.conf (added),
+	  safekeep/trunk/debian/rules, safekeep/trunk/Makefile,
 	  safekeep/trunk/sample.cfg, safekeep/trunk/doc/callouts.xsl
 	  (added), safekeep/trunk/safekeep.spec.in,
 	  safekeep/trunk/debian/control, safekeep/trunk/doc/Makefile
-	  (added), safekeep/trunk/safekeep, safekeep/trunk/doc (added),
-	  safekeep/trunk/doc/safekeep.txt (added),
-	  safekeep/trunk/doc/asciidoc.conf (added): Add documentation and
-	  rework the sample configuration file.
+	  (added), safekeep/trunk/safekeep: Add documentation and rework
+	  the sample configuration file.
 
 2007-01-12 05:02 +0000 [r279]  Dimi Paun <dimi@lattica.com>
 
@@ -2234,27 +2433,27 @@
 
 2006-12-27 21:21 +0000 [r266]  Dimi Paun <dimi@lattica.com>
 
-	* safekeep/trunk/debian/rules, safekeep/trunk/Makefile,
-	  safekeep/trunk/README, safekeep/trunk/debian/changelog.in,
-	  safekeep/trunk/sample.cfg, safekeep/trunk/safekeep-test,
+	* safekeep/trunk/sample.cfg, safekeep/trunk/safekeep-test,
 	  safekeep/trunk/LICENSE, safekeep/trunk/debian/control,
-	  safekeep/trunk/safekeep, safekeep/trunk/AUTHORS: Rename LaBackup
-	  to SafeKeep, using the following rules: - in natural language, it
-	  is spelled SafeKeep - the binary, package, dirs, etc. are all
-	  lower case: safekeep This follows the pattern used by
-	  SpamAssassin. Please note that the files have been manipulated in
-	  the CVS repo to maintain the history. The new CVS module is
+	  safekeep/trunk/safekeep, safekeep/trunk/AUTHORS,
+	  safekeep/trunk/debian/rules, safekeep/trunk/Makefile,
+	  safekeep/trunk/README, safekeep/trunk/debian/changelog.in: Rename
+	  LaBackup to SafeKeep, using the following rules: - in natural
+	  language, it is spelled SafeKeep - the binary, package, dirs,
+	  etc. are all lower case: safekeep This follows the pattern used
+	  by SpamAssassin. Please note that the files have been manipulated
+	  in the CVS repo to maintain the history. The new CVS module is
 	  called 'SafeKeep', the old 'LaBackup' module still exists in CVS
 	  as read-only.
 
 2006-12-27 20:50 +0000 [r265]  Dimi Paun <dimi@lattica.com>
 
-	* safekeep/trunk/LICENSE (added), safekeep/trunk/AUTHORS (added),
-	  safekeep/trunk/COPYING (added): Add OSS structure
+	* safekeep/trunk/AUTHORS (added), safekeep/trunk/COPYING (added),
+	  safekeep/trunk/LICENSE (added): Add OSS structure
 
 2006-12-27 20:39 +0000 [r264]  Dimi Paun <dimi@lattica.com>
 
-	* safekeep/trunk/README, safekeep/trunk/safekeep: Add protocol
+	* safekeep/trunk/safekeep, safekeep/trunk/README: Add protocol
 	  versioning.
 
 2006-12-24 17:04 +0000 [r263]  Dimi Paun <dimi@lattica.com>
@@ -2447,10 +2646,10 @@
 
 2006-12-12 05:16 +0000 [r224]  Dimi Paun <dimi@lattica.com>
 
-	* safekeep/trunk/debian/rules, safekeep/trunk/Makefile,
+	* safekeep/trunk/debian/control, safekeep/trunk/safekeep,
+	  safekeep/trunk/debian/rules, safekeep/trunk/Makefile,
 	  safekeep/trunk/debian/changelog.in, safekeep/trunk/sample.cfg,
-	  safekeep/trunk/safekeep-test, safekeep/trunk/debian/control,
-	  safekeep/trunk/safekeep: Standardize capitalization to
+	  safekeep/trunk/safekeep-test: Standardize capitalization to
 	  'LaBackup'. Rename /etc/labackuip --> /etc/LaBackup.d
 
 2006-12-12 04:49 +0000 [r223]  Dimi Paun <dimi@lattica.com>
@@ -3121,13 +3320,13 @@
 
 2006-11-19 21:17 +0000 [r83]  Stelian Pop <stelian@lattica.com>
 
-	* safekeep/trunk/debian/copyright (added),
+	* safekeep/trunk/debian (added), safekeep/trunk/debian/control
+	  (added), safekeep/trunk/debian/dirs (added),
+	  safekeep/trunk/safekeep, safekeep/trunk/debian/compat (added),
+	  safekeep/trunk/debian/copyright (added),
 	  safekeep/trunk/debian/rules (added),
-	  safekeep/trunk/debian/changelog.in (added), safekeep/trunk/debian
-	  (added), safekeep/trunk/debian/control (added),
-	  safekeep/trunk/debian/dirs (added), safekeep/trunk/safekeep,
-	  safekeep/trunk/debian/compat (added): RPM and DEB packaging, all
-	  with a global Makefile.
+	  safekeep/trunk/debian/changelog.in (added): RPM and DEB
+	  packaging, all with a global Makefile.
 
 2006-11-08 08:57 +0000 [r82]  Stelian Pop <stelian@lattica.com>
 
@@ -3540,6 +3739,6 @@
 
 2006-07-03 06:32 +0000 [r1]  Dimi Paun <dimi@lattica.com>
 
-	* safekeep/tags (added), safekeep (added), safekeep/trunk (added),
-	  safekeep/branches (added): New repository initialized by cvs2svn.
+	* safekeep/trunk (added), safekeep/branches (added), safekeep/tags
+	  (added), safekeep (added): New repository initialized by cvs2svn.
 
