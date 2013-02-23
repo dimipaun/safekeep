@@ -271,9 +271,9 @@ def try_to_run(args):
 # Statistics format routines for the "server" type
 #
 def print_stats_table_server_text(stats):
-    result = '|{:<8}|{:<8}'.format(stats['id'], stats['state'])
+    result = '|{0:<8}|{1:<8}'.format(stats['id'], stats['state'])
     if (len(stats) > 2):
-        result += '|{:>6}|{:<24}|{:<24}|{:>24}|{:>12}|{:>12}|{:>13}|'.format(
+        result += '|{0:>6}|{1:<24}|{2:<24}|{3:>24}|{4:>12}|{5:>12}|{6:>13}|'.format(
                             stats['Errors'],
                             stats['StartTime'],
                             stats['EndTime'],
@@ -312,7 +312,7 @@ def print_stats_table_server_html(stats):
 
 def stats_to_table_server_text():
     result = ['-' * 141 + '\r\n', 
-              '|{:<8}|{:<8}|{:<6}|{:<24}|{:<24}|{:<24}|{:<12}|{:<12}|{:<13}|'.format(
+              '|{0:<8}|{1:<8}|{2:<6}|{3:<24}|{4:<24}|{5:<24}|{6:<12}|{7:<12}|{8:<13}|'.format(
                   'Name',
                   'State',
                   'Errors',
@@ -353,9 +353,9 @@ def stats_to_table_server_html():
 # Statistics format routines for the "list" type
 #
 def print_stats_table_list_text(stats):
-    result = '|{:<8}|{:<8}'.format(stats['id'], stats['state'])
+    result = '|{0:<8}|{1:<8}'.format(stats['id'], stats['state'])
     if (len(stats) > 2):
-        result += '|{:<24}|{:<24}|{:>10}|'.format(
+        result += '|{0:<24}|{1:<24}|{2:>10}|'.format(
                             stats['CurrentMirror'],
                             stats['OldestIncrement'],
                             stats['Increments'])
@@ -382,7 +382,7 @@ def print_stats_table_list_html(stats):
 
 def stats_to_table_list_text():
     result = ['-' * 80 + '\r\n', 
-              '|{:<8}|{:<8}|{:<24}|{:<24}|{:<10}|'.format(
+              '|{0:<8}|{1:<8}|{2:<24}|{3:<24}|{4:<10}|'.format(
                   'Name',
                   'State',
                   'Current Mirror',
