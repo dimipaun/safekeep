@@ -1528,8 +1528,10 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
         stats['id'] = cfg_id
         output_done = True
 
-        cleaned_up = True
+        cleaned_up = not cleanup
         try:
+            cin = None
+            cout = None
             if cfg['host']:
                 if not os.path.isfile(cfg['key_ctrl']):
                     raise Exception('Client %(id)s missing ctrl key %(key_ctrl)s' % cfg)
@@ -1662,8 +1664,8 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
             statistics.append(stats)
 
         # Shutdown client
-        cout.close()
-        cin.close()
+        if cout: cout.close()
+        if cin: cin.close()
 
         if not cleaned_up:
             do_server_rdiff_cleanup(cfg)
