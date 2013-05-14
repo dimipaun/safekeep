@@ -581,6 +581,9 @@ def parse_config(backup_el, dflt_id):
     cfg_id = backup_el.getAttribute('id')
     if not cfg_id: cfg_id = dflt_id
 
+    if backup_el.getAttribute('disabled') == 'true':
+        return None
+
     host_el = backup_el.getElementsByTagName('host')
     if host_el:
         host = host_el[0].getAttribute('name')
@@ -722,6 +725,7 @@ def parse_locs(cfglocs):
             cfg = parse_config(dom.documentElement, filename)
         finally:
             dom.unlink()
+        if not cfg: continue
         cfg['text'] = cfg_str
         if cfg['id'] in cfgs:
             raise ConfigException('Duplicate client ID: %s' % cfg['id'])
