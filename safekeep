@@ -77,7 +77,7 @@ statistics = []
 # or 'bind' for a bind mount (check mount for details)
 default_mountoptions = { 'xfs' : 'ro,nouuid', 'snapshot' : 'ro', 'bind' : 'ro' }
 
-PROTOCOL = "1.3"
+PROTOCOL = "1.4"
 VERSION = "1.4.1"
 VEBOSITY_BY_CLASS = {'DBG': 3, 'INFO': 2, 'WARN': 1, 'ERR': 0}
 
@@ -769,6 +769,7 @@ def client_side_script(step, cfg, bdir):
 
 def do_client_dbdump(cfg):
     debug('Doing DB dumps')
+    ec = 0
     for dump in cfg['dumps']:
         dbtype = dump['type']
         opts = dump['opts']
@@ -822,6 +823,7 @@ def do_client_dbdump(cfg):
                 os.remove(passwdfile)
         if ec:
             warn('Can not dump the database: %s' % dump['db'])
+    return ec
 
 def do_client_dbdump_teardown(cfg):
     debug('Tear down DB dumps')
@@ -1096,7 +1098,7 @@ def do_client_remote_script(script_file, cfg, cmd):
 def do_client_setup(cfg):
     debug('Do setup of %s' % cfg['host'])
 
-    do_client_dbdump(cfg)
+    total_ret = do_client_dbdump(cfg)
 
     if len(cfg['snaps']) > 0:
         debug('Checking FS snapshots')
@@ -1108,20 +1110,23 @@ def do_client_setup(cfg):
         ret = spawn(['modprobe', 'dm-snapshot'])
         if ret:
             warn('modprobe dm-snapshot failed, continuing')
+            total_ret += ret
         bdir = tempfile.mkdtemp(suffix="-rbind", prefix="safekeep-%d-" % current_pid, dir="/mnt")
         ret = do_rbind(cfg, '/', bdir)
         if ret:
             warn('mount --rbind failed, snapshotting will be disabled')
+            total_ret += ret
             try:
                 os.rmdir(bdir)
             except OSError, e:
                 warn('Failed to remove: %s: %s' % (bdir, e))
+                total_ret += 1
             bdir = '/'
     else:
         bdir = '/'
     debug('Working root is %s' % bdir)
 
-    return bdir
+    return (bdir, total_ret)
 
 def do_client_cleanup(cfg, bdir):
     debug('Do cleanup of %s in %s' % (cfg['host'], bdir))
@@ -1141,6 +1146,14 @@ def do_client_cleanup(cfg, bdir):
 
 def do_client_compat(server_versions):
     debug('Server versions: %s' % server_versions)
+    (server_protocol, server_version) = server_versions.split(',')
+    compat = {
+        'client': get_protocol_info(PROTOCOL, True),
+        'server': get_protocol_info(server_protocol, False)
+    }
+
+    return compat
+
 
 def do_client_scrub():
     debug("Do client scrub loop")
@@ -1267,7 +1280,8 @@ def do_client():
             try:
                 line = sys.stdin.readline()
                 if line.startswith('ALOHA'):
-                    do_client_compat(line.strip().split(':', 1)[1])
+                    compat = do_client_compat(line.strip().split(':', 1)[1])
+                    send_status = ('CL_STATUS' in compat['server']['caps'])
                     send('OK %s, %s' % (PROTOCOL, VERSION))
                 elif line.startswith('DEFAULT'):
                     for opts in line.strip().split(':', 1)[1].split(','):
@@ -1275,7 +1289,10 @@ def do_client():
                         if opt == 'snapshot.size':
                             global default_snapshot
                             default_snapshot = val
-                    send('OK')
+                    if send_status:
+                        send('OK 0')
+                    else:
+                        send('OK')
                 elif line.startswith('CONFIG'):
                     cfg = do_client_config(line)
                     if cfg['script']:
@@ -1290,17 +1307,27 @@ def do_client():
                             script = os.path.basename(script)
                             (fd, cfg['script']) = tempfile.mkstemp(prefix="%s-" % script, dir=script_dir)
                             script_file = os.fdopen(fd, 'w')
-                            send('OK %s' % cfg['script'])
+                            if send_status:
+                                send('OK %d %s' % (0, cfg['script']))
+                            else:
+                                send('OK %s' % cfg['script'])
                         elif script_loc == 'client':
                             cfg['script'] = script
                             ret = client_side_script('STARTUP', cfg, bdir)
                             if ret:
                                 send('ERROR Client-side setup script failed: %s' % ret)
+                            elif send_status:
+                                send('OK 0')
                             else:
                                 send('OK')
                         else:
                             warn('Unknown script location %s for script %s' % (script_loc, script))
-                            send('OK')
+                            if send_status:
+                                send('OK 1')
+                            else:
+                                send('OK')
+                    elif send_status:
+                        send('OK 0')
                     else:
                         send('OK')
                 elif line.startswith('SCRIPT'):
@@ -1308,26 +1335,48 @@ def do_client():
                         ret = client_side_script('STARTUP', cfg, bdir)
                         if ret:
                             send('ERROR Client-side setup script failed: %s' % ret)
+                        elif send_status:
+                            send('OK 0')
                         else:
                             send('OK')
                     else:
                         cfg['script'] = None
-                        send('OK')
+                        if send_status:
+                            send('OK 0')
+                        else:
+                            send('OK')
                 elif line.startswith('SETUP'):
-                    client_side_script('PRE-SETUP', cfg, bdir)
-                    bdir = do_client_setup(cfg)
-                    client_side_script('POST-SETUP', cfg, bdir)
-                    send('OK ' + bdir)
+                    status = 0
+                    ret = client_side_script('PRE-SETUP', cfg, bdir)
+                    if ret: status += 1
+                    bdir, ret = do_client_setup(cfg)
+                    if ret: status += 1
+                    ret = client_side_script('POST-SETUP', cfg, bdir)
+                    if ret: status += 1
+                    if send_status:
+                        send('OK %d %s' % (status, bdir))
+                    else:
+                        send('OK %s' % bdir)
                 elif line.startswith('CLEANUP'):
+                    status = 0
                     path = line[7:].strip()
                     if path == bdir: should_cleanup = False
                     do_client_cleanup(cfg, path)
-                    client_side_script('POST-BACKUP', cfg, bdir)
-                    send('OK')
+                    ret = client_side_script('POST-BACKUP', cfg, bdir)
+                    if ret: status += 1
+                    if send_status:
+                        send('OK %d' % status)
+                    else:
+                        send('OK')
                 elif line.startswith('SCRUB'):
+                    status = 0
                     do_client_scrub()
-                    client_side_script('POST-SCRUB', cfg, bdir)
-                    send('OK')
+                    ret = client_side_script('POST-SCRUB', cfg, bdir)
+                    if ret: status += 1
+                    if send_status:
+                        send('OK %d' % status)
+                    else:
+                        send('OK')
                 elif not line:
                     break
                 else:
@@ -1356,11 +1405,19 @@ def do_client():
 # Server implementation
 ######################################################################
 
-def do_server_getanswer(cout):
+def do_server_getanswer(cout, cl_status):
     while True:
         line = cout.readline()
         if line.startswith('OK'):
-            return line[2:-1].strip()
+            if cl_status:
+                status_s = line[2:-1].strip()
+                if ' ' in status_s:
+                    status_s, ret = status_s.split(None, 1)
+                else:
+                    ret = None
+                return(int(status_s), ret)
+            else:
+                return (0, line[2:-1].strip())
         elif line.startswith('ERROR'):
             raise ClientException(line[5:].strip())
         elif line.startswith('TRACEBACK'):
@@ -1494,6 +1551,8 @@ def get_protocol_info(protocol, is_client):
     if major == 1:
         if minor >= 3:
             caps.append('DEFAULT')
+        if minor >= 4:
+            caps.append('CL_STATUS')
 
     return { 
         'version': (major, minor), 
@@ -1532,6 +1591,7 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
         try:
             cin = None
             cout = None
+            setup_errs = 0
             if cfg['host']:
                 if not os.path.isfile(cfg['key_ctrl']):
                     raise Exception('Client %(id)s missing ctrl key %(key_ctrl)s' % cfg)
@@ -1566,19 +1626,21 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
 
             cin.write('ALOHA: %s, %s\n' % (PROTOCOL, VERSION))
             cin.flush()
-            client_versions = do_server_getanswer(cout)
+            client_versions = (do_server_getanswer(cout, False))[1]
             compat = do_server_compat(client_versions)
+            cl_status = ('CL_STATUS' in compat['client']['caps'])
 
             # This test will need to be improved for later PROTOCOL versions.
             if ('DEFAULT' in compat['client']['caps']) and len(client_defaults):
                 cin.write('DEFAULT: %s\n' % (','.join(client_defaults)))
                 cin.flush()
-                do_server_getanswer(cout)
+                setup_errs += (do_server_getanswer(cout, cl_status))[0]
 
             cin.write('CONFIG: %d: %s\n' % (len(cfg['text'].splitlines()), cfg_id))
             cin.write(cfg['text'] + '\n')
             cin.flush()
-            remote_script = do_server_getanswer(cout)
+            errs, remote_script = do_server_getanswer(cout, cl_status)
+            setup_errs += errs
             if cfg['script'] and cfg['script'].startswith('server:') and remote_script:
                 local_script = cfg['script'].split(':', 1)[1]
                 if os.path.isfile(local_script):
@@ -1597,18 +1659,19 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
                     warn('No server based script found: %s' % local_script)
                     cin.write('SCRIPT: %s: %d\n' % ('-', 0))
                 cin.flush()
-                do_server_getanswer(cout)
+                setup_errs += (do_server_getanswer(cout, cl_status))[0]
             if cleanup:
                 cleaned_up = False
                 cin.write('SCRUB\n')
                 cin.flush()
-                do_server_getanswer(cout)
+                setup_errs += (do_server_getanswer(cout, cl_status))[0]
                 bdir = '/'  # Fake directory for the rest of the cleanup
                 errs = 0
             else:
                 cin.write('SETUP\n')
                 cin.flush()
-                bdir = do_server_getanswer(cout)
+                errs, bdir = do_server_getanswer(cout, cl_status)
+                setup_errs += errs
 
                 if os.path.isdir(rdiff_logdir):
                     rdiff_logpre = os.listdir(rdiff_logdir)
@@ -1636,6 +1699,7 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
                         if lfn.startswith('session_statistics.') and lfn.endswith('.data') and lfn not in rdiff_logpre:
                             errs += info_file(os.path.join(rdiff_logdir, lfn), None, stats)
                             stats['state'] = 'OK'
+                            stats['Errors'] = str(errs + setup_errs)
                             statistics.append(stats)
                 else:
                     warn('Log dir does not exist.')
@@ -1644,12 +1708,14 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
 
             cin.write('CLEANUP %s\n' % bdir)
             cin.flush()
-            do_server_getanswer(cout)
+            setup_errs += (do_server_getanswer(cout, cl_status))[0]
 
-            if errs == 0:
+            if (errs + setup_errs) == 0:
                 info('Server backup for client %s: OK' % cfg_id)
-            else:
+            elif setup_errs == 0:
                 info('Server backup for client %s: OK (%d WARNINGS)' % (cfg_id, errs))
+            else:
+                info('Server backup for client %s: OK (%d WARNINGS/%d SETUP WARNINGS)' % (cfg_id, errs, setup_errs))
 
         except Exception, ex:
             if cleanup:
