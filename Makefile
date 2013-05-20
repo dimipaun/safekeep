@@ -117,10 +117,15 @@ tar:
 	tar cz -f $(snapshotname).tar.gz $(snapshotname)
 	rm -rf $(snapshotname)
 
-deb: tar
+deb-common: tar
 	tar xz -C /tmp -f $(snapshotname).tar.gz
 	rm -rf $(snapshotname).tar.gz
+
+deb: deb-common
 	cd /tmp/$(snapshotname) && debuild --check-dirname-regex 'safekeep(-.*)?'
+
+debsrc: deb-common
+	cd /tmp/$(snapshotname) && dpkg-buildpackage -S -us -uc -rfakeroot
 
 rpm: tar
 	rpmbuild -ta $(snapshotname).tar.gz

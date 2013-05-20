@@ -2,7 +2,7 @@ Source: safekeep
 Section: Applications/System
 Priority: optional
 Maintainer: Lattica, Inc.
-Build-Depends: debhelper (>= 4.0.0)
+Build-Depends: debhelper (>= 4.0.0), python-support, asciidoc, xmlto
 Standards-Version: 3.6.2
 
 Package: safekeep-server
