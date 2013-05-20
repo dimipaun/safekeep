@@ -581,7 +581,8 @@ def parse_config(backup_el, dflt_id):
     cfg_id = backup_el.getAttribute('id')
     if not cfg_id: cfg_id = dflt_id
 
-    if backup_el.getAttribute('disabled') == 'true':
+    enabled = backup_el.getAttribute('enabled')
+    if enabled == 'false' or enabled == '0':
         return None
 
     host_el = backup_el.getElementsByTagName('host')

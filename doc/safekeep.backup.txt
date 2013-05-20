@@ -25,7 +25,7 @@ in XML. Virtually all elements and attributes are optional; if not present,
 
 The full set of supported elements and attributes looks as follows:
 ------------------------------------------------------------------------
-<backup id="my_workstation" disabled="false">
+<backup id="my_workstation" enabled="true">
 
   <!-- the client backup host, the user and keys for access -->
   <host name="myhost" user="root" nice="10"
@@ -83,10 +83,10 @@ are separated by '/', attributes are introduced by '@':
 	Optional, defaults to the filename without the `.backup` extension.
 	Use of the default value is *highly* recommended. 
           
-/backup/@disabled::
-	If specified and 'true', it disables this host. It is a nicer way
-	to disable a host without renaming the file.
-	Optional, defaults to 'false;.
+/backup/@enabled::
+	If specified and set to 'false' or '0', it disables this host. It is a
+	nicer way to disable a host without renaming the file.
+	Optional, defaults to 'true;.
 
 /backup/host/@name::
 	The name or IP address of the client. If you need to backup the
