@@ -78,7 +78,7 @@ statistics = []
 default_mountoptions = { 'xfs' : 'ro,nouuid', 'snapshot' : 'ro', 'bind' : 'ro' }
 
 PROTOCOL = "1.4"
-VERSION = "1.4.1"
+VERSION = "1.4.2"
 VEBOSITY_BY_CLASS = {'DBG': 3, 'INFO': 2, 'WARN': 1, 'ERR': 0}
 
 ######################################################################
