@@ -107,6 +107,12 @@ id %{name} >/dev/null 2>&1 || \
 %doc samples/sample.backup
 
 %changelog
+* Sun Jun  2 2013 Frank Crawford <frank@crawford.emu.id.au> 1.4.2-1
+  - Report setup errors in summary reports.
+  - Added a flag to disable a backup configuration file.
+  - Added new targets for building Debian source packages.
+  - A number of bug fixes for Python compatibility and other errors.
+
 * Sat Jan 19 2013 Frank Crawford <frank@crawford.emu.id.au> 1.4.1-1
   - A major rework of LVM snapshot handling.
   - Generate MIME emails with summary reports.

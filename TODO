@@ -2,7 +2,7 @@ Next release:
   * Add configure script + an INSTALL file
   * Test the sendmail delivery method
   * Add tests db dumps
-  * Avoid snapshotting snapshots
+  * Avoid snapshotting snapshots (DONE)
   * Don't snapshot a device if a snapshot is already present (Partially DONE)
   * Protect against multiple safekeep instance running at once (DONE)
   * Do not include fifos and sockets by default (DONE)
