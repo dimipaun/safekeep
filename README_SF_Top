@@ -19,23 +19,23 @@ Requirements
   * python
   * openssh
 
-Current Release 1.4.1 (19 Jan 2013)
+Current Release 1.4.2 (2 Jun 2013)
 ~~~~~~~~~~~~~~~
 Sources and binaries are available from the following locations:
 
-  - RedHat EL/CentOS 4,5,6 Fedora 8,9,10,11,12,13,14,15,16,17,18:
-  http://prdownloads.sourceforge.net/safekeep/safekeep-common-1.4.1-1.noarch.rpm
-  http://prdownloads.sourceforge.net/safekeep/safekeep-client-1.4.1-1.noarch.rpm
-  http://prdownloads.sourceforge.net/safekeep/safekeep-server-1.4.1-1.noarch.rpm
+  - RedHat EL/CentOS 4,5,6 Fedora 12,13,14,15,16,17,18,19:
+  http://prdownloads.sourceforge.net/safekeep/safekeep-common-1.4.2-1.noarch.rpm
+  http://prdownloads.sourceforge.net/safekeep/safekeep-client-1.4.2-1.noarch.rpm
+  http://prdownloads.sourceforge.net/safekeep/safekeep-server-1.4.2-1.noarch.rpm
  
-  - Ubuntu Dapper, Breezy, Hardy, Lucid, Maverick, Natty, Oneiric and Precise:
-  http://prdownloads.sourceforge.net/safekeep/safekeep-common_1.4.1_all.deb
-  http://prdownloads.sourceforge.net/safekeep/safekeep-client_1.4.1_all.deb
-  http://prdownloads.sourceforge.net/safekeep/safekeep-server_1.4.1_all.deb
+  - Ubuntu Lucid, Maverick, Natty, Oneiric, Precise, Quantal and Raring:
+  http://prdownloads.sourceforge.net/safekeep/safekeep-common_1.4.2_all.deb
+  http://prdownloads.sourceforge.net/safekeep/safekeep-client_1.4.2_all.deb
+  http://prdownloads.sourceforge.net/safekeep/safekeep-server_1.4.2_all.deb
 
   - Source:
-  http://prdownloads.sourceforge.net/safekeep/safekeep-1.4.1.tar.gz
-  http://prdownloads.sourceforge.net/safekeep/safekeep-1.4.1-1.src.rpm
+  http://prdownloads.sourceforge.net/safekeep/safekeep-1.4.2.tar.gz
+  http://prdownloads.sourceforge.net/safekeep/safekeep-1.4.2-1.src.rpm
 
 Current GPG Key
 ~~~~~~~~~~~~~~~
