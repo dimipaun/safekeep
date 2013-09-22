@@ -432,7 +432,14 @@ def send_notification(email, mode):
     if not logbuf: return
     email_to = email.get('to')
     if not email_to: return
-    info('Sending email to %s via %s' % (','.join(email_to), email.get('smtp', 'Local')))
+    if 'smtp' in email:
+        if 'port' in email['smtp']:
+            portstr  = ':%d' % email['smtp']['port']
+        else:
+            portstr = ''
+        info('Sending email to %s via %s%s' % (','.join(email_to), email['smtp'].get('server', 'Local'), portstr))
+    else:
+        info('Sending email to %s via %s' % (','.join(email_to), 'Local'))
     hostname = socket.getfqdn()
     if 'from' in email:
         email_from = email['from']
@@ -459,7 +466,7 @@ def send_notification(email, mode):
                '\r\n' + '\r\n'.join(logbuf) + '\r\n' + \
                '\r\n--safebounder001--\r\n'
     if 'smtp' in email:
-        server = smtplib.SMTP(email['smtp'])
+        server = smtplib.SMTP(email['smtp'].get('server'), email['smtp'].get('port'))
         server.sendmail(email_from, email_to, msg)
         server.quit()
     else:
@@ -2160,7 +2167,18 @@ def main():
                     if props[prop].lower() in ('true', 'yes', 1):
                         email['summary'] = props[prop]
                 else:
-                    email[prop.split('.')[1]] = props[prop]
+                    proplist = prop.split('.')
+                    if len(proplist) > 2:
+                        if proplist[1] not in email: email[proplist[1]] = {}
+                        if prop == 'email.smtp.port':
+                            val = get_int(prop)
+                            if not val or val <= 0:
+                                error('CONFIG ERROR: invalid email.smtp.port value: %s: must be a postive numeric value' % props[prop])
+                            email[proplist[1]][proplist[2]] = val
+                        else:
+                            email[proplist[1]][proplist[2]] = props[prop]
+                    else:
+                        email[proplist[1]] = props[prop]
         else:
             email = {}
         nice_def = get_int('nice.adjustment')

@@ -61,6 +61,11 @@ email.to::
 	the recipients of the logs. If not specified,
 	`safekeep` will not attempt to email the logs.
 
+email.smtp.port::
+	Specifies the port to use to connect to the SMTP server.
+	If not specified, `safekeep` will use the system default
+	value, normally port 25/tcp.
+
 email.smtp.server::
 	Specifies the SMTP server used for sending mails 
 	if the `email.to` specifies any recipients.
