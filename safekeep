@@ -1491,7 +1491,7 @@ def do_server_rdiff(cfg, bdir, nice, ionice, force):
     args.extend(['rdiff-backup'])
 
     if cfg['host']:
-        basessh = 'ssh'
+        basessh = 'ssh -oStrictHostKeyChecking=no'
         if cfg['port']: basessh += ' -p %s' % cfg['port']
         schema = '%s %s -i %s %%s rdiff-backup --server' % (basessh, verbosity_ssh, cfg['key_data'])
         args.extend(['--remote-schema', schema])
@@ -1872,7 +1872,7 @@ def do_keys(cfgs, ids, nice_rem, identity, status, dump, deploy):
         if dump:
             print output
 
-        basessh = 'ssh'
+        basessh = 'ssh -oStrictHostKeyChecking=no'
         if cfg['port']: basessh += ' -p %s' % cfg['port']
         if identity: basessh += ' -i %s' % (commands.mkarg(identity))
 
