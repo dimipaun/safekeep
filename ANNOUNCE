@@ -30,7 +30,7 @@ Sources and binaries are available from the following locations:
 
 The GPG Signing Key can be found in the following location:
 
-  http://prdownloads.sourceforge.net/safekeep/RPM-GPG-KEY-SafeKeep
+  https://raw.githubusercontent.com/dimipaun/safekeep/master/RPM-GPG-KEY-SafeKeep
 
 with fingerprint:
 
