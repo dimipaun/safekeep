@@ -1,16 +1,10 @@
 name        := safekeep
-timestamp   := $(shell LANG=C date)
-timestamp_svn := $(shell date -u -d '$(timestamp)' '+%Y%m%dT%H%MZ')
 version_num := $(shell grep 'VERSION *=' safekeep | sed s'/[^"]*"\([^"].*\)".*/\1/')
-version_ts  := $(shell date -u -d '$(timestamp)' '+%Y%m%d%H%M')
 version     := $(version_num)
 release     := 1
 releasename := $(name)-$(version)
-snapshotname:= $(name)-$(version).$(version_ts)
-tagname     := $(shell echo Release-$(releasename) | tr . _)
 dirname     := $(shell basename $(PWD))
 rpmroot     := $(shell grep '^%_topdir' ~/.rpmmacros 2>/dev/null | sed -e 's/^[^ \t]*[ \t]*//' -e 's/%/$$/g')
-svnroot     := $(shell LANG=C svn info 2>/dev/null | grep 'Root:' | cut -d: -f 2-)
 deb_box	    := 192.168.3.202
 rpm_box     := 192.168.3.242
 SF_USER     := $(shell whoami)
@@ -35,9 +29,6 @@ help:
 	@echo "    docs        Builds all documentation formats"
 	@echo "    web         Updates the website to the latest documentation"
 	@echo "    build       Builds everything needed for an installation"
-	@echo "    tar         Builds snapshot source distribution"
-	@echo "    deb         Builds snapshot binary and source DEBs"
-	@echo "    rpm         Buidls snapshot binary and source RPMs"
 	@echo "    tag         Tags the source for release"
 	@echo "    dist        Builds release source distribution"
 	@echo "    distdeb     Builds release binary and source DEBs"
@@ -49,12 +40,8 @@ help:
 
 info:
 	@echo "Release Name   = $(releasename)"
-	@echo "Snapshot Name  = $(snapshotname)"
 	@echo "Version        = $(version)"
-	@echo "Timestamp      = $(timestamp)"
-	@echo "Tag            = $(tagname)"
 	@echo "RPM Root       = $(rpmroot)"
-	@echo "SVN Root       = $(svnroot)"
 
 
 build: docs
@@ -64,10 +51,11 @@ release: check-info commit-release dist distrpm
 deploy: deploy-lattica deploy-sf
 
 commit-release:
-	svn ci -m "Release $(version) (tagged as $(tagname))"
+	git commit -a -m "Release $(version)"
 
 tag:
-	svn cp -m "Tag safekeep $(version)" . $(svnroot)/safekeep/tags/$(tagname)
+	git tag $(name)-$(version)
+	git push --tags
 
 check-info: info
 	@echo -n 'Is this information correct? (yes/No) '
@@ -75,7 +63,7 @@ check-info: info
 
 web: html
 	cp doc/*.html $(webroot)
-	cd  $(webroot); svn ci -m "Update man pages on website to latest as of $(timestamp)"
+	cd  $(webroot); svn ci -m "Update man pages on website to latest"
 
 docs: html man
 
@@ -94,9 +82,6 @@ man: $(DOC_MAN)
 
 $(DOC_HTML) $(DOC_MAN): doc/asciidoc.conf
 
-changelog:
-	svn log -v --xml -r HEAD:1 | svn2log.py -D 0 -u doc/users
-
 install:
 	install -d -m 755 "$(DESTDIR)/usr/bin/"
 	install -m 755 $(name) "$(DESTDIR)/usr/bin/"
@@ -110,27 +95,7 @@ install:
 	install -m 444 doc/$(name).conf.5 "$(DESTDIR)/usr/share/man/man5/"
 	install -m 444 doc/$(name).backup.5 "$(DESTDIR)/usr/share/man/man5/"
 
-tar:
-	svn export -r {'$(timestamp_svn)'} $(svnroot)/safekeep/trunk $(snapshotname)
-	cat $(snapshotname)/$(name).spec.in | sed 's/^%define version.*/%define version $(version).$(version_ts)/' > $(snapshotname)/$(name).spec
-	cat $(snapshotname)/debian/changelog.in | sed 's/^safekeep.*/safekeep ($(version).$(version_ts)) unstable; urgency=low/' > $(snapshotname)/debian/changelog
-	tar cz -f $(snapshotname).tar.gz $(snapshotname)
-	rm -rf $(snapshotname)
-
-deb-common: tar
-	tar xz -C /tmp -f $(snapshotname).tar.gz
-	rm -rf $(snapshotname).tar.gz
-
-deb: deb-common
-	cd /tmp/$(snapshotname) && debuild --check-dirname-regex 'safekeep(-.*)?'
-
-debsrc: deb-common
-	cd /tmp/$(snapshotname) && dpkg-buildpackage -S -us -uc -rfakeroot
-
-rpm: tar
-	rpmbuild -ta $(snapshotname).tar.gz
-	mv $(rpmroot)/SRPMS/$(snapshotname)-$(release)*.src.rpm .
-	mv $(rpmroot)/RPMS/noarch/$(name)-*-$(version).$(version_ts)-$(release)*.noarch.rpm .
+tar: $(releasedir)/$(releasename).tar.gz
 
 dist: $(releasedir)/$(releasename).tar.gz
 
@@ -167,16 +132,16 @@ dist-sign: distrpm-sign distdeb-sign
 dist-all: dist distdeb-remote fetch-debs distrpm-remote fetch-rpms dist-sign
 
 distdeb-remote:
-	ssh $(deb_box) 'cd ~/safekeep/safekeep; svn up; cd trunk; make distdeb-build'
+	ssh $(deb_box) 'cd ~/git/safekeep; git pull; make distdeb-build'
 
 fetch-debs:
-	scp $(deb_box):~/safekeep/safekeep/trunk/$(releasedir)/$(name)-*_$(version)_all.deb $(releasedir)
+	scp $(deb_box):~/git/safekeep/$(releasedir)/$(name)-*_$(version)_all.deb $(releasedir)
 
 distrpm-remote:
-	ssh $(rpm_box) 'cd ~/safekeep/safekeep; svn up; cd trunk; make distrpm-build'
+	ssh $(rpm_box) 'cd ~/git/safekeep; git pull; make distrpm-build'
 
 fetch-rpms:
-	scp $(rpm_box):~/safekeep/safekeep/trunk/$(releasedir)/$(name)-*$(version)-$(release).*.rpm $(releasedir)
+	scp $(rpm_box):~/git/safekeep/$(releasedir)/$(name)-*$(version)-$(release).*.rpm $(releasedir)
 
 deploy-lattica:
 	scp $(releasedir)/${name}{,-common,-client,-server}-${version}-*.rpm ${repo_srv}:${repo_dir}/upload
@@ -200,3 +165,4 @@ clean:
 	rm -f $(name).spec debian/changelog
 	rm -f doc/*.xml doc/*.html doc/*.[15]
 	rm -f safekeep-*[.]20[01][0-9][01][0-9][0-3][0-9][012][0-9][0-5][0-9]*
+
