@@ -1,32 +1,5 @@
-Introduction
-~~~~~~~~~~~~
-SafeKeep is a centralized and easy to use backup application that 
-combines the best features of a mirror and an incremental backup.
-It is build around rdiff-backup, a well-known backup utility,
-enhancing it with easy deployment, database dumps, as well as 
-LVM snapshot handling.
 
-For more information, visit the project's homepage:
-    http://safekeep.sourceforge.net/
-or contact us via email on our mailing list:
-    safekeep-devel@lists.sourceforge.net
-
-Requirements
-~~~~~~~~~~~~
-  * rdiff-backup
-  * asciidoc
-  * xmlto
-  * python
-  * openssh
-
-Install
-~~~~~~~
-It is recommended that you install the packaged version of SafeKeep,
-via the provided RPMs or DEBs.
-
-For more installation related notes, please see the INSTALL file.
-
-Full Test
+FULL TEST
 ~~~~~~~~~
 To run the full test simply invoke the target:
   $ make fulltest
@@ -54,7 +27,7 @@ prepare a few things in advance:
      (it needs rpmbuild(8)), in order to use the full test.
 
 
-Protocol
+PROTOCOL
 ~~~~~~~~
 The client/server protocol is versioned for forward/backward compatibility.
 The conversation starts with the server sending over it's protocol version,
