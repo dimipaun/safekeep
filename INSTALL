@@ -4,6 +4,14 @@ PACKAGE INSTALL
 It is highly recommended that you install the packaged version of 
 SafeKeep via the provided RPMs or DEBs.
 
+REQUIREMENTS
+~~~~~~~~~~~~
+  * rdiff-backup
+  * asciidoc
+  * xmlto
+  * python
+  * openssh
+
 
 SOURCE INSTALL
 ~~~~~~~~~~~~~~
