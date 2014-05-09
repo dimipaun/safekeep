@@ -6,6 +6,24 @@ Next release:
   * Don't snapshot a device if a snapshot is already present (Partially DONE)
   * Protect against multiple safekeep instance running at once (DONE)
   * Do not include fifos and sockets by default (DONE)
+  * Backup fails due to this:
+DBG: Do server main loop
+INFO: ------------------------------------------------------------------
+INFO: Server backup starting for client ajax
+dbg: Do client main loop
+dbg: Server versions:  1.2, 1.4.0
+dbg: Do client_side_script: step PRE-SETUP
+dbg: Do setup of ajax.lattica.com
+dbg: Doing DB dumps
+dbg: Run [ 'pg_dumpall'  '-U'  'postgres' >  '/var/lib/pgsql/backups/all_dbs']
+ERR: Server backup for client ajax: FAILED
+Traceback (most recent call last):
+  File "/usr/bin/safekeep", line 1294, in do_server
+    bdir = do_server_getanswer(cout)
+  File "/usr/bin/safekeep", line 1085, in do_server_getanswer
+    raise Exception('client died unexpectedly')
+Exception: client died unexpectedly
+
 
 Feedback from users:
   * Øyvind Skaar <os@opoint.no>: FreeBSD have snapshot capabilities
