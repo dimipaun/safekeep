@@ -496,7 +496,7 @@ def parse_prop_file(filename):
             props[key.strip()] = value.strip()
         else:
             props[line] = None
-    return props            
+    return props
 
 ######################################################################
 # Configuration file parser
@@ -656,6 +656,7 @@ def parse_config(backup_el, dflt_id):
     dumps = []
     snaps = []
     script = None
+    run_on = 'client'
     if len(setup_el) > 0:
         writable = parse_true_false(setup_el[0], 'writable')
         dump_els = setup_el[0].getElementsByTagName('dump')
@@ -673,12 +674,22 @@ def parse_config(backup_el, dflt_id):
                     script = 'client:' + script
                 else:
                     script = 'server:' + script
+            run_on_conf = script_el[0].getAttribute('run-on')
+            if run_on_conf is not None and len(run_on_conf.strip()) > 0:
+                # assert the values
+                if not run_on_conf in ['server', 'client']:
+                    raise ConfigException('Incorrect configuration value for run-on attribute: %s. '
+                            'Supported values are "server" and "client"' % run_on_conf)
+                run_on = run_on_conf
+
+            if run_on_conf == 'server' and script.startswith('client:'):
+                raise ConfigException('Incorrect combination: run-on="server" and client-side path of a script')
         elif len(script_el) > 1:
             raise ConfigException('Can not have more than one setup script element')
 
     data_options = {}
     data_el = backup_el.getElementsByTagName('data')
-    
+
     if len(data_el) == 1:
         data_options = parse_data_attributes(data_el[0])
         child_els = data_el[0].childNodes
@@ -701,7 +712,7 @@ def parse_config(backup_el, dflt_id):
 
     return { 'id': cfg_id, 'host' : host, 'port' : port, 'nice' : nice, 'user' : user, 'key_ctrl' : key_ctrl, 'key_data' : key_data,
              'dir' : repo_dir, 'retention' : retention, 'dumps' : dumps, 'snaps' : snaps, 'script' : script, 'mount_writable' : writable,
-             'cludes' : cludes, 'data_options' : data_options, 'options' : options, 'bw' : bw}
+             'cludes' : cludes, 'data_options' : data_options, 'options' : options, 'bw' : bw, 'run_on': run_on}
 
 def parse_locs(cfglocs):
     cfgfiles = []
@@ -762,22 +773,34 @@ def check_script_permissions(script):
 
     return None
 
-def client_side_script(step, cfg, bdir):
-    debug('Do client_side_script: step %s' % step)
+
+def _call_script(step, cfg, bdir, mode):
+    debug('Do %s_side_script: step %s' % (mode, step))
 
     ret = None
     script = cfg['script']
 
     if script:
-        debug('client_side_script: script = %s' % script)
+        # XXX a not so elegant branching
+        script = cfg['script'].split(':', 1)[1] if mode == 'server' else script
+        debug('%s_side_script: script = %s' % (mode, script))
         if os.path.exists(script):
             ret = check_script_permissions(script)
             if not ret:
                 ret = spawn([script, step, cfg['id'], bdir])
         else:
-            debug('client_side_script: %s not found' % script)
+            debug('%s_side_script: %s not found' % (mode, script))
 
     return ret
+
+
+def client_side_script(step, cfg, bdir):
+    return _call_script(step, cfg, bdir, 'client')
+
+
+def server_side_script(step, cfg, bdir):
+    return _call_script(step, cfg, bdir, 'server')
+
 
 def do_client_dbdump(cfg):
     debug('Doing DB dumps')
@@ -1307,7 +1330,7 @@ def do_client():
                         send('OK')
                 elif line.startswith('CONFIG'):
                     cfg = do_client_config(line)
-                    if cfg['script']:
+                    if cfg['script'] and cfg['run_on'] == 'client':
                         if ':' in cfg['script']:
                             (script_loc, script) = cfg['script'].split(':', 1)
                         else:
@@ -1558,7 +1581,7 @@ def get_protocol_info(protocol, is_client):
     (major_s, minor_s) = protocol.strip().split('.')
     major = int(major_s)
     minor = int(minor_s)
-    
+
     caps = []
     if major == 1:
         if minor >= 3:
@@ -1653,7 +1676,12 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
             cin.flush()
             errs, remote_script = do_server_getanswer(cout, cl_status)
             setup_errs += errs
-            if cfg['script'] and cfg['script'].startswith('server:') and remote_script:
+            # run a server-side hook as the first thing
+            if cfg['script'] and cfg['run_on'] == 'server':
+                server_side_script('STARTUP', cfg, cfg['dir'])
+
+            if cfg['script'] and cfg['script'].startswith('server:')\
+                    and remote_script and cfg['run_on'] == 'client':
                 local_script = cfg['script'].split(':', 1)[1]
                 if os.path.isfile(local_script):
                     ret = check_script_permissions(local_script)
