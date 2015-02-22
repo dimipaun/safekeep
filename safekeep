@@ -72,6 +72,8 @@ current_pid = os.getpid()
 default_bandwidth = {}
 default_snapshot = '20%FREE'
 statistics = []
+error_counter = 0
+warning_counter = 0
 # Default mount options, overridden elsewhere:
 # Key is a file system type, or 'snapshot' for default for snapshot mount
 # or 'bind' for a bind mount (check mount for details)
@@ -288,6 +290,8 @@ def print_stats_table_server_text(stats):
 def print_stats_table_server_html(stats):
     if (stats.get('state') == 'OK'):
         color = ' bgcolor="#81F7BE"'
+    elif 'WARNING' in stats.get('state'):
+        color = ' bgcolor="#FFCC66"'
     else:
         color = ' bgcolor="#F78181"'
     result = '<tr' + color + '><td>' + stats['id'] + '</td><td>' + stats['state'] + '</td>'
@@ -344,7 +348,7 @@ def stats_to_table_server_html():
               '</tr>']
 
     for stats in statistics:
-        result.append(print_stats_table_server_html(stats))
+        result.append(print_stats_table_server_html(stats) + '\r\n')
 
     result.append('</table></html>')
     return result
@@ -406,7 +410,7 @@ def stats_to_table_list_html():
               '</tr>']
 
     for stats in statistics:
-        result.append(print_stats_table_list_html(stats))
+        result.append(print_stats_table_list_html(stats) + '\r\n')
 
     result.append('</table></html>')
     return result
@@ -428,7 +432,7 @@ def stats_to_table(mode, fmt):
     return result
 
 def send_notification(email, mode):
-    global logbuf
+    global logbuf, error_counter, warning_counter
     if not logbuf: return
     email_to = email.get('to')
     if not email_to: return
@@ -445,9 +449,17 @@ def send_notification(email, mode):
         email_from = email['from']
     else:
         email_from = 'SafeKeep@' + hostname
+
+    if error_counter > 0:
+        global_status = '%s errors' % error_counter
+    elif warning_counter > 0:
+        global_status = '%s warnings' % warning_counter
+    else:
+        global_status = 'OK'
+
     msg = 'From: ' + email_from + '\r\n' + \
           'To: ' + ', '.join(email_to) + '\r\n' + \
-          'Subject: SafeKeep results for ' + hostname + '\r\n' + \
+          'Subject: SafeKeep ' + global_status + ' for ' + hostname + '\r\n' + \
           'Date: ' + time.strftime("%a, %d %b %Y %H:%M:%S %z") + '\r\n'
     if 'format' not in email:
         msg += '\r\n' + '\r\n'.join(logbuf) + '\r\n'
@@ -888,7 +900,7 @@ def do_lvremove(device):
     if group == 'mapper':
         lvmdev = device
     else:
-        lvmdev = '/dev/mapper/%s-%s' % (group, volume.replace('-', '--'))
+        lvmdev = '/dev/mapper/%s-%s' % (group.replace('-', '--'), volume.replace('-', '--'))
     if os.path.exists(lvmdev):
         for i in range(1, 10):
             ret = spawn(['sync'])
@@ -1587,7 +1599,7 @@ def do_server_compat(client_versions):
     return compat
 
 def do_server(cfgs, ids, nice, ionice, force, cleanup):
-    global statistics, client_defaults
+    global statistics, client_defaults, error_counter, warning_counter
     debug("Do server main loop")
     output_done = False
     for cfg in cfgs.itervalues():
@@ -1712,11 +1724,9 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
                             errs += info_file(os.path.join(rdiff_logdir, lfn), None, stats)
                             stats['state'] = 'OK'
                             stats['Errors'] = str(errs + setup_errs)
-                            statistics.append(stats)
                 else:
                     warn('Log dir does not exist.')
                     stats['state'] = 'MISSING'
-                    statistics.append(stats)
 
             cin.write('CLEANUP %s\n' % bdir)
             cin.flush()
@@ -1725,8 +1735,12 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
             if (errs + setup_errs) == 0:
                 info('Server backup for client %s: OK' % cfg_id)
             elif setup_errs == 0:
+                warning_counter += 1
+                stats['state'] = 'WARNING'
                 info('Server backup for client %s: OK (%d WARNINGS)' % (cfg_id, errs))
             else:
+                warning_counter += 1
+                stats['state'] = 'SETUP WARNING'
                 info('Server backup for client %s: OK (%d WARNINGS/%d SETUP WARNINGS)' % (cfg_id, errs, setup_errs))
 
         except Exception, ex:
@@ -1738,8 +1752,10 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
                     if ex.traceback and verbosity_level > 2: error(ex.traceback)
                 else:
                     error('Server backup for client %s: FAILED' % cfg_id, ex)
+            error_counter += 1
             stats['state'] = 'FAILED'
-            statistics.append(stats)
+
+        statistics.append(stats)
 
         # Shutdown client
         if cout: cout.close()
