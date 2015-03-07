@@ -1602,7 +1602,7 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
     global statistics, client_defaults, error_counter, warning_counter
     debug("Do server main loop")
     output_done = False
-    for cfg in cfgs.itervalues():
+    for cfg in sorted(cfgs.itervalues(), key=lambda cfg: cfg['id']):
         cfg_id = cfg['id']
         if ids and cfg_id not in ids: continue
         info('------------------------------------------------------------------')
@@ -1773,7 +1773,7 @@ def do_list(cfgs, ids, list_type, list_date, list_parsable):
     global statistics
     debug("Do server listing main loop")
     output_done = False
-    for cfg in cfgs.itervalues():
+    for cfg in sorted(cfgs.itervalues(), key=lambda cfg: cfg['id']):
         cfg_id = cfg['id']
         if ids and cfg_id not in ids: continue
         stats = {}
@@ -1832,7 +1832,7 @@ def do_list(cfgs, ids, list_type, list_date, list_parsable):
     debug('Server listing done')
 
 def do_keys(cfgs, ids, nice_rem, identity, status, dump, deploy):
-    for cfg in cfgs.itervalues():
+    for cfg in sorted(cfgs.itervalues(), key=lambda cfg: cfg['id']):
         cfg_id = cfg['id']
         if ids and cfg_id not in ids: continue
         info('Handling keys for client: %s' % cfg_id)
