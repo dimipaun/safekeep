@@ -290,6 +290,8 @@ def print_stats_table_server_text(stats):
 def print_stats_table_server_html(stats):
     if (stats.get('state') == 'OK'):
         color = ' bgcolor="#81F7BE"'
+    elif 'CLEAN' in stats.get('state'):
+        color = ' bgcolor="#66CCFF"'
     elif 'WARNING' in stats.get('state'):
         color = ' bgcolor="#FFCC66"'
     else:
@@ -1364,6 +1366,7 @@ def do_client():
                         else:
                             send('OK')
                     else:
+                        script_file = None
                         cfg['script'] = None
                         if send_status:
                             send('OK 0')
@@ -1691,6 +1694,7 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
                 setup_errs += (do_server_getanswer(cout, cl_status))[0]
                 bdir = '/'  # Fake directory for the rest of the cleanup
                 errs = 0
+                stats['state'] = 'CLEAN'
             else:
                 cin.write('SETUP\n')
                 cin.flush()
@@ -1746,6 +1750,11 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
         except Exception, ex:
             if cleanup:
                 info('Client-side cleanup for client %s: FAILED' % cfg_id)
+                if isinstance(ex, ClientException):
+                    if ex.traceback and verbosity_level > 2:
+                        info(ex.traceback)
+                    else:
+                        info('Reason: %s' % (ex or ''))
             else:
                 if isinstance(ex, ClientException):
                     error('Client %s: FAILED due to: %s' % (cfg_id, ex or ''))
