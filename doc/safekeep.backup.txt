@@ -29,8 +29,8 @@ The full set of supported elements and attributes looks as follows:
 
   <!-- the client backup host, the user and keys for access -->
   <host name="myhost" user="root" nice="10"
-        key-ctrl="/home/jdoe/.ssh/backup_id_dsa" 
-        key-data="/home/jdoe/.ssh/backup2_id_dsa" />
+        key-ctrl="/home/jdoe/.ssh/backup_id_rsa" 
+        key-data="/home/jdoe/.ssh/backup2_id_rsa" />
 
   <!-- rate limit bandwidth (kB/s) on a client basis -->
   <bandwidth overall="80" download="50" upload="50" />
