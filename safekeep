@@ -1901,7 +1901,7 @@ def do_keys(cfgs, ids, nice_rem, identity, status, dump, deploy):
                     break
                 if deploy:
                     info('%s: Key do not exist, generating it now: %s' % (cfg_id, privatekeyfile))
-                    gencmd = 'ssh-keygen -q -b 1024 -t dsa -N "" -C "SafeKeep auto generated key at %s@%s" -f %s' % (backup_user, os.uname()[1], privatekeyfile)
+                    gencmd = 'ssh-keygen -q -b 4096 -t rsa -N "" -C "SafeKeep auto generated key at %s@%s" -f %s' % (backup_user, os.uname()[1], privatekeyfile)
                     if backup_user != work_user:
                         gencmd = 'su -s /bin/sh -c %s - %s' % (commands.mkarg(gencmd), backup_user)
                     debug(gencmd)
@@ -1968,7 +1968,7 @@ def parse_authorized_keys(keystext):
             warn('SSH Protocol 1 keys are ignored: %s' % line)
             continue
         opts = ''
-        if line[0:7] not in ('ssh-dss', 'ssh-rsa'):
+        if line[0:7] not in ('ssh-dss', 'ssh-rsa', 'ssh-ed25519'):
             in_str = False
             in_esc = False
             for i, c in enumerate(line):
@@ -1998,7 +1998,7 @@ def parse_authorized_keys(keystext):
             continue
 
         ssh_type = parts[0]
-        if ssh_type not in ('ssh-dss', 'ssh-rsa'):
+        if ssh_type not in ('ssh-dss', 'ssh-rsa', 'ssh-ed25519'):
             error('Invalid key type "%s", skipping: %s' % (ssh_type, line))
             continue
 
