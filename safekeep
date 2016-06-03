@@ -20,6 +20,7 @@ import getopt, os, os.path, re, sys, fnmatch, stat, types
 import commands, tempfile, time, traceback
 import getpass, pwd, xml.dom.minidom
 import socket, smtplib, cStringIO
+import fcntl
 
 try:
     import subprocess
@@ -1641,6 +1642,7 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
         try:
             cin = None
             cout = None
+            fbm = None
             setup_errs = 0
             if cfg['host']:
                 if not os.path.isfile(cfg['key_ctrl']):
@@ -1656,6 +1658,16 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
                     raise Exception('Can not create data store dir: %s: %s' % (datadir, ex))
 
             rdiff_logdir = os.path.join(datadir, 'rdiff-backup-data')
+
+            backup_log = os.path.join(rdiff_logdir, 'backup.log')
+            if os.path.isfile(backup_log):
+                fbm = open(backup_log, 'a')
+                try:
+                    fcntl.flock(fbm.fileno(), fcntl.LOCK_EX|fcntl.LOCK_NB)
+                except IOError, ex:
+                    warn('Another backup or cleanup is in progress for client %s' % cfg_id)
+                    raise Exception('Another backup or cleanup is in progress')
+
             if cfg['retention'] and os.path.isdir(rdiff_logdir) and not cleanup:
                 do_server_data_cleanup(cfg)
 
@@ -1734,12 +1746,9 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
                 else:
                     rdiff_logpre = []
 
-                backup_log = os.path.join(rdiff_logdir, 'backup.log')
-                if os.path.isfile(backup_log):
+                if fbm:
                     backup_marker = '=== Backup session on %s ===' % time.asctime()
-                    fbm = open(backup_log, 'a')
                     fbm.write(backup_marker + '\n')
-                    fbm.close()
                 else:
                     backup_marker = None
 
@@ -1795,6 +1804,7 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
         statistics.append(stats)
 
         # Shutdown client
+        if fbm: fbm.close()
         if cout: cout.close()
         if cin: cin.close()
 
