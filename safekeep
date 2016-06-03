@@ -930,9 +930,11 @@ def do_lvremove(device):
     if os.path.exists(lvmdev):
         for i in range(1, 10):
             ret = spawn(['sync'])
-            ret = spawn(['dmsetup', 'remove', lvmdev])
-            ret = spawn(['dmsetup', 'remove', lvmdev + '-cow'])
             ret = spawn(['lvremove', '--force', device])
+            if ret:
+                ret = spawn(['dmsetup', 'remove', lvmdev])
+                ret = spawn(['dmsetup', 'remove', lvmdev + '-cow'])
+                ret = spawn(['lvremove', '--force', device])
             if not ret:
                 break
     else:
