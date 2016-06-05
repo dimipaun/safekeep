@@ -125,7 +125,7 @@ bandwidth.upload::
 	This is the default bandwidth limit for upload across all clients.
 	If specified (with a value greater than 0) it will override
 	the value set in `bandwidth.overall` (refer to it for more
-	informatio). This value is optional.
+	information). This value is optional.
 
 snapshot.size::
 	This is the default size to be used for any snapshots without a
@@ -135,6 +135,21 @@ snapshot.size::
 	based on unallocated space (i.e. LVM2 `%FREE'), which is different
 	to the interpretation within the `<snapshot>` option.
 	This value is optional, it defaults to '20%FREE'.
+
+ssh.keygen.type::
+	The SSH private key type to generate when 'safekeep --keys' is used.
+	This is passed to 'ssh-keygen(1)' and not all valid types may be
+	accepted on all systems.
+	Only SSH protocol version 2 keys are accepted.
+	This value is optional, it defaults to 'rsa'.
+
+ssh.keygen.bits::
+	Specifies the number of bits in the SSH private key to create.
+	This is passed to 'ssh-keygen(1)' and only certain sizes are
+	accepted, depending of the key type.
+	If no value is required, e.g. for 'ecdsa' key type, give this
+	option with no corresponding bit size.
+	This value is optional, it defaults to '4096'.
 
 NOTES
 -----
@@ -158,9 +173,10 @@ FILES
 
 SEE ALSO
 --------
-safekeep(1), safekeep.backup(5), rdiff-backup(1), trickle(1), lvcreate(8)
+safekeep(1), safekeep.backup(5), rdiff-backup(1), trickle(1), lvcreate(8),
+ssh-keygen(1)
 
 AUTHOR
 ------
-This man page was written by Dimi Paun <dimi@lattica.com>.
+This man page was originally written by Dimi Paun <dimi@lattica.com>.
 
