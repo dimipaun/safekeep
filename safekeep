@@ -75,6 +75,10 @@ default_snapshot = '20%FREE'
 statistics = []
 error_counter = 0
 warning_counter = 0
+ssh_keygen_type = 'rsa'
+ssh_keygen_bits = 4096
+SSH_TYPES = [ 'dsa', 'rsa', 'ed25519', 'ecdsa' ]
+SSH_KEY_TYPES = [ 'ssh-dss', 'ssh-rsa', 'ssh-ed25519', 'ecdsa-sha2-nistp256', 'ecdsa-sha2-nistp384', 'ecdsa-sha2-nistp521' ]
 # Default mount options, overridden elsewhere:
 # Key is a file system type, or 'snapshot' for default for snapshot mount
 # or 'bind' for a bind mount (check mount for details)
@@ -525,11 +529,13 @@ class ConfigException (Exception):
 
 def parse_true_false(el, attr, default = None):
     true_false = el.getAttribute(attr).lower()
-    if true_false and not true_false in ('true', 'false'):
+    if true_false and not true_false in ('true', 'yes', '1', 'false', 'no', '0'):
         raise ConfigException('Option needs to be true or false: attr %s: value %s' % (attr, el.getAttribute(attr)))
-    if not true_false:
-        true_false = default
-    return true_false
+    if true_false in ('true', 'yes', '1'):
+        return 'true'
+    elif true_false in ('false', 'no', '0'):
+        return 'false'
+    return default
 
 def parse_dump(dump_el):
     dbtype = dump_el.getAttribute('type')
@@ -547,8 +553,12 @@ def parse_dump(dump_el):
     if not dbfile:
         raise ConfigException('You need to specify where the database should be dumped')
     cleanup = parse_true_false(dump_el, 'cleanup')
+    save_db_name = parse_true_false(dump_el, 'save-db-name')
+    if dbtype in ('postgres', 'postgresql', 'pgsql') and db and save_db_name == 'false':
+        warn('Database dump options: pgsql, save-db-name = false and dump all databases, are incompatible: save-db-name ignored')
+        save_db_name = None
     return { 'type' : dbtype, 'db' : db, 'user' : user, 'dbuser' : dbuser, 'dbpasswd': dbpasswd,
-             'opts' : opts, 'file' : dbfile, 'cleanup' : cleanup }
+             'opts' : opts, 'file' : dbfile, 'cleanup' : cleanup, 'save-db-name' : save_db_name }
 
 def parse_snap(snap_el):
     global default_snapshot
@@ -603,8 +613,7 @@ def parse_config(backup_el, dflt_id):
     cfg_id = backup_el.getAttribute('id')
     if not cfg_id: cfg_id = dflt_id
 
-    enabled = backup_el.getAttribute('enabled')
-    if enabled == 'false' or enabled == '0':
+    if parse_true_false(backup_el, 'enabled') == 'false':
         return None
 
     host_el = backup_el.getElementsByTagName('host')
@@ -827,7 +836,8 @@ def do_client_dbdump(cfg):
         if dbtype in ('postgres', 'postgresql', 'pgsql'):
             if dump['db']:
                 args = ['pg_dump']
-                args.extend(['-C'])
+                if dump['save-db-name'] != 'false':
+                    args.extend(['-C'])
             else:
                 args = ['pg_dumpall']
             if dump['dbuser']:
@@ -848,10 +858,16 @@ def do_client_dbdump(cfg):
             if dump['dbpasswd']:
                 args.extend(['-p%s' % dump['dbpasswd']])
             if not dump['db']:
-                args.extend(['-A'])
+                if dump['save-db-name'] == 'false':
+                    args.extend(['-n', '-A'])
+                else:
+                    args.extend(['-A'])
             args.extend(opts)
             if dump['db']:
-                args.extend([dump['db']])
+                if dump['save-db-name'] == 'true':
+                    args.extend(['-B', dump['db']])
+                else:
+                    args.extend([dump['db']])
 
         else:
             warn('Invalid database type: ' + dbtype)
@@ -1553,7 +1569,7 @@ def do_server_rdiff(cfg, bdir, nice, ionice, force):
     for option in cfg['options']:
         if 'special-files' in option:
             if 'include' in option['special-files']:
-                if 'true' == option['special-files']['include'].lower():
+                if option['special-files']['include'].lower() in ('true', 'yes', '1'):
                     special_files = ['--include-special-files']
 
         # Note if we ever add other backends this section should only be run
@@ -1707,7 +1723,9 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
             setup_errs += errs
             # run a server-side hook as the first thing
             if cfg['script'] and cfg['run_on'] == 'server':
-                server_side_script('STARTUP', cfg, cfg['dir'])
+                ret = server_side_script('STARTUP', cfg, cfg['dir'])
+                error('Server-side setup script failed: %s' % ret)
+                raise Exception('Server-side setup script failed: %s' % ret)
 
             if cfg['script'] and cfg['script'].startswith('server:')\
                     and remote_script and cfg['run_on'] == 'client':
@@ -1737,11 +1755,22 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
                 bdir = '/'  # Fake directory for the rest of the cleanup
                 errs = 0
                 stats['state'] = 'CLEAN'
+                # run a server-side hook following client SCRUB
+                if cfg['script'] and cfg['run_on'] == 'server':
+                    setup_errs += server_side_script('POST-SCRUB', cfg, bdir)
             else:
+                # run a server-side hook prior to client SETUP
+                if cfg['script'] and cfg['run_on'] == 'server':
+                    setup_errs += server_side_script('PRE-SETUP', cfg, cfg['dir'])
+
                 cin.write('SETUP\n')
                 cin.flush()
                 errs, bdir = do_server_getanswer(cout, cl_status)
                 setup_errs += errs
+
+                # run a server-side hook following client SETUP
+                if cfg['script'] and cfg['run_on'] == 'server':
+                    setup_errs += server_side_script('POST-SETUP', cfg, cfg['dir'])
 
                 if os.path.isdir(rdiff_logdir):
                     rdiff_logpre = os.listdir(rdiff_logdir)
@@ -1775,6 +1804,10 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
             cin.write('CLEANUP %s\n' % bdir)
             cin.flush()
             setup_errs += (do_server_getanswer(cout, cl_status))[0]
+
+            # run a server-side hook as the last thing
+            if cfg['script'] and cfg['run_on'] == 'server':
+                setup_errs += server_side_script('POST-BACKUP', cfg, cfg['dir'])
 
             if (errs + setup_errs) == 0:
                 info('Server backup for client %s: OK' % cfg_id)
@@ -1915,7 +1948,11 @@ def do_keys(cfgs, ids, nice_rem, identity, status, dump, deploy):
                     break
                 if deploy:
                     info('%s: Key do not exist, generating it now: %s' % (cfg_id, privatekeyfile))
-                    gencmd = 'ssh-keygen -q -b 4096 -t rsa -N "" -C "SafeKeep auto generated key at %s@%s" -f %s' % (backup_user, os.uname()[1], privatekeyfile)
+                    if ssh_keygen_bits:
+                        keygen_bits = '-b %d' % ssh_keygen_bits
+                    else:
+                        keygen_bits = ''
+                    gencmd = 'ssh-keygen -q %s -t %s -N "" -C "SafeKeep auto generated key at %s@%s" -f %s' % (keygen_bits, ssh_keygen_type, backup_user, os.uname()[1], privatekeyfile)
                     if backup_user != work_user:
                         gencmd = 'su -s /bin/sh -c %s - %s' % (commands.mkarg(gencmd), backup_user)
                     debug(gencmd)
@@ -1982,7 +2019,7 @@ def parse_authorized_keys(keystext):
             warn('SSH Protocol 1 keys are ignored: %s' % line)
             continue
         opts = ''
-        if line[0:7] not in ('ssh-dss', 'ssh-rsa', 'ssh-ed25519'):
+        if line.split(None,1)[0] not in SSH_KEY_TYPES:
             in_str = False
             in_esc = False
             for i, c in enumerate(line):
@@ -2012,7 +2049,7 @@ def parse_authorized_keys(keystext):
             continue
 
         ssh_type = parts[0]
-        if ssh_type not in ('ssh-dss', 'ssh-rsa', 'ssh-ed25519'):
+        if ssh_type not in SSH_KEY_TYPES:
             error('Invalid key type "%s", skipping: %s' % (ssh_type, line))
             continue
 
@@ -2231,7 +2268,7 @@ def main():
                         error('CONFIG ERROR: invalid email format type: %s' % email['format'])
                         sys.exit(2)
                 elif prop == 'email.summary':
-                    if props[prop].lower() in ('true', 'yes', 1):
+                    if props[prop].lower() in ('true', 'yes', '1'):
                         email['summary'] = props[prop]
                 else:
                     proplist = prop.split('.')
@@ -2267,6 +2304,25 @@ def main():
             if default_snapshot.endswith('%'):
                 default_snapshot += 'FREE'
             client_defaults.append('snapshot.size=%s' % default_snapshot)
+
+        global ssh_keygen_type, ssh_keygen_bits
+        if 'ssh.keygen.type' in props:
+            ssh_keygen_type = props['ssh.keygen.type']
+            if ssh_keygen_type not in SSH_TYPES:
+                error('CONFIG ERROR: invalid ssh.keygen.type: %s' % props['ssh.keygen.type'])
+                sys.exit(2)
+        if 'ssh.keygen.bits' in props:
+            if props['ssh.keygen.bits']:
+                try:
+                    ssh_keygen_bits = get_int('ssh.keygen.bits')
+                except:
+                    ssh_keygen_bits = -1
+                if ssh_keygen_bits <= 0:
+                    error('CONFIG ERROR: invalid ssh.keygen.bit value: %s' % props['ssh.keygen.bits'])
+                    sys.exit(2)
+            else:
+                # For cases where no bit size is required
+                ssh_keygen_bits = 0
 
         if len(cfglocs) == 0: 
             locs = os.path.join(os.path.dirname(cfgfile), 'backup.d')

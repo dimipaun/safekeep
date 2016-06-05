@@ -86,7 +86,7 @@ are separated by '/', attributes are introduced by '@':
 /backup/@enabled::
 	If specified and set to 'false' or '0', it disables this host. It is a
 	nicer way to disable a host without renaming the file.
-	Optional, defaults to 'true;.
+	Optional, defaults to 'true'.
 
 /backup/host/@name::
 	The name or IP address of the client. If you need to backup the
@@ -176,12 +176,12 @@ are separated by '/', attributes are introduced by '@':
 	Optional, defaults to empty (unlimited retention).
 
 /backup/options/special-files/@include::
-       NOTE: THIS OPTION HAS BEEN DEPRECATED.  See data attributes below.
+       *NOTE: THIS OPTION HAS BEEN DEPRECATED.*  See data attributes below.
        One of "true" or "false". If "true", the dump file will
        include all special files, including device files, fifo files and
        socket files.
-       Optional, defaults to "false". 
-       *NOTE*: specification of no options is equivalent to false, but the
+       Optional, defaults to 'false'. 
+       *NOTE*: Specification of no options is equivalent to false, but the
        inclusion of other options may cause the underlying backup defaults
        to be use.
 
@@ -207,6 +207,17 @@ are separated by '/', attributes are introduced by '@':
 	Name of the database to dump. If not specified, it defaults
 	to all databases maintained in the RDBMS specified by `type`.
 	Optional, defaults to all databases.
+
+/backup/setup/dump/@save-db-name::
+	Specify if CREATE DATABASE instructions are included in database
+	dumps.  If the option is not specified then the result defaults
+	to what is natural for the default database dump function.
+	If the option is "true" then CREATE DATABASE are added in all cases.
+	If the option is "false" then no CREATE DATABASE statement is added.
+	*NOTE*: For Postgres it is not possible to suppress the CREATE
+	DATABASE statement when dumping all databases, i.e. no single
+	database named, in which case this option is ignored.
+	Optional, defaults to not set.
 
 /backup/setup/dump/@dbuser::
 	Name of the database user to use while doing the dump. 
@@ -244,7 +255,7 @@ are separated by '/', attributes are introduced by '@':
 	It is usually futile to delete it, since it will be created
 	for each backup, and hence you will need to have the space
 	available.   
-	Optional, defaults to "false". 
+	Optional, defaults to 'false'. 
 
 /backup/setup/snapshot/@device::
 	The path (device location) to the client LVM volume to snapshot
@@ -287,25 +298,30 @@ are separated by '/', attributes are introduced by '@':
 	Optional for a `<snapshot>` element.
 
 /backup/setup/script/@path::
-	Execute the script specified path on the client at certain steps
-	of the backup process.
+	Execute the script specified path on the client or server at
+	certain steps of the backup process.
 	This script is executed with three arguments:
 	- Backup id (/backup/@id)
 	- Backup step
 	- Backup root directory (valid after creation of a snapshot)
-	The `location` optionally consists of an optional `host` and
-	a mandatory `path`, separated by a ":", where the host part is
-	either "client" or "server".  If no host part is specified then
-	it is first looked for on the client, and if not found, then is
-	looked for on the server.  If it not found on either, then a
-	warning is raised.
-	See the `CLIENT SCRIPT` section for more information.
+	For client-side scripts, the `location` optionally consists of an
+	optional `host` and a mandatory `path`, separated by a ":", where
+	the host part is either "client" or "server".  If no host part is
+	specified then it is first looked for on the client, and if not
+	found, then is looked for on the server.  If it not found on
+	either, then a warning is raised.
+	Only one `<script>` element may be specified.
+	See the `CLIENT AND SERVER SCRIPTS` section for more information.
 	Mandatory for a `<script>` element.
+
+/backup/setup/script/@run-on::
+	Execute the script on the "server" or the "client".
+	Optional, defaults to 'client'.
 
 /backup/data/@exclude-devices::
        One of "true" or "false". If "true", the dump file will
        exclude all device files.
-       Optional, defaults to "false". 
+       Optional, defaults to 'false'. 
        *NOTE*: specification of no attributes is equivalent to false, but the
        inclusion of other options may cause the underlying backup defaults
        to be use.
@@ -313,7 +329,7 @@ are separated by '/', attributes are introduced by '@':
 /backup/data/@exclude-fifos::
        One of "true" or "false". If "true", the dump file will
        exclude all fifos.
-       Optional, defaults to "false". 
+       Optional, defaults to 'false'. 
        *NOTE*: specification of no attributes is equivalent to false, but the
        inclusion of other options may cause the underlying backup defaults
        to be use.
@@ -321,7 +337,7 @@ are separated by '/', attributes are introduced by '@':
 /backup/data/@exclude-sockets::
        One of "true" or "false". If "true", the dump file will
        exclude all sockets.
-       Optional, defaults to "false". 
+       Optional, defaults to 'false'. 
        *NOTE*: specification of no attribute is equivalent to false, but the
        inclusion of other options may cause the underlying backup defaults
        to be use.
@@ -382,19 +398,25 @@ as if that file does not exist in the source directory.
 For more information on file selection semantics, please see
 `rdiff-backup(1)`.
 
-CLIENT SCRIPT
--------------
+CLIENT AND SCRIPTS
+------------------
 `safekeep(1)` support the optional execution of a script or program
-on the client system at different steps during execution of the backup.
+on the client or server systems at different steps during execution of
+the backup.
 
-The script may be located on either the server or the client.  If it is
-located on the server, then the file is copied to the client into a
-temporary directory before execution.  Note that this directory is located
-where ever the system normally creates temporary files, and it is possible
-that the execution of scripts are disallowed.  In that case it is recommended
-that a client based script is used.  In addition, the script is copied from
-the server on a line by line basis, and so it is not suitable to pass binary
-files.
+Currently only a single script, either client-side or server-side can
+be specified for a client.
+
+For client-side scripts the script may be located on either the server or
+the client.  If it is located on the server, then the file is copied to
+the client into a temporary directory before execution.  Note that this
+directory is located where ever the system normally creates temporary
+files, and it is possible that the execution of scripts are disallowed.
+In that case it is recommended that a client based script is used.
+In addition, the script is copied from the server on a line by line basis,
+and so it is not suitable to pass binary files.
+
+For server-side scripts the script must be located on the server.
 
 Note: specification of a script which does not exist is not considered an
 error, and is treated as the same as not specifying a script.  However, if
@@ -402,11 +424,14 @@ the specified path does match a file or directory, the security tests listed
 below will occur.
 
 This script is executed with the following three arguments:
+
 - Safekeep step
 - Backup id
 - Backup root directory, which may be set during the creation of a snapshot.
 
-The steps currently defined and tokens passed, are:
+For both client-side and server-side scripts, the steps currently defined
+and tokens passed, are:
+
 - STARTUP - prior to any execution, however, if it exits with a non-zero
 status this constitutes an error and the backup is aborted.
 - PRE-SETUP - prior to running any setup steps being run.  A non-zero status
@@ -443,4 +468,4 @@ safekeep(1), safekeep.conf(5), rdiff-backup(1), lvcreate(8)
 
 AUTHOR
 ------
-This man page was written by Dimi Paun <dimi@lattica.com>.
+This man page was originally written by Dimi Paun <dimi@lattica.com>.
