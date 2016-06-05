@@ -176,7 +176,7 @@ are separated by '/', attributes are introduced by '@':
 	Optional, defaults to empty (unlimited retention).
 
 /backup/options/special-files/@include::
-       _NOTE: THIS OPTION HAS BEEN DEPRECATED._  See data attributes below.
+       *NOTE: THIS OPTION HAS BEEN DEPRECATED.*  See data attributes below.
        One of "true" or "false". If "true", the dump file will
        include all special files, including device files, fifo files and
        socket files.
@@ -424,11 +424,14 @@ the specified path does match a file or directory, the security tests listed
 below will occur.
 
 This script is executed with the following three arguments:
+
 - Safekeep step
 - Backup id
 - Backup root directory, which may be set during the creation of a snapshot.
 
-For client-side scripts, the steps currently defined and tokens passed, are:
+For both client-side and server-side scripts, the steps currently defined
+and tokens passed, are:
+
 - STARTUP - prior to any execution, however, if it exits with a non-zero
 status this constitutes an error and the backup is aborted.
 - PRE-SETUP - prior to running any setup steps being run.  A non-zero status
@@ -440,11 +443,6 @@ a warning, and execution continues.
 - POST-SCRUB - after execution of a server cleanup step, normally only seen
 after a backup failure.  A non-zero status is considered a warning, and
 execution continues.
-
-For server-side scripts, only the STARTUP step is currently defined and is
-run after a connection to the remote system is made but before any commands
-have been run.  A non-zero status is considered a warning, and execution
-continues.
 
 Due to security considerations, there are a number of checks made on this
 script prior to execution and failure of any of these steps will cause the

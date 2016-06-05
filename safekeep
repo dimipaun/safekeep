@@ -529,11 +529,13 @@ class ConfigException (Exception):
 
 def parse_true_false(el, attr, default = None):
     true_false = el.getAttribute(attr).lower()
-    if true_false and not true_false in ('true', 'false'):
+    if true_false and not true_false in ('true', 'yes', '1', 'false', 'no', '0'):
         raise ConfigException('Option needs to be true or false: attr %s: value %s' % (attr, el.getAttribute(attr)))
-    if not true_false:
-        true_false = default
-    return true_false
+    if true_false in ('true', 'yes', '1'):
+        return 'true'
+    elif true_false in ('false', 'no', '0'):
+        return 'false'
+    return default
 
 def parse_dump(dump_el):
     dbtype = dump_el.getAttribute('type')
@@ -611,8 +613,7 @@ def parse_config(backup_el, dflt_id):
     cfg_id = backup_el.getAttribute('id')
     if not cfg_id: cfg_id = dflt_id
 
-    enabled = backup_el.getAttribute('enabled')
-    if enabled == 'false' or enabled == '0':
+    if parse_true_false(backup_el, 'enabled') == 'false':
         return None
 
     host_el = backup_el.getElementsByTagName('host')
@@ -1568,7 +1569,7 @@ def do_server_rdiff(cfg, bdir, nice, ionice, force):
     for option in cfg['options']:
         if 'special-files' in option:
             if 'include' in option['special-files']:
-                if 'true' == option['special-files']['include'].lower():
+                if option['special-files']['include'].lower() in ('true', 'yes', '1'):
                     special_files = ['--include-special-files']
 
         # Note if we ever add other backends this section should only be run
@@ -1722,7 +1723,9 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
             setup_errs += errs
             # run a server-side hook as the first thing
             if cfg['script'] and cfg['run_on'] == 'server':
-                server_side_script('STARTUP', cfg, cfg['dir'])
+                ret = server_side_script('STARTUP', cfg, cfg['dir'])
+                error('Server-side setup script failed: %s' % ret)
+                raise Exception('Server-side setup script failed: %s' % ret)
 
             if cfg['script'] and cfg['script'].startswith('server:')\
                     and remote_script and cfg['run_on'] == 'client':
@@ -1752,11 +1755,22 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
                 bdir = '/'  # Fake directory for the rest of the cleanup
                 errs = 0
                 stats['state'] = 'CLEAN'
+                # run a server-side hook following client SCRUB
+                if cfg['script'] and cfg['run_on'] == 'server':
+                    setup_errs += server_side_script('POST-SCRUB', cfg, bdir)
             else:
+                # run a server-side hook prior to client SETUP
+                if cfg['script'] and cfg['run_on'] == 'server':
+                    setup_errs += server_side_script('PRE-SETUP', cfg, cfg['dir'])
+
                 cin.write('SETUP\n')
                 cin.flush()
                 errs, bdir = do_server_getanswer(cout, cl_status)
                 setup_errs += errs
+
+                # run a server-side hook following client SETUP
+                if cfg['script'] and cfg['run_on'] == 'server':
+                    setup_errs += server_side_script('POST-SETUP', cfg, cfg['dir'])
 
                 if os.path.isdir(rdiff_logdir):
                     rdiff_logpre = os.listdir(rdiff_logdir)
@@ -1790,6 +1804,10 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
             cin.write('CLEANUP %s\n' % bdir)
             cin.flush()
             setup_errs += (do_server_getanswer(cout, cl_status))[0]
+
+            # run a server-side hook as the last thing
+            if cfg['script'] and cfg['run_on'] == 'server':
+                setup_errs += server_side_script('POST-BACKUP', cfg, cfg['dir'])
 
             if (errs + setup_errs) == 0:
                 info('Server backup for client %s: OK' % cfg_id)
@@ -2250,7 +2268,7 @@ def main():
                         error('CONFIG ERROR: invalid email format type: %s' % email['format'])
                         sys.exit(2)
                 elif prop == 'email.summary':
-                    if props[prop].lower() in ('true', 'yes', 1):
+                    if props[prop].lower() in ('true', 'yes', '1'):
                         email['summary'] = props[prop]
                 else:
                     proplist = prop.split('.')
