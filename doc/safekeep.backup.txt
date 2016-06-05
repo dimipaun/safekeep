@@ -208,6 +208,17 @@ are separated by '/', attributes are introduced by '@':
 	to all databases maintained in the RDBMS specified by `type`.
 	Optional, defaults to all databases.
 
+/backup/setup/dump/@save-db-name::
+	Specify if CREATE DATABASE instructions are included in database
+	dumps.  If the option is not specified then the result defaults
+	to what is natural for the default database dump function.
+	If the option is 'true' then CREATE DATABASE are added in all cases.
+	If the option is 'false' then no CREATE DATABASE statement is added.
+	Note that for Postgres it is not possible to suppress the CREATE
+	DATABASE statement when dumping all databases, i.e. no single
+	database named.
+	Optional, defaults to not set.
+
 /backup/setup/dump/@dbuser::
 	Name of the database user to use while doing the dump. 
 	Optional, defaults to whatever the database determines

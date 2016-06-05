@@ -551,8 +551,12 @@ def parse_dump(dump_el):
     if not dbfile:
         raise ConfigException('You need to specify where the database should be dumped')
     cleanup = parse_true_false(dump_el, 'cleanup')
+    save_db_name = parse_true_false(dump_el, 'save-db-name')
+    if dbtype in ('postgres', 'postgresql', 'pgsql') and db and save_db_name == 'false':
+        warn('Database dump options: pgsql, save-db-name = false and dump all databases, are incompatible: save-db-name ignored')
+        save_db_name = None
     return { 'type' : dbtype, 'db' : db, 'user' : user, 'dbuser' : dbuser, 'dbpasswd': dbpasswd,
-             'opts' : opts, 'file' : dbfile, 'cleanup' : cleanup }
+             'opts' : opts, 'file' : dbfile, 'cleanup' : cleanup, 'save-db-name' : save_db_name }
 
 def parse_snap(snap_el):
     global default_snapshot
@@ -831,7 +835,8 @@ def do_client_dbdump(cfg):
         if dbtype in ('postgres', 'postgresql', 'pgsql'):
             if dump['db']:
                 args = ['pg_dump']
-                args.extend(['-C'])
+                if dump['save-db-name'] != 'false':
+                    args.extend(['-C'])
             else:
                 args = ['pg_dumpall']
             if dump['dbuser']:
@@ -852,10 +857,16 @@ def do_client_dbdump(cfg):
             if dump['dbpasswd']:
                 args.extend(['-p%s' % dump['dbpasswd']])
             if not dump['db']:
-                args.extend(['-A'])
+                if dump['save-db-name'] == 'false':
+                    args.extend(['-n', '-A'])
+                else:
+                    args.extend(['-A'])
             args.extend(opts)
             if dump['db']:
-                args.extend([dump['db']])
+                if dump['save-db-name'] == 'true':
+                    args.extend(['-B', dump['db']])
+                else:
+                    args.extend([dump['db']])
 
         else:
             warn('Invalid database type: ' + dbtype)
