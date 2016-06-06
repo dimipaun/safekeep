@@ -77,12 +77,12 @@ error_counter = 0
 warning_counter = 0
 ssh_keygen_type = 'rsa'
 ssh_keygen_bits = 4096
-SSH_TYPES = [ 'dsa', 'rsa', 'ed25519', 'ecdsa' ]
-SSH_KEY_TYPES = [ 'ssh-dss', 'ssh-rsa', 'ssh-ed25519', 'ecdsa-sha2-nistp256', 'ecdsa-sha2-nistp384', 'ecdsa-sha2-nistp521' ]
+SSH_TYPES = ['dsa', 'rsa', 'ed25519', 'ecdsa']
+SSH_KEY_TYPES = ['ssh-dss', 'ssh-rsa', 'ssh-ed25519', 'ecdsa-sha2-nistp256', 'ecdsa-sha2-nistp384', 'ecdsa-sha2-nistp521']
 # Default mount options, overridden elsewhere:
 # Key is a file system type, or 'snapshot' for default for snapshot mount
 # or 'bind' for a bind mount (check mount for details)
-default_mountoptions = { 'xfs' : 'ro,nouuid', 'snapshot' : 'ro', 'bind' : 'ro' }
+default_mountoptions = {'xfs' : 'ro,nouuid', 'snapshot' : 'ro', 'bind' : 'ro'}
 
 PROTOCOL = "1.4"
 VERSION = "1.4.2"
@@ -205,10 +205,10 @@ def do_spawn(args, stdin=None, stdout=False):
         else:
             (child_in, child_out, child_err) = os.popen3(args)
             child_err.close()
-            
+
         if not stdin:
             child_in.close()
-        
+
     if stdin:
         child_in.write(stdin)
         child_in.close()
@@ -279,7 +279,7 @@ def try_to_run(args):
 #
 def print_stats_table_server_text(stats):
     result = '|{0:<8}|{1:<8}'.format(stats['id'], stats['state'])
-    if (len(stats) > 2):
+    if len(stats) > 2:
         result += '|{0:>6}|{1:<24}|{2:<24}|{3:>24}|{4:>12}|{5:>12}|{6:>13}|'.format(
                             stats['Errors'],
                             stats['StartTime'],
@@ -293,7 +293,7 @@ def print_stats_table_server_text(stats):
     return result
 
 def print_stats_table_server_html(stats):
-    if (stats.get('state') == 'OK'):
+    if stats.get('state') == 'OK':
         color = ' bgcolor="#81F7BE"'
     elif 'CLEAN' in stats.get('state'):
         color = ' bgcolor="#66CCFF"'
@@ -302,7 +302,7 @@ def print_stats_table_server_html(stats):
     else:
         color = ' bgcolor="#F78181"'
     result = '<tr' + color + '><td>' + stats['id'] + '</td><td>' + stats['state'] + '</td>'
-    if (len(stats) > 2):
+    if len(stats) > 2:
         result += '<td align="right">' + stats['Errors'] + '</td>' + \
                   '<td>' + stats['StartTime'] + '</td>' + \
                   '<td>' + stats['EndTime']  + '</td>' + \
@@ -322,7 +322,7 @@ def print_stats_table_server_html(stats):
     return result
 
 def stats_to_table_server_text():
-    result = ['-' * 141 + '\r\n', 
+    result = ['-' * 141 + '\r\n',
               '|{0:<8}|{1:<8}|{2:<6}|{3:<24}|{4:<24}|{5:<24}|{6:<12}|{7:<12}|{8:<13}|'.format(
                   'Name',
                   'State',
@@ -365,7 +365,7 @@ def stats_to_table_server_html():
 #
 def print_stats_table_list_text(stats):
     result = '|{0:<8}|{1:<8}'.format(stats['id'], stats['state'])
-    if (len(stats) > 2):
+    if len(stats) > 2:
         result += '|{0:<24}|{1:<24}|{2:>10}|'.format(
                             stats['CurrentMirror'],
                             stats['OldestIncrement'],
@@ -375,12 +375,12 @@ def print_stats_table_list_text(stats):
     return result
 
 def print_stats_table_list_html(stats):
-    if (stats.get('state') == 'OK'):
+    if stats.get('state') == 'OK':
         color = ' bgcolor="#81F7BE"'
     else:
         color = ' bgcolor="#F78181"'
     result = '<tr' + color + '><td>' + stats['id'] + '</td><td>' + stats['state'] + '</td>'
-    if (len(stats) > 2):
+    if len(stats) > 2:
         result += '<td>' + stats['CurrentMirror'] + '</td>' + \
                   '<td>' + stats['OldestIncrement']  + '</td>' + \
                   '<td align="right">' + stats['Increments'] + '</td>'
@@ -392,7 +392,7 @@ def print_stats_table_list_html(stats):
     return result
 
 def stats_to_table_list_text():
-    result = ['-' * 80 + '\r\n', 
+    result = ['-' * 80 + '\r\n',
               '|{0:<8}|{1:<8}|{2:<24}|{3:<24}|{4:<10}|'.format(
                   'Name',
                   'State',
@@ -445,7 +445,7 @@ def send_notification(email, mode):
     if not email_to: return
     if 'smtp' in email:
         if 'port' in email['smtp']:
-            portstr  = ':%d' % email['smtp']['port']
+            portstr = ':%d' % email['smtp']['port']
         else:
             portstr = ''
         info('Sending email to %s via %s%s' % (','.join(email_to), email['smtp'].get('server', 'Local'), portstr))
@@ -510,7 +510,7 @@ def parse_prop_file(filename):
     for line in lines:
         line = line.strip()
         if len(line) == 0 or line[0] == '#': continue
-        if '=' in line: 
+        if '=' in line:
             key, value = line.split('=', 1)
             props[key.strip()] = value.strip()
         else:
@@ -521,13 +521,13 @@ def parse_prop_file(filename):
 # Configuration file parser
 ######################################################################
 
-class ConfigException (Exception):
+class ConfigException(Exception):
     def __init__(self, value):
         self.value = value
     def __str__(self):
         return repr(self.value)
 
-def parse_true_false(el, attr, default = None):
+def parse_true_false(el, attr, default=None):
     true_false = el.getAttribute(attr).lower()
     if true_false and not true_false in ('true', 'yes', '1', 'false', 'no', '0'):
         raise ConfigException('Option needs to be true or false: attr %s: value %s' % (attr, el.getAttribute(attr)))
@@ -557,8 +557,8 @@ def parse_dump(dump_el):
     if dbtype in ('postgres', 'postgresql', 'pgsql') and db and save_db_name == 'false':
         warn('Database dump options: pgsql, save-db-name = false and dump all databases, are incompatible: save-db-name ignored')
         save_db_name = None
-    return { 'type' : dbtype, 'db' : db, 'user' : user, 'dbuser' : dbuser, 'dbpasswd': dbpasswd,
-             'opts' : opts, 'file' : dbfile, 'cleanup' : cleanup, 'save-db-name' : save_db_name }
+    return {'type' : dbtype, 'db' : db, 'user' : user, 'dbuser' : dbuser, 'dbpasswd': dbpasswd,
+            'opts' : opts, 'file' : dbfile, 'cleanup' : cleanup, 'save-db-name' : save_db_name}
 
 def parse_snap(snap_el):
     global default_snapshot
@@ -581,7 +581,7 @@ def parse_snap(snap_el):
                 warn('Device: %s: empty tag in taglist: %s' % (device, tag_el))
     mountoptions = snap_el.getAttribute('mount-options')
     writable = parse_true_false(snap_el, 'writable')
-    return { 'device' : device, 'size' : size, 'tags' : tags, 'mountoptions' : mountoptions, 'snap_writable' : writable }
+    return {'device' : device, 'size' : size, 'tags' : tags, 'mountoptions' : mountoptions, 'snap_writable' : writable}
 
 def parse_clude(clude_el):
     path = clude_el.getAttribute('path')
@@ -591,7 +591,7 @@ def parse_clude(clude_el):
     regexp = clude_el.getAttribute('regexp')
     if not path and not glob and not regexp:
         raise ConfigException('Empty ' + clude_el.tagName)
-    return { 'type' : clude_el.tagName, 'path' : path, 'glob' : glob, 'regexp' : regexp }
+    return {'type' : clude_el.tagName, 'path' : path, 'glob' : glob, 'regexp' : regexp}
 
 def parse_bandwidth(bw_el):
     return {
@@ -669,7 +669,7 @@ def parse_config(backup_el, dflt_id):
             if option in ('special-files', 'rdiff-backup'):
                 if options_el.hasAttributes():
                     for key, value in options_el.attributes.items():
-                        options.append({ option : { key : value } })
+                        options.append({option : {key : value}})
                 else:
                     raise ConfigException('Option "%s" has no value' % option)
             else:
@@ -703,7 +703,7 @@ def parse_config(backup_el, dflt_id):
                 # assert the values
                 if not run_on_conf in ['server', 'client']:
                     raise ConfigException('Incorrect configuration value for run-on attribute: %s. '
-                            'Supported values are "server" and "client"' % run_on_conf)
+                        'Supported values are "server" and "client"' % run_on_conf)
                 run_on = run_on_conf
 
             if run_on_conf == 'server' and script.startswith('client:'):
@@ -724,19 +724,19 @@ def parse_config(backup_el, dflt_id):
             if child_el.tagName not in ('include', 'exclude'):
                 continue
             cludes.append(parse_clude(child_el))
-        cludes.append({ 'type' : 'exclude', 'path' : '', 'glob' : '', 'regexp' : '.*' })
+        cludes.append({'type' : 'exclude', 'path' : '', 'glob' : '', 'regexp' : '.*'})
     elif len(data_el) > 1:
         raise ConfigException('Can not have more than one data element')
     else:
-        path_xcludes = [ '/dev/', '/media/', '/mnt/', '/net/', '/proc/', '/selinux/', '/sys/',
-                         '/tmp/', '/var/cache', '/var/lock', '/var/run', '/var/tmp',
-                         '/var/named/chroot/dev', '/var/named/chroot/proc', 
-                         '/var/named/chroot/var/run', '/var/named/chroot/var/tmp' ]
-        cludes = [{ 'type' : 'exclude', 'path' : path, 'glob' : None, 'regexp' : None } for path in path_xcludes]
+        path_xcludes = ['/dev/', '/media/', '/mnt/', '/net/', '/proc/', '/selinux/', '/sys/',
+                        '/tmp/', '/var/cache', '/var/lock', '/var/run', '/var/tmp',
+                        '/var/named/chroot/dev', '/var/named/chroot/proc',
+                        '/var/named/chroot/var/run', '/var/named/chroot/var/tmp']
+        cludes = [{'type' : 'exclude', 'path' : path, 'glob' : None, 'regexp' : None} for path in path_xcludes]
 
-    return { 'id': cfg_id, 'host' : host, 'port' : port, 'nice' : nice, 'user' : user, 'key_ctrl' : key_ctrl, 'key_data' : key_data,
-             'dir' : repo_dir, 'retention' : retention, 'dumps' : dumps, 'snaps' : snaps, 'script' : script, 'mount_writable' : writable,
-             'cludes' : cludes, 'data_options' : data_options, 'options' : options, 'bw' : bw, 'run_on': run_on}
+    return {'id': cfg_id, 'host' : host, 'port' : port, 'nice' : nice, 'user' : user, 'key_ctrl' : key_ctrl, 'key_data' : key_data,
+            'dir' : repo_dir, 'retention' : retention, 'dumps' : dumps, 'snaps' : snaps, 'script' : script, 'mount_writable' : writable,
+            'cludes' : cludes, 'data_options' : data_options, 'options' : options, 'bw' : bw, 'run_on': run_on}
 
 def parse_locs(cfglocs):
     cfgfiles = []
@@ -792,7 +792,7 @@ def check_script_permissions(script):
     if statinfo.st_uid and statinfo.st_uid != os.getuid():
         return '%s is owned by others' % script
 
-    if (statinfo.st_mode & (stat.S_IWGRP | stat.S_IWOTH)):
+    if statinfo.st_mode & (stat.S_IWGRP | stat.S_IWOTH):
         return '%s is writable by others' % script
 
     return None
@@ -849,7 +849,7 @@ def do_client_dbdump(cfg):
                 (fd, passwdfile) = tempfile.mkstemp()
                 f = os.fdopen(fd, 'w')
                 f.write('*:*:*:*:%s' % dump['dbpasswd'])
-                f.close()                
+                f.close()
 
         elif dbtype in ('mysql'):
             args = ['mysqldump']
@@ -875,7 +875,7 @@ def do_client_dbdump(cfg):
 
         if dump['user']:
             cmd = ' '.join([commands.mkarg(arg) for arg in args])
-            args = [ 'su', '-c', cmd, '-', dump['user'] ]
+            args = ['su', '-c', cmd, '-', dump['user']]
         cmd = ' '.join([commands.mkarg(arg) for arg in args])
         cmd = '%s > %s' % (cmd, commands.mkarg(dump['file']))
 
@@ -912,7 +912,7 @@ def lvm_snap_information():
                 lvms.append([volume, group])
     return lvms
 
-def mount_information(reverse = False):
+def mount_information(reverse=False):
     lines = call(['mount']) or ''
     mounts = []
     pattern = re.compile(r"^(\S+) on (.+) type (\S+) \((\S+)\)")
@@ -925,7 +925,7 @@ def mount_information(reverse = False):
     return mounts
 
 def normalise_lvm_device(device):
-    return device.replace('/mapper','').replace('-','/').replace('//', '-')
+    return device.replace('/mapper', '').replace('-', '/').replace('//', '-')
 
 def map_lvm_device(device):
     return normalise_lvm_device(device).split('/')[-2:]
@@ -961,7 +961,7 @@ def do_lvremove(device):
 def generate_snap_information(device, bdir, mountpoint, mounttype):
     assert os.path.ismount(mountpoint)
     (group, volume) = map_lvm_device(device)
-    lvmdev =  os.path.join('/dev', group, volume)
+    lvmdev = os.path.join('/dev', group, volume)
     if bdir[-1] == '/': bdir = bdir[:-1]
     snapname = '%s_snap_%s' % (volume, os.path.basename(bdir))
     snapdev = os.path.join('/dev', group, snapname)
@@ -1109,7 +1109,7 @@ def do_rbind(cfg, startpath, bdir):
                         if cfg['mount_writable']:
                             mountoptions = update_mountoptions(mountoptions, cfg['mount_writable'])
                         if mountoptions:
-                            spawn(['mount' , '-o',
+                            spawn(['mount', '-o',
                                 ('remount,%s,bind' % mountoptions),
                                 mountpoint, reroot(bdir, mountpoint)])
                 if ret:
@@ -1523,7 +1523,7 @@ def do_server_rdiff(cfg, bdir, nice, ionice, force):
                 warn('ionice(1) fails, ignoring ionice.adjustment')
         else:
             warn('ionice(1) not available, ignoring ionice.adjustment')
- 
+
     # handle bandwidth limiting via trickle
     def get_bw(vals, d):
         return vals.get(d) or vals.get('overall')
@@ -1623,17 +1623,17 @@ def get_protocol_info(protocol, is_client):
         if minor >= 4:
             caps.append('CL_STATUS')
 
-    return { 
-        'version': (major, minor), 
-        'caps': caps 
-    } 
+    return {
+        'version': (major, minor),
+        'caps': caps
+    }
 
 
 def do_server_compat(client_versions):
     (client_protocol, client_version) = client_versions.split(',')
-    compat = { 
-        'client': get_protocol_info(client_protocol, True), 
-        'server': get_protocol_info(PROTOCOL, False) 
+    compat = {
+        'client': get_protocol_info(client_protocol, True),
+        'server': get_protocol_info(PROTOCOL, False)
     }
 
     (server_major, server_minor) = PROTOCOL.split('.')
@@ -1696,7 +1696,7 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
                 if cfg['port']: cmd.extend(['-p', cfg['port']])
                 cmd.extend(['-T', '-i', cfg['key_ctrl'], '-l', cfg['user'], cfg['host']])
             cmd.extend(['safekeep', '--client'])
-   
+
             if use_subprocess:
                 subp = subprocess.Popen(cmd, stdin=PIPE, stdout=PIPE)
                 cin = subp.stdin
@@ -1930,7 +1930,7 @@ def do_keys(cfgs, ids, nice_rem, identity, status, dump, deploy):
             nice_cmd = 'nice -n%s ' % (nice)
         else:
             nice_cmd = ''
- 
+
         cmds = ['safekeep --client', 'rdiff-backup --server --restrict-read-only /']
         privatekeyfiles = [cfg.get('key_ctrl'), cfg.get('key_data')]
         output = []
@@ -2020,7 +2020,7 @@ def parse_authorized_keys(keystext):
             warn('SSH Protocol 1 keys are ignored: %s' % line)
             continue
         opts = ''
-        if line.split(None,1)[0] not in SSH_KEY_TYPES:
+        if line.split(None, 1)[0] not in SSH_KEY_TYPES:
             in_str = False
             in_esc = False
             for i, c in enumerate(line):
@@ -2108,13 +2108,13 @@ def usage(exitcode=None):
 def main():
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'c:e:i:hs:qvV',
-                                   [ 'conf=', 'client', 'clientid=', 'deploy',
-                                     'email=', 'force', 'help', 'keys',
-                                     'list', 'increments', 'sizes',
-                                     'parsable-output', 'changed=', 'at-time=',
-                                     'noemail', 'cleanup',
-                                     'print', 'quiet', 'server', 'smtp=',
-                                     'status', 'verbose', 'version'])
+                                   ['conf=', 'client', 'clientid=', 'deploy',
+                                    'email=', 'force', 'help', 'keys',
+                                    'list', 'increments', 'sizes',
+                                    'parsable-output', 'changed=', 'at-time=',
+                                    'noemail', 'cleanup',
+                                    'print', 'quiet', 'server', 'smtp=',
+                                    'status', 'verbose', 'version'])
     except getopt.GetoptError:
         usage(2)
 
@@ -2143,7 +2143,7 @@ def main():
         user_path = os.path.expanduser('~/.safekeep')
         if os.path.exists(user_path) and os.path.isdir(user_path):
             config_file = user_path + '/safekeep.conf'
-           
+
     for o, a in opts:
         if o in ('-c', '--conf'):
             if os.path.isdir(a) or a.endswith(config_ext):
@@ -2236,7 +2236,7 @@ def main():
         usage(2)
 
     if mode != 'client':
-        if cfgfile is None and os.path.isfile(config_file): 
+        if cfgfile is None and os.path.isfile(config_file):
             cfgfile = config_file
         if cfgfile and os.path.isfile(cfgfile):
             props = parse_prop_file(cfgfile)
@@ -2325,7 +2325,7 @@ def main():
                 # For cases where no bit size is required
                 ssh_keygen_bits = 0
 
-        if len(cfglocs) == 0: 
+        if len(cfglocs) == 0:
             locs = os.path.join(os.path.dirname(cfgfile), 'backup.d')
             if os.path.isdir(locs): cfglocs.append(locs)
 
@@ -2400,7 +2400,7 @@ def main():
         elif mode == 'keys':
             is_client = False
             verbosity_level = 1 + verbosity
-            if not keys_status and not keys_print and not keys_deploy: 
+            if not keys_status and not keys_print and not keys_deploy:
                 keys_status = True
             do_keys(cfgs, args, nice_cln, identity, keys_status, keys_print, keys_deploy)
         else:
