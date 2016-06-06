@@ -300,10 +300,12 @@ are separated by '/', attributes are introduced by '@':
 /backup/setup/script/@path::
 	Execute the script specified path on the client or server at
 	certain steps of the backup process.
-	This script is executed with three arguments:
+	This script is executed with four arguments:
 	- Backup id (/backup/@id)
 	- Backup step
-	- Backup root directory (valid after creation of a snapshot)
+	- Backup root directory (valid after creation of a snapshot) for client
+	  or safekeep backup directory for server
+	- Run-on parameter, i.e. 'client' or 'server'
 	For client-side scripts, the `location` optionally consists of an
 	optional `host` and a mandatory `path`, separated by a ":", where
 	the host part is either "client" or "server".  If no host part is
@@ -423,11 +425,13 @@ error, and is treated as the same as not specifying a script.  However, if
 the specified path does match a file or directory, the security tests listed
 below will occur.
 
-This script is executed with the following three arguments:
+This script is executed with the following four arguments:
 
 - Safekeep step
 - Backup id
-- Backup root directory, which may be set during the creation of a snapshot.
+- Backup root directory, which may be set during the creation of a snapshot
+for client or safekeep backup directory for server.
+- Run-on parameter, i.e. 'client' or 'server'
 
 For both client-side and server-side scripts, the steps currently defined
 and tokens passed, are:
