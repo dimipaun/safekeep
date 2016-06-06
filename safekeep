@@ -811,7 +811,7 @@ def _call_script(step, cfg, bdir, mode):
         if os.path.exists(script):
             ret = check_script_permissions(script)
             if not ret:
-                ret = spawn([script, step, cfg['id'], bdir])
+                ret = spawn([script, step, cfg['id'], bdir, mode])
         else:
             debug('%s_side_script: %s not found' % (mode, script))
 
@@ -1723,9 +1723,10 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
             setup_errs += errs
             # run a server-side hook as the first thing
             if cfg['script'] and cfg['run_on'] == 'server':
-                ret = server_side_script('STARTUP', cfg, cfg['dir'])
-                error('Server-side setup script failed: %s' % ret)
-                raise Exception('Server-side setup script failed: %s' % ret)
+                ret = server_side_script('STARTUP', cfg, datadir)
+                if ret:
+                    error('Server-side setup script failed: %s' % ret)
+                    raise Exception('Server-side setup script failed: %s' % ret)
 
             if cfg['script'] and cfg['script'].startswith('server:')\
                     and remote_script and cfg['run_on'] == 'client':
@@ -1757,11 +1758,11 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
                 stats['state'] = 'CLEAN'
                 # run a server-side hook following client SCRUB
                 if cfg['script'] and cfg['run_on'] == 'server':
-                    setup_errs += server_side_script('POST-SCRUB', cfg, bdir)
+                    setup_errs += server_side_script('POST-SCRUB', cfg, datadir)
             else:
                 # run a server-side hook prior to client SETUP
                 if cfg['script'] and cfg['run_on'] == 'server':
-                    setup_errs += server_side_script('PRE-SETUP', cfg, cfg['dir'])
+                    setup_errs += server_side_script('PRE-SETUP', cfg, datadir)
 
                 cin.write('SETUP\n')
                 cin.flush()
@@ -1770,7 +1771,7 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
 
                 # run a server-side hook following client SETUP
                 if cfg['script'] and cfg['run_on'] == 'server':
-                    setup_errs += server_side_script('POST-SETUP', cfg, cfg['dir'])
+                    setup_errs += server_side_script('POST-SETUP', cfg, datadir)
 
                 if os.path.isdir(rdiff_logdir):
                     rdiff_logpre = os.listdir(rdiff_logdir)
@@ -1807,7 +1808,7 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
 
             # run a server-side hook as the last thing
             if cfg['script'] and cfg['run_on'] == 'server':
-                setup_errs += server_side_script('POST-BACKUP', cfg, cfg['dir'])
+                setup_errs += server_side_script('POST-BACKUP', cfg, datadir)
 
             if (errs + setup_errs) == 0:
                 info('Server backup for client %s: OK' % cfg_id)
