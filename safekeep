@@ -1854,7 +1854,7 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
     debug('Server backup done')
 
 def do_list(cfgs, ids, list_type, list_date, list_parsable):
-    global statistics
+    global statistics, error_counter
     debug("Do server listing main loop")
     output_done = False
     for cfg in sorted(cfgs.itervalues(), key=lambda cfg: cfg['id']):
