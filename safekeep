@@ -85,7 +85,7 @@ SSH_KEY_TYPES = ['ssh-dss', 'ssh-rsa', 'ssh-ed25519', 'ecdsa-sha2-nistp256', 'ec
 default_mountoptions = {'xfs' : 'ro,nouuid', 'snapshot' : 'ro', 'bind' : 'ro'}
 
 PROTOCOL = "1.4"
-VERSION = "1.4.2"
+VERSION = "1.4.3"
 VEBOSITY_BY_CLASS = {'DBG': 3, 'INFO': 2, 'WARN': 1, 'ERR': 0}
 
 ######################################################################
