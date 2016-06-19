@@ -1,32 +1,49 @@
-This is release 1.4.2 of SafeKeep, a centralized and easy to use 
+This is release 1.4.3 of SafeKeep, a centralized and easy to use 
 backup application that combines the best features of a mirror 
 and an incremental backup.
 
-This is primarily a bug fix update, but what's new in this release:
-  - Report setup errors in summary reports.
-  - Added a flag to disable a backup configuration file.
-  - Added new targets for building Debian source packages.
-  - A number of bug fixes for Python compatibility and other errors.
- 
-Many thanks to Henrik Riomar and Terry Phelps for their bug reports
-and fixes that made this release possible, and to Dimi Paun for his
-continual work with SafeKeep.
+This is primarily a long delayed update, and includes a number of enhancements
+and bug fixes.  What's in this release:
+  - Updated server-side scripting and general cleanups of code and documentation
+  - Documentation cleanup
+  - Optionally remove CREATE DATABASE statement in dumps as proposed
+	by Marco Bozzolan <mailbox@s19n.net>
+  - Added configuration option to specify ssh-keygen settings
+  - Attempt normal lvremove before invoking dmsetup for cleanup
+  - Correct email subject for errors during list output
+  - Added locking on the server to stop overlapping runs
+  - Update documentation for SSH change
+  - Support for SSH ed25519 keys, switch default key type to RSA
+	from Alexander List <alex@list.priv.at>
+  - Added server side startup hook support.
+  - Fixed a couple of small bugs related to:
+    - report errors during server cleanups,
+    - missing remote scripts, and
+    - client errors not reported by server during cleanups.
+  - Sort entries based on IDs as proposed by Carl Franks <carl@fireartist.com>
+  - Applied long outstanding patches from 2014
+    - Fix lvremove error as reported by Eric Aslakson <ericaslakson@hotmail.com>
+    - Clean up html generation with patches from
+	Stanislav Blokhin <stanislav.blokhin@tomologic.com>
+
+Many thanks to all those who sent in bug reports and fixes that made this
+release possible, and to Dimi Paun for his continual work with SafeKeep.
 
 Sources and binaries are available from the following locations:
 
-  - RedHat EL/CentOS 4,5,6 Fedora 12,13,14,15,16,17,18,19:
-  http://prdownloads.sourceforge.net/safekeep/safekeep-common-1.4.2-1.noarch.rpm
-  http://prdownloads.sourceforge.net/safekeep/safekeep-client-1.4.2-1.noarch.rpm
-  http://prdownloads.sourceforge.net/safekeep/safekeep-server-1.4.2-1.noarch.rpm
+  - RedHat EL/CentOS 5,6,7 Fedora 12-24:
+  http://prdownloads.sourceforge.net/safekeep/safekeep-common-1.4.3-1.noarch.rpm
+  http://prdownloads.sourceforge.net/safekeep/safekeep-client-1.4.3-1.noarch.rpm
+  http://prdownloads.sourceforge.net/safekeep/safekeep-server-1.4.3-1.noarch.rpm
  
-  - Ubuntu Lucid, Maverick, Natty, Oneiric, Precise, Quantal and Raring:
-  http://prdownloads.sourceforge.net/safekeep/safekeep-common_1.4.2_all.deb
-  http://prdownloads.sourceforge.net/safekeep/safekeep-client_1.4.2_all.deb
-  http://prdownloads.sourceforge.net/safekeep/safekeep-server_1.4.2_all.deb
+  - Ubuntu Precise (12.04 LTS) to Yakkety (16.10):
+  http://prdownloads.sourceforge.net/safekeep/safekeep-common_1.4.3_all.deb
+  http://prdownloads.sourceforge.net/safekeep/safekeep-client_1.4.3_all.deb
+  http://prdownloads.sourceforge.net/safekeep/safekeep-server_1.4.3_all.deb
 
   - Source:
-  http://prdownloads.sourceforge.net/safekeep/safekeep-1.4.2.tar.gz
-  http://prdownloads.sourceforge.net/safekeep/safekeep-1.4.2-1.src.rpm
+  http://prdownloads.sourceforge.net/safekeep/safekeep-1.4.3.tar.gz
+  http://prdownloads.sourceforge.net/safekeep/safekeep-1.4.3-1.src.rpm
 
 The GPG Signing Key can be found in the following location:
 

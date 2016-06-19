@@ -3,7 +3,7 @@ Next release:
   * Test the sendmail delivery method
   * Add tests db dumps
   * Avoid snapshotting snapshots (DONE)
-  * Don't snapshot a device if a snapshot is already present (Partially DONE)
+  * Don't snapshot a device if a snapshot is already present (DONE)
   * Protect against multiple safekeep instance running at once (DONE)
   * Do not include fifos and sockets by default (DONE)
   * Backup fails due to this:
@@ -44,7 +44,7 @@ Future (post 1.0):
   * Compare mirroring with a straight rsync(1)
 
 Future (post 1.4.0):
-  * Server-side scripting
+  * Server-side scripting (DONE)
   * In-line scripts
   * Automatic compression of DB dumps
   * Preprocessing of configuration prior to client processing
