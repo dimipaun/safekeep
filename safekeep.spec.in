@@ -107,6 +107,16 @@ id %{name} >/dev/null 2>&1 || \
 %doc samples/sample.backup
 
 %changelog
+* Sun Jun 19 2016 Frank Crawford <frank@crawford.emu.id.au> 1.4.3-1
+  - See Changelog for full details.
+  - Optionally remove CREATE DATABASE statement in dumps.
+  - Attempt normal lvremove before invoking dmsetup for cleanup.
+  - Added locking on the server to stop overlapping runs.
+  - Added configuration option to specify ssh-keygen settings.
+  - Support for SSH ed25519 keys, switch default key type to RSA.
+  - Added server side startup hook support..
+  - Sort entries based on IDs.
+
 * Sun Jun  2 2013 Frank Crawford <frank@crawford.emu.id.au> 1.4.2-1
   - Report setup errors in summary reports.
   - Added a flag to disable a backup configuration file.
