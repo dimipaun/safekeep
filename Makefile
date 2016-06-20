@@ -10,6 +10,7 @@ rpm_box     := 192.168.3.242
 SF_USER     := $(shell whoami)
 sf_login    := $(SF_USER),$(name)@frs.sourceforge.net
 sf_dir	    := /home/frs/project/s/sa/$(name)/$(name)
+gitroot     := https://github.com/dimipaun
 releasedir  := releases
 repo_srv    := root@ulysses
 repo_dir    := /var/www/repos/lattica
@@ -54,7 +55,7 @@ commit-release:
 	git commit -a -m "Release $(version)"
 
 tag:
-	git tag $(name)-$(version)
+	git tag $(version)
 	git push --tags
 
 check-info: info
@@ -100,11 +101,13 @@ tar: $(releasedir)/$(releasename).tar.gz
 dist: $(releasedir)/$(releasename).tar.gz
 
 $(releasedir)/$(releasename).tar.gz:
-	svn export $(svnroot)/safekeep/tags/$(tagname) $(releasename)
+	wget -q $(gitroot)/$(name)/archive/$(version).tar.gz
+	tar xz -f $(version).tar.gz
+	rm $(version).tar.gz
 	cat $(releasename)/$(name).spec.in | sed 's/^%define version.*/%define version $(version)/' > $(releasename)/$(name).spec
 	cat $(releasename)/debian/changelog.in | sed 's/^safekeep.*/safekeep ($(version)) unstable; urgency=low/' > $(releasename)/debian/changelog
-	mkdir -p $(releasedir); tar cz -f $(releasedir)/$(releasename).tar.gz $(releasename)
 	cd $(releasename); make docs
+	mkdir -p $(releasedir); tar cz -f $(releasedir)/$(releasename).tar.gz $(releasename)
 	rm -rf $(releasename)
 
 distdeb: distdeb-build distdeb-sign
