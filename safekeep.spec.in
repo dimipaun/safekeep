@@ -11,7 +11,7 @@ Summary:        The SafeKeep backup system
 Group:          Applications/System
 License:        GPLv2+
 URL:            http://%{name}.sourceforge.net
-Source0:        https://github.com/dimipaun/%{name}/archive/%{version}.tar.gz
+Source0:        https://github.com/dimipaun/%{name}/archive/%{version}.tar.gz#/%{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildArch:      noarch
