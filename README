@@ -1,0 +1,85 @@
+Introduction
+~~~~~~~~~~~~
+SafeKeep is a centralized and easy to use backup application that 
+combines the best features of a mirror and an incremental backup.
+It is build around rdiff-backup, a well-known backup utility,
+enhancing it with easy deployment, database dumps, as well as 
+LVM snapshot handling.
+
+For more information, visit the project's homepage:
+    http://safekeep.sourceforge.net/
+or contact us via email on our mailing list:
+    safekeep-devel@lists.sourceforge.net
+
+Requirements
+~~~~~~~~~~~~
+  * rdiff-backup
+  * asciidoc
+  * xmlto
+  * python
+  * openssh
+
+Install
+~~~~~~~
+It is recommended that you install the packaged version of SafeKeep,
+via the provided RPMs or DEBs.
+
+For more installation related notes, please see the INSTALL file.
+
+Full Test
+~~~~~~~~~
+To run the full test simply invoke the target:
+  $ make fulltest
+
+However, to be able to run it successfully, you will need to
+prepare a few things in advance:
+  1. You need two boxes to act as a client and a server in the test.
+     It is highly recommended that you use some virtual images that
+     can suffer corruption, as the test will take control of them
+     and perform all necessary steps to accomplish the task.
+
+  2. Make sure you have the following names resolve to the IPs of 
+     the above mentioned boxes:
+                safekeep-test-client
+                safekeep-test-server
+     The easiest way to achive that is to have them in your /etc/hosts
+     files like this:
+192.168.4.128   safekeep-test-client
+192.168.4.129   safekeep-test-server
+
+  3. At the moment, it is assumed that the VMs will run a RPM based
+     distro, preferably Fedora Core 5.
+
+  4. You will need to develop from a box that can build rpms 
+     (it needs rpmbuild(8)), in order to use the full test.
+
+
+Protocol
+~~~~~~~~
+The client/server protocol is versioned for forward/backward compatibility.
+The conversation starts with the server sending over it's protocol version,
+and the client replying with it's version:
+  S: ALOHA: <server_protocol_version>, <server_software_version>
+  C: <client_protocol_version>, <client_software_version>
+
+For the time being the software version is ignored, being sent only for
+information purposes.
+
+The protocol version has the following structure:
+    <major>.<minor>, e.g. "1.0"
+
+This is interpreted through the following rules:
+  - the <major> portion must the EQUAL between the client and server for
+    the conversation to continue.
+  - the <minor> portion may be different, and may be used to signal
+    additional features that may be present in a forwards and backwards
+    compatible manner.
+
+In other words, if the server determins that the client's major protocol
+version is different from its own major, it will exit immediatly with an
+error.
+
+If the majors are the same, it may use the minor to invoke any optional
+features, or it will proceed as if they were the same. In that case, the
+other end must be able to handle the older protocol appropriately.
+
