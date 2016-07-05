@@ -145,7 +145,7 @@ KEYS OPTIONS
 -i FILE::
 	Forces `ssh(1)` to use FILE for the identity (private key) in 
 	RSA/DSA authentication.  If not specified, ssh(1) will use its 
-	default indetity files.
+	default identity files.
 
 --status::
 	Display the key status for the clients. It is implied if no other

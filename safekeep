@@ -1977,12 +1977,12 @@ def do_keys(cfgs, ids, nice_rem, identity, status, dump, deploy):
         if dump:
             print output
 
-        basessh = 'ssh -oStrictHostKeyChecking=no'
-        if cfg['port']: basessh += ' -p %s' % cfg['port']
-        if identity: basessh += ' -i %s' % (commands.mkarg(identity))
+        basessh = ['ssh', '-oStrictHostKeyChecking=no']
+        if cfg['port']: basessh.append('-p %s' % cfg['port'])
+        if identity: basessh.append('-i %s' % (commands.mkarg(identity)))
 
         if status or deploy:
-            cmd = [basessh, '%s@%s' % (cfg['user'], cfg['host']), "if test -f .ssh/authorized_keys; then cat .ssh/authorized_keys; fi"]
+            cmd = basessh + ['%s@%s' % (cfg['user'], cfg['host']), "if test -f .ssh/authorized_keys; then cat .ssh/authorized_keys; fi"]
             authtext = call(cmd)
             if authtext is None:
                 error('%s: Failed to read the %s@%s:~/.ssh/authorized_keys file.' % (cfg_id, cfg['user'], cfg['host']))
@@ -2003,7 +2003,7 @@ def do_keys(cfgs, ids, nice_rem, identity, status, dump, deploy):
             if status:
                 print '%s: Keys will be deployed on the client.' % cfg_id
             if deploy:
-                cmd = [basessh, '%s@%s' % (cfg['user'], cfg['host']), "umask 077; test -d .ssh || mkdir .ssh; cat >> .ssh/authorized_keys"]
+                cmd = basessh + ['%s@%s' % (cfg['user'], cfg['host']), "umask 077; test -d .ssh || mkdir .ssh; cat >> .ssh/authorized_keys"]
                 keys = '%s\n' % '\n'.join([key[4] for key in new_keys])
                 out = call(cmd, stdin=keys)
                 if out is None:
