@@ -68,7 +68,7 @@ installed on the server on which the data will be backed-up to.
 %setup -q
 
 %build
-make build
+make %{?_smp_mflags} build
 
 %install
 rm -rf %{buildroot}

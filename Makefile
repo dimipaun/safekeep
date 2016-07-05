@@ -156,6 +156,9 @@ deploy-sf:
 	scp ANNOUNCE $(sf_login):$(sf_dir)/$(version)/README.txt
 	scp $(releasedir)/$(releasename)-$(release)*.src.rpm $(releasedir)/$(name)-*-$(version)-$(release)*.noarch.rpm $(sf_login):$(sf_dir)/$(version)
 	scp $(releasedir)/$(name)-*_$(version)_all.deb $(sf_login):$(sf_dir)/$(version)
+	scp $(releasedir)/$(name)_* $(sf_login):$(sf_dir)/$(version)
+	scp RPM-GPG-KEY-SafeKeep $(sf_login):$(sf_dir)/$(version)
+	scp README_SF_Top $(sf_login):$(sf_dir)/../README.txt
 
 check:
 	safekeep-test --local
