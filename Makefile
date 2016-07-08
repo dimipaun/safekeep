@@ -150,15 +150,19 @@ deploy-lattica:
 	scp $(releasedir)/${name}{,-common,-client,-server}-${version}-*.rpm ${repo_srv}:${repo_dir}/upload
 	ssh ${repo_srv} "cd ${repo_dir}; ./deploy-rpms.sh upload/${name}-*${version}-*.rpm"
 
-deploy-sf: 
+deploy-sf: $(releasedir)/CHECKSUM-$(releasename).txt
 	echo -e "cd $(sf_dir)\nmkdir $(version)" | sftp -b- $(sf_login)
 	scp $(releasedir)/$(releasename).tar.gz $(sf_login):$(sf_dir)/$(version)
 	scp ANNOUNCE $(sf_login):$(sf_dir)/$(version)/README.txt
 	scp $(releasedir)/$(releasename)-$(release)*.src.rpm $(releasedir)/$(name)-*-$(version)-$(release)*.noarch.rpm $(sf_login):$(sf_dir)/$(version)
 	scp $(releasedir)/$(name)-*_$(version)_all.deb $(sf_login):$(sf_dir)/$(version)
 	scp $(releasedir)/$(name)_* $(sf_login):$(sf_dir)/$(version)
+	scp $(releasedir)/CHECKSUM-$(releasename).txt $(sf_login):$(sf_dir)/$(version)
 	scp RPM-GPG-KEY-SafeKeep $(sf_login):$(sf_dir)/$(version)
 	scp README_SF_Top $(sf_login):$(sf_dir)/../README.txt
+
+$(releasedir)/CHECKSUM-$(releasename).txt:
+	cd $(releasedir); sha512sum $(name)*$(version)* | gpg --clearsign -u $(name) > CHECKSUM-$(releasename).txt
 
 check:
 	safekeep-test --local
