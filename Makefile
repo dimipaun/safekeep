@@ -1,6 +1,7 @@
 name        := safekeep
 version_num := $(shell grep 'VERSION *=' safekeep | sed s'/[^"]*"\([^"].*\)".*/\1/')
 version     := $(version_num)
+git_version := $(shell git describe --tags)
 release     := 1
 releasename := $(name)-$(version)
 dirname     := $(shell basename $(PWD))
@@ -119,6 +120,10 @@ distdeb-build: $(releasedir)/$(releasename).tar.gz
 
 distdeb-sign:
 	debsign $(releasedir)/$(name)-*_$(version)_all.deb
+
+debsrc: $(releasedir)/$(releasename).tar.gz
+	cat debian/changelog.in | sed 's/^safekeep.*/safekeep ($(git_version)) unstable; urgency=low/' > debian/changelog
+	dpkg-buildpackage -us -uc -S
 
 distrpm: distrpm-build distrpm-sign
 
