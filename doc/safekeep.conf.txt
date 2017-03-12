@@ -151,6 +151,15 @@ ssh.keygen.bits::
 	option with no corresponding bit size.
 	This value is optional, it defaults to '4096'.
 
+ssh.strict_hostkey_checking::
+	Specifies if StrictHostKeyChecking should be performed by the ssh
+	client when connecting to the remote host.
+	This value is optional, it defaults to 'ask'.
+	Set to 'yes' if you sign host keys with a CA key or manage host keys
+	by other means (FreeIPA/sssd, Ansible,,,).
+	Setting this to 'no' is a bit unsafe as new hosts are automatically
+	added to known_hosts without any validation.
+
 NOTES
 -----
 Safekeep uses `trickle` to implement bandwidth throttling (see
