@@ -59,7 +59,7 @@ SSH_STRICT_HOSTKEY_CHECK_OPTS = ['ask', 'yes', 'no' ]
 default_mountoptions = {'xfs' : 'ro,nouuid', 'snapshot' : 'ro', 'bind' : 'ro'}
 
 PROTOCOL = "1.4"
-VERSION = "1.4.4"
+VERSION = "2.0.0"
 VEBOSITY_BY_CLASS = {'DBG': 3, 'INFO': 2, 'WARN': 1, 'ERR': 0}
 
 ######################################################################
