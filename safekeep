@@ -444,7 +444,7 @@ def send_notification(email, mode):
                '\r\n--safebounder001--\r\n'
     if 'smtp' in email:
         server = smtplib.SMTP(email['smtp'].get('server'), email['smtp'].get('port'))
-        server.sendmail(email_from, email_to, msg)
+        server.sendmail(email_from, email_to, msg.encode('ascii', 'backslashreplace'))
         server.quit()
     else:
         cmd = ['/usr/sbin/sendmail', '-t', '-f', email_from]
