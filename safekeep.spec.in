@@ -25,7 +25,7 @@ power of rdiff-backup with simple, centralized configuration.
 Summary:        The SafeKeep backup system (common component)
 Group:          Applications/System
 Requires:       rdiff-backup
-Requires:       python >= 3.4
+Requires:       python3 >= 3.4
 
 %description common
 SafeKeep is a client/server backup system which enhances the
