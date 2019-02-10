@@ -107,6 +107,12 @@ id %{name} >/dev/null 2>&1 || \
 %doc samples/sample.backup
 
 %changelog
+* Sun Feb 10 2019 Frank Crawford <frank@crawford.emu.id.au> 1.4.5-1
+  - Make ssh StrictHostKeyChecking configurable in safekeep.conf with
+    'ask' as default if not configured.
+  - Add make-target debsrc again
+  - Fix compatibility issue with Python 2.4
+
 * Sat Jul  9 2016 Frank Crawford <frank@crawford.emu.id.au> 1.4.4-1
   - Fix error with key deployment.
   - Cleanup up some minor issues in the build and deployment process.

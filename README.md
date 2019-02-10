@@ -10,19 +10,19 @@ It is build around [**rdiff-backup**](http://www.nongnu.org/rdiff-backup/), enha
 For more information, visit the [project's homepage](http://safekeep.sourceforge.net/) or get in touch [via email](safekeep-devel@lists.sourceforge.net).
 
 # Latest Release
-Version 1.4.4 was released Jul  9, 2016:
+Version 1.4.5 was released Feb 10, 2019:
 
   * **RHEL, CentOS and Fedora**:
-  http://prdownloads.sourceforge.net/safekeep/safekeep-common-1.4.4-1.noarch.rpm
-  http://prdownloads.sourceforge.net/safekeep/safekeep-client-1.4.4-1.noarch.rpm
-  http://prdownloads.sourceforge.net/safekeep/safekeep-server-1.4.4-1.noarch.rpm
+  http://prdownloads.sourceforge.net/safekeep/safekeep-common-1.4.5-1.noarch.rpm
+  http://prdownloads.sourceforge.net/safekeep/safekeep-client-1.4.5-1.noarch.rpm
+  http://prdownloads.sourceforge.net/safekeep/safekeep-server-1.4.5-1.noarch.rpm
 
   * **Ubuntu**:
-  http://prdownloads.sourceforge.net/safekeep/safekeep-common_1.4.4_all.deb
-  http://prdownloads.sourceforge.net/safekeep/safekeep-client_1.4.4_all.deb
-  http://prdownloads.sourceforge.net/safekeep/safekeep-server_1.4.4_all.deb
+  http://prdownloads.sourceforge.net/safekeep/safekeep-common_1.4.5_all.deb
+  http://prdownloads.sourceforge.net/safekeep/safekeep-client_1.4.5_all.deb
+  http://prdownloads.sourceforge.net/safekeep/safekeep-server_1.4.5_all.deb
 
   * **Source**:
-  http://prdownloads.sourceforge.net/safekeep/safekeep-1.4.4.tar.gz
-  http://prdownloads.sourceforge.net/safekeep/safekeep-1.4.4-1.src.rpm
+  http://prdownloads.sourceforge.net/safekeep/safekeep-1.4.5.tar.gz
+  http://prdownloads.sourceforge.net/safekeep/safekeep-1.4.5-1.src.rpm
 
