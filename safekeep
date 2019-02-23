@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 
 # Copyright (C) 2006-2010 Lattica, Inc.
 #
@@ -15,41 +15,13 @@
 # You should have received a copy of the GNU General Public License
 # along with Safekeep.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import generators
-import getopt, os, os.path, re, sys, fnmatch, stat, types
-import commands, tempfile, time, traceback
+import getopt, os, re, sys, fnmatch, stat
+import subprocess, tempfile, time, traceback, shlex
 import getpass, pwd, xml.dom.minidom
-import socket, smtplib, cStringIO
+import socket, smtplib, io
 import fcntl
 
-try:
-    import subprocess
-    from subprocess import PIPE, STDOUT
-    use_subprocess = True
-except:
-    PIPE = -1
-    STDOUT = -2
-    use_subprocess = False
-
-######################################################################
-# Python 2.2 compatibility
-######################################################################
-# There is no guarantee that we'll continue supporting Python 2.2
-# indefinitely, but we make a reasonable effort to do so as long as
-# it doesn't result in major complication/ugliness.
-# Note that some features related to scripting, snapshots and DB backups
-# already require Python 2.3.
-
-try:
-    True, False
-except NameError:
-    True, False = 1, 0
-
-def enumerate(obj):
-    i = -1
-    for item in obj:
-        i += 1
-        yield i, item
+from subprocess import PIPE, STDOUT
 
 ######################################################################
 # Global settings
@@ -87,7 +59,7 @@ SSH_STRICT_HOSTKEY_CHECK_OPTS = ['ask', 'yes', 'no' ]
 default_mountoptions = {'xfs' : 'ro,nouuid', 'snapshot' : 'ro', 'bind' : 'ro'}
 
 PROTOCOL = "1.4"
-VERSION = "1.4.5"
+VERSION = "1.5.0"
 VEBOSITY_BY_CLASS = {'DBG': 3, 'INFO': 2, 'WARN': 1, 'ERR': 0}
 
 ######################################################################
@@ -102,11 +74,14 @@ class ClientException(Exception):
     def __str__(self):
         return repr(self.value)
 
+#def byte_or_str(arg):
+#    if isinstance(arg, (str,)): # check if its in bytes
+#        return arg
+#    else:
+#        return arg.decode('utf-8', 'backslashreplace')
+
 def send(msg):
-    try:
-        print msg.encode('utf-8', 'backslashreplace')
-    except UnicodeDecodeError:
-        print str(msg).encode('string_escape')
+    print(msg)
     sys.stdout.flush()
 
 def log(msg, cls=None):
@@ -115,7 +90,7 @@ def log(msg, cls=None):
         if is_client: cls = cls.lower()
         msg = '%s: %s' % (cls, msg)
     else:
-        for c in VEBOSITY_BY_CLASS.keys():
+        for c in list(VEBOSITY_BY_CLASS.keys()):
             if msg.upper().startswith(c + ': '):
                 cls = c
                 break
@@ -125,15 +100,11 @@ def log(msg, cls=None):
     cutoff = VEBOSITY_BY_CLASS.get(cls.upper())
     if cutoff is None: cutoff = 3
     if is_client or verbosity_level >= cutoff:
-        try:
-            str_msg = msg.encode('utf-8', 'backslashreplace')
-        except UnicodeDecodeError:
-            str_msg = str(msg).encode('string_escape')
-        logbuf.append(str_msg)
+        logbuf.append(msg)
         if is_client:
-            send(str_msg)
+            send(msg)
         else:
-            print >> sys.stderr, str_msg
+            print(msg, file=sys.stderr)
 
 def info_file(filename, marker=None, stats=None):
     info('# File: ' + filename)
@@ -160,7 +131,7 @@ def info_file(filename, marker=None, stats=None):
     return errs
 
 def stacktrace():
-    exc_file = cStringIO.StringIO()
+    exc_file = io.StringIO()
     traceback.print_exc(None, exc_file)
     return "\n" + exc_file.getvalue()
 
@@ -180,12 +151,12 @@ def error(msg, ex=None):
     log(msg + extra, 'ERR')
 
 def do_spawn(args, stdin=None, stdout=False):
-    if isinstance(args, types.StringTypes):
+    if isinstance(args, (str,)):
         debug('Run [' + args + ']')
     else:
         debug('Run [' + ' '.join(args) + ']')
 
-    _shell = isinstance(args, types.StringTypes)
+    _shell = isinstance(args, (str,))
     if stdin:
         _stdin = PIPE
     else:
@@ -195,21 +166,9 @@ def do_spawn(args, stdin=None, stdout=False):
     else:
         _stderr = STDOUT
 
-    if use_subprocess:
-        proc = subprocess.Popen(args, bufsize=1, shell=_shell, stdin=_stdin, stdout=PIPE, stderr=_stderr, close_fds=True)
-        child_in = proc.stdin
-        child_out = proc.stdout
-    else:
-        if _shell:
-            args = ["/bin/sh", "-c", args]
-        if _stderr:
-            (child_in, child_out) = os.popen4(args)
-        else:
-            (child_in, child_out, child_err) = os.popen3(args)
-            child_err.close()
-
-        if not stdin:
-            child_in.close()
+    proc = subprocess.Popen(args, bufsize=1, shell=_shell, stdin=_stdin, stdout=PIPE, stderr=_stderr, close_fds=True, encoding='utf-8', errors='backslashreplace')
+    child_in = proc.stdin
+    child_out = proc.stdout
 
     if stdin:
         child_in.write(stdin)
@@ -222,20 +181,17 @@ def do_spawn(args, stdin=None, stdout=False):
             info(line.rstrip())
     child_out.close()
 
-    if use_subprocess:
-        return (proc.wait(), lines)
-    else:
-        return (0, lines)
+    return (proc.wait(), lines)
 
 def _spawn(args, stdin=None, stdout=False):
-    if isinstance(args, types.StringTypes):
+    if isinstance(args, (str,)):
         cmd = args.split(None)[0]
     else:
         cmd = args[0]
 
     try:
         rc, out = do_spawn(args, stdin, stdout)
-    except OSError, ex:
+    except OSError as ex:
         ret = "OSError: %s" % (ex)
         error('%s failed: %s' % (cmd, ret))
         return ret
@@ -270,7 +226,7 @@ def call(args, stdin=None):
 def try_to_run(args):
     try:
         rc, out = do_spawn(args, None, True)
-    except OSError, ex:
+    except OSError as ex:
         return None
     if not rc in (0, 1):
         return None
@@ -434,7 +390,7 @@ def stats_to_table(mode, fmt):
 
     try:
         result = eval('stats_to_table_' + mode + '_' + fmt + '()')
-    except NameError, ex:
+    except NameError as ex:
         error('ERROR: %s' % (ex or ''), ex)
         result = 'Internal error: no statistics available'
 
@@ -488,7 +444,7 @@ def send_notification(email, mode):
                '\r\n--safebounder001--\r\n'
     if 'smtp' in email:
         server = smtplib.SMTP(email['smtp'].get('server'), email['smtp'].get('port'))
-        server.sendmail(email_from, email_to, msg)
+        server.sendmail(email_from, email_to, msg.encode('ascii', 'backslashreplace'))
         server.quit()
     else:
         cmd = ['/usr/sbin/sendmail', '-t', '-f', email_from]
@@ -587,8 +543,8 @@ def parse_snap(snap_el):
 
 def parse_clude(clude_el):
     path = clude_el.getAttribute('path')
-    path = path.replace('*', '\*').replace('?', '\?')
-    path = path.replace('[', '\[').replace(']', '\]')
+    path = path.replace('*', r'\*').replace('?', r'\?')
+    path = path.replace('[', r'\[').replace(']', r'\]')
     glob = clude_el.getAttribute('glob')
     regexp = clude_el.getAttribute('regexp')
     if not path and not glob and not regexp:
@@ -670,7 +626,7 @@ def parse_config(backup_el, dflt_id):
                 warn('options element special-files is deprecated, use data attributes instead')
             if option in ('special-files', 'rdiff-backup'):
                 if options_el.hasAttributes():
-                    for key, value in options_el.attributes.items():
+                    for key, value in list(options_el.attributes.items()):
                         options.append({option : {key : value}})
                 else:
                     raise ConfigException('Option "%s" has no value' % option)
@@ -807,7 +763,6 @@ def _call_script(step, cfg, bdir, mode):
     script = cfg['script']
 
     if script:
-        # XXX a not so elegant branching
         if mode == 'server': script = cfg['script'].split(':', 1)[1]
         debug('%s_side_script: script = %s' % (mode, script))
         if os.path.exists(script):
@@ -876,10 +831,10 @@ def do_client_dbdump(cfg):
             continue
 
         if dump['user']:
-            cmd = ' '.join([commands.mkarg(arg) for arg in args])
+            cmd = ' '.join([shlex.quote(arg) for arg in args])
             args = ['su', '-c', cmd, '-', dump['user']]
-        cmd = ' '.join([commands.mkarg(arg) for arg in args])
-        cmd = '%s > %s' % (cmd, commands.mkarg(dump['file']))
+        cmd = ' '.join([shlex.quote(arg) for arg in args])
+        cmd = '%s > %s' % (cmd, shlex.quote(dump['file']))
 
         if passwdfile:
             os.environ['PGPASSFILE'] = passwdfile
@@ -900,7 +855,7 @@ def do_client_dbdump_teardown(cfg):
             continue
         try:
             os.remove(dump['file'])
-        except OSError, e:
+        except OSError as e:
             warn('Unable to remove dump file: %s for database %s because: %s' %
                  (dump['file'], dump['db'], e))
 
@@ -1131,7 +1086,7 @@ def do_client_config(cmd):
     cfgStr = ''
 
     (cfg_cmd, cnt_str, dflt_id) = cmd.split(':', 2)
-    for i in xrange(int(cnt_str)):
+    for i in range(int(cnt_str)):
         line = sys.stdin.readline()
         if not line: raise ConfigException('Unexpected end of file')
         cfgStr += line
@@ -1150,7 +1105,7 @@ def do_client_remote_script(script_file, cfg, cmd):
     debug("do_client_remote_script: %s -> %s: cnt_str = %s" % (server_file, cfg['script'], cnt_str.strip()))
     if int(cnt_str) > 0:
         try:
-            for i in xrange(int(cnt_str)):
+            for i in range(int(cnt_str)):
                 line = sys.stdin.readline()
                 if not line: raise Exception('Unexpected end of file')
                 script_file.write(line)
@@ -1188,7 +1143,7 @@ def do_client_setup(cfg):
             total_ret += ret
             try:
                 os.rmdir(bdir)
-            except OSError, e:
+            except OSError as e:
                 warn('Failed to remove: %s: %s' % (bdir, e))
                 total_ret += 1
             bdir = '/'
@@ -1207,7 +1162,7 @@ def do_client_cleanup(cfg, bdir):
         else:
             try:
                 os.rmdir(bdir)
-            except OSError, e:
+            except OSError as e:
                 warn('Unable to remove: %s: %s' % (bdir, e))
 
         do_client_snap_teardown(cfg, bdir)
@@ -1297,7 +1252,7 @@ def do_client_scrub():
                     info("Removing rbind directory %s" % mountpoint)
                     try:
                         os.rmdir(mountpoint)
-                    except OSError, e:
+                    except OSError as e:
                         warn('Failed to remove: %s: %s' % (mountpoint, e))
 
         debug("Cleaning up remaining safekeep script files")
@@ -1313,18 +1268,18 @@ def do_client_scrub():
                             info("Removing script file %s" % script_file)
                             try:
                                 os.remove('%s' % script_file)
-                            except OSError, e:
+                            except OSError as e:
                                 warn('Failed to remove: %s: %s' % (script_file, e))
                         info("Removing script directory %s" % temp_dir)
                         try:
                             os.rmdir(temp_dir)
-                        except OSError, e:
+                        except OSError as e:
                             warn('Failed to remove: %s: %s' % (temp_dir, e))
                     else:
                         info("Removing script file %s" % script_file)
                         try:
                             os.remove('%s' % script_file)
-                        except OSError, e:
+                        except OSError as e:
                             warn('Failed to remove: %s: %s' % (script_file, e))
 
         if not scrubbed:
@@ -1453,7 +1408,7 @@ def do_client():
                 else:
                     send('ERROR Unknown command: %s' % line)
                     break
-            except Exception, e:
+            except Exception as e:
                 ex = e
                 break
     finally:
@@ -1466,7 +1421,7 @@ def do_client():
             tempfile.tempdir = None
             try:
                 os.rmdir(script_dir)
-            except OSError, e:
+            except OSError as e:
                 warn('Failed to remove: %s: %s' % (script_dir, e))
 
     if ex:
@@ -1630,7 +1585,6 @@ def get_protocol_info(protocol, is_client):
         'caps': caps
     }
 
-
 def do_server_compat(client_versions):
     (client_protocol, client_version) = client_versions.split(',')
     compat = {
@@ -1649,7 +1603,7 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
     global statistics, client_defaults, error_counter, warning_counter
     debug("Do server main loop")
     output_done = False
-    for cfg in sorted(cfgs.itervalues(), key=lambda cfg: cfg['id']):
+    for cfg in sorted(iter(cfgs.values()), key=lambda cfg: cfg['id']):
         cfg_id = cfg['id']
         if ids and cfg_id not in ids: continue
         info('------------------------------------------------------------------')
@@ -1674,7 +1628,7 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
             if not os.path.isdir(datadir):
                 try:
                     os.makedirs(datadir)
-                except EnvironmentError, ex:
+                except EnvironmentError as ex:
                     raise Exception('Can not create data store dir: %s: %s' % (datadir, ex))
 
             rdiff_logdir = os.path.join(datadir, 'rdiff-backup-data')
@@ -1684,7 +1638,7 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
                 fbm = open(backup_log, 'a')
                 try:
                     fcntl.flock(fbm.fileno(), fcntl.LOCK_EX|fcntl.LOCK_NB)
-                except IOError, ex:
+                except IOError as ex:
                     warn('Another backup or cleanup is in progress for client %s' % cfg_id)
                     raise Exception('Another backup or cleanup is in progress')
 
@@ -1700,12 +1654,9 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
                 cmd.extend(['-T', '-i', cfg['key_ctrl'], '-l', cfg['user'], cfg['host']])
             cmd.extend(['safekeep', '--client'])
 
-            if use_subprocess:
-                subp = subprocess.Popen(cmd, stdin=PIPE, stdout=PIPE)
-                cin = subp.stdin
-                cout = subp.stdout
-            else:
-                (cin, cout) = os.popen2(cmd)
+            subp = subprocess.Popen(cmd, stdin=PIPE, stdout=PIPE, encoding='utf-8', errors='backslashreplace')
+            cin = subp.stdin
+            cout = subp.stdout
 
             cin.write('ALOHA: %s, %s\n' % (PROTOCOL, VERSION))
             cin.flush()
@@ -1824,7 +1775,7 @@ def do_server(cfgs, ids, nice, ionice, force, cleanup):
                 stats['state'] = 'SETUP WARNING'
                 info('Server backup for client %s: OK (%d WARNINGS/%d SETUP WARNINGS)' % (cfg_id, errs, setup_errs))
 
-        except Exception, ex:
+        except Exception as ex:
             if cleanup:
                 info('Client-side cleanup for client %s: FAILED' % cfg_id)
                 if isinstance(ex, ClientException):
@@ -1860,7 +1811,7 @@ def do_list(cfgs, ids, list_type, list_date, list_parsable):
     global statistics, error_counter
     debug("Do server listing main loop")
     output_done = False
-    for cfg in sorted(cfgs.itervalues(), key=lambda cfg: cfg['id']):
+    for cfg in sorted(iter(cfgs.values()), key=lambda cfg: cfg['id']):
         cfg_id = cfg['id']
         if ids and cfg_id not in ids: continue
         stats = {}
@@ -1920,7 +1871,7 @@ def do_list(cfgs, ids, list_type, list_date, list_parsable):
     debug('Server listing done')
 
 def do_keys(cfgs, ids, nice_rem, identity, status, dump, deploy):
-    for cfg in sorted(cfgs.itervalues(), key=lambda cfg: cfg['id']):
+    for cfg in sorted(iter(cfgs.values()), key=lambda cfg: cfg['id']):
         cfg_id = cfg['id']
         if ids and cfg_id not in ids: continue
         info('Handling keys for client: %s' % cfg_id)
@@ -1945,10 +1896,10 @@ def do_keys(cfgs, ids, nice_rem, identity, status, dump, deploy):
                     error('%s: Public key exists %s, but private key is missing. Skipping client.' % (cfg_id, publickeyfile))
                     break
                 if dump:
-                    print '%s: Key does not exist: %s.' % (cfg_id, privatekeyfile)
+                    print('%s: Key does not exist: %s.' % (cfg_id, privatekeyfile))
                     break
                 if status:
-                    print '%s: Key does not exist: %s. Will be generated.' % (cfg_id, privatekeyfile)
+                    print('%s: Key does not exist: %s. Will be generated.' % (cfg_id, privatekeyfile))
                     break
                 if deploy:
                     info('%s: Key do not exist, generating it now: %s' % (cfg_id, privatekeyfile))
@@ -1958,7 +1909,7 @@ def do_keys(cfgs, ids, nice_rem, identity, status, dump, deploy):
                         keygen_bits = ''
                     gencmd = 'ssh-keygen -q %s -t %s -N "" -C "SafeKeep auto generated key at %s@%s" -f %s' % (keygen_bits, ssh_keygen_type, backup_user, os.uname()[1], privatekeyfile)
                     if backup_user != work_user:
-                        gencmd = 'su -s /bin/sh -c %s - %s' % (commands.mkarg(gencmd), backup_user)
+                        gencmd = 'su -s /bin/sh -c %s - %s' % (shlex.quote(gencmd), backup_user)
                     debug(gencmd)
                     if spawn(gencmd):
                         error('%s: Failed to generate key %s. Skipping client.' % (cfg_id, privatekeyfile))
@@ -1978,11 +1929,11 @@ def do_keys(cfgs, ids, nice_rem, identity, status, dump, deploy):
             continue
 
         if dump:
-            print output
+            print(output)
 
         basessh = ['ssh', '-oStrictHostKeyChecking=%s' % (ssh_StrictHostKeyChecking) ]
         if cfg['port']: basessh.append('-p %s' % cfg['port'])
-        if identity: basessh.append('-i %s' % (commands.mkarg(identity)))
+        if identity: basessh.append('-i %s' % (shlex.quote(identity)))
 
         if status or deploy:
             cmd = basessh + ['%s@%s' % (cfg['user'], cfg['host']), "if test -f .ssh/authorized_keys; then cat .ssh/authorized_keys; fi"]
@@ -2000,18 +1951,17 @@ def do_keys(cfgs, ids, nice_rem, identity, status, dump, deploy):
                     new_keys.append(this_key)
             if not new_keys:
                 if status:
-                    print '%s: Client is up to date.' % cfg_id
+                    print('%s: Client is up to date.' % cfg_id)
                 continue
 
             if status:
-                print '%s: Keys will be deployed on the client.' % cfg_id
+                print('%s: Keys will be deployed on the client.' % cfg_id)
             if deploy:
                 cmd = basessh + ['%s@%s' % (cfg['user'], cfg['host']), "umask 077; test -d .ssh || mkdir .ssh; cat >> .ssh/authorized_keys"]
                 keys = '%s\n' % '\n'.join([key[4] for key in new_keys])
                 out = call(cmd, stdin=keys)
                 if out is None:
                     error('Failed to deliver the keys to the client')
-
 
 # parses authozied_keys, see sshd(8) man page for details
 def parse_authorized_keys(keystext):
@@ -2073,45 +2023,45 @@ def parse_authorized_keys(keystext):
 ######################################################################
 
 def usage(exitcode=None):
-    print 'usage: %s --server [common options] [server options] <client-id>*' % (sys.argv[0])
-    print '       %s --keys [common options] [keys options] <client-id>*' % (sys.argv[0])
-    print '       %s --list [common options] [list options] <client-id>*' % (sys.argv[0])
-    print
-    print 'mode selection (you must pick one):'
-    print '--server            launch in server mode'
-    print '--keys              launch in keys management mode'
-    print '--list              list previous backup status'
-    print
-    print 'common options:'
-    print '-c, --conf=FILE     use the FILE configuration file'
-    print '-h, --help          show this help message and exit'
-    print '-q, --quiet         decreases the verbosity level'
-    print '-v, --verbose       increases the verbosity level'
-    print '-V, --version       show the version number and exit'
-    print '--noemail           disables the sending of email'
-    print
-    print 'server options:'
-    print '--force             force backup destination overwriting, dangerous!'
-    print '--cleanup           perform cleanup actions after a failure'
-    print
-    print 'keys options:'
-    print '-i FILE             use FILE as identity for RSA/DSA authentication'
-    print '--status            display the key status for the clients (default)'
-    print '--print             display the authorization keys'
-    print '--deploy            deploy the authorization keys'
-    print
-    print 'list options:'
-    print '--increments        list number and dates of increments'
-    print '--parsable-output   tailor output for parsing by other programs'
-    print '--sizes             list sizes of all the increments'
-    print '--changed=time      list files that have changed since time'
-    print '--at-time=time      list files in the archive at given time'
+    print('usage: %s --server [common options] [server options] <client-id>*' % (sys.argv[0]))
+    print('       %s --keys [common options] [keys options] <client-id>*' % (sys.argv[0]))
+    print('       %s --list [common options] [list options] <client-id>*' % (sys.argv[0]))
+    print()
+    print('mode selection (you must pick one):')
+    print('--server            launch in server mode')
+    print('--keys              launch in keys management mode')
+    print('--list              list previous backup status')
+    print()
+    print('common options:')
+    print('-c, --conf=FILE     use the FILE configuration file')
+    print('-h, --help          show this help message and exit')
+    print('-q, --quiet         decreases the verbosity level')
+    print('-v, --verbose       increases the verbosity level')
+    print('-V, --version       show the version number and exit')
+    print('--noemail           disables the sending of email')
+    print()
+    print('server options:')
+    print('--force             force backup destination overwriting, dangerous!')
+    print('--cleanup           perform cleanup actions after a failure')
+    print()
+    print('keys options:')
+    print('-i FILE             use FILE as identity for RSA/DSA authentication')
+    print('--status            display the key status for the clients (default)')
+    print('--print             display the authorization keys')
+    print('--deploy            deploy the authorization keys')
+    print()
+    print('list options:')
+    print('--increments        list number and dates of increments')
+    print('--parsable-output   tailor output for parsing by other programs')
+    print('--sizes             list sizes of all the increments')
+    print('--changed=time      list files that have changed since time')
+    print('--at-time=time      list files in the archive at given time')
     if exitcode is not None: sys.exit(exitcode)
 
 def main():
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'c:e:i:hs:qvV',
-                                   ['conf=', 'client', 'clientid=', 'deploy',
+                                   ['conf=', 'client', 'deploy',
                                     'email=', 'force', 'help', 'keys',
                                     'list', 'increments', 'sizes',
                                     'parsable-output', 'changed=', 'at-time=',
@@ -2129,7 +2079,6 @@ def main():
     cfgfile = None
     cfglocs = []
     verbosity = 0
-    clientid = None
     force = False
     cleanup = False
     noemail = False
@@ -2217,7 +2166,7 @@ def main():
         elif o in ('-v', '--verbose'):
             verbosity += 1
         elif o in ('-V', '--version'):
-            print 'safekeep', VERSION
+            print('safekeep', VERSION)
             return
 
     if mode is None:
@@ -2328,10 +2277,10 @@ def main():
                 # For cases where no bit size is required
                 ssh_keygen_bits = 0
         if 'ssh.strict_hostkey_checking' in props:
-                ssh_StrictHostKeyChecking = props['ssh.strict_hostkey_checking']
-                if ssh_StrictHostKeyChecking not in SSH_STRICT_HOSTKEY_CHECK_OPTS:
-                    error('CONFIG ERROR: invalid ssh.strict_hostkey_checking value: %s' % props['ssh.strict_hostkey_checking'])
-                    sys.exit(2)
+            ssh_StrictHostKeyChecking = props['ssh.strict_hostkey_checking']
+            if ssh_StrictHostKeyChecking not in SSH_STRICT_HOSTKEY_CHECK_OPTS:
+                error('CONFIG ERROR: invalid ssh.strict_hostkey_checking value: %s' % props['ssh.strict_hostkey_checking'])
+                sys.exit(2)
 
         if len(cfglocs) == 0:
             locs = os.path.join(os.path.dirname(cfgfile), 'backup.d')
@@ -2343,7 +2292,7 @@ def main():
             try:
                 os.setregid(gid, gid)
                 os.setreuid(uid, uid)
-            except OSError, ex:
+            except OSError as ex:
                 warn("Cannot setreuid(): " + str(ex))
             os.environ['HOME'] = home_dir
     else:
@@ -2357,7 +2306,7 @@ def main():
         try:
             verbosity_level = 1 + verbosity
             cfgs = parse_locs(cfglocs)
-        except Exception, ex:
+        except Exception as ex:
             if isinstance(ex, ConfigException):
                 error('CONFIG ERROR: %s' % (ex or ''), ex)
             else:
@@ -2413,7 +2362,7 @@ def main():
             do_keys(cfgs, args, nice_cln, identity, keys_status, keys_print, keys_deploy)
         else:
             assert False, 'Unknown mode: %s' % (mode)
-    except Exception, ex:
+    except Exception as ex:
         error('ERROR: %s' % (ex or ''), ex)
 
     send_notification(email, mode)

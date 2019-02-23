@@ -1,8 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import getopt, glob, os, os.path, re, shutil, socket, sys
-import commands, random, time, tempfile, traceback
-from commands import mkarg
+import subprocess, random, time, tempfile, traceback, shlex
 
 ssh_id_file_keys = None
 perform_snapshots = True
@@ -17,15 +16,15 @@ def mkssh(cmd='ssh'):
     ssh_id_file = ssh_id_file_keys[0]
     if ssh_id_file:
         args.append('-i')
-        args.append(mkarg(ssh_id_file))
+        args.append(shlex.quote(ssh_id_file))
     return ' '.join(args)
 
 def rpipe(cmd, user, host, desc, cmd2, user2, host2):
     if host:
-        cmd = '%s %s@%s %s' % (mkssh(), user, host, mkarg(cmd))
+        cmd = '%s %s@%s %s' % (mkssh(), user, host, shlex.quote(cmd))
     if host2:
-        cmd2 = '%s %s@%s %s' % (mkssh(), user2, host2, mkarg(cmd2))
-    print cmd, '|', cmd2
+        cmd2 = '%s %s@%s %s' % (mkssh(), user2, host2, shlex.quote(cmd2))
+    print(cmd, '|', cmd2)
     pout = os.popen(cmd, 'r')
     pin = os.popen(cmd2, 'w')
     for line in pout:
@@ -41,8 +40,8 @@ def rpipe(cmd, user, host, desc, cmd2, user2, host2):
 
 def rcmd(cmd, user, host, desc=None):
     if host:
-        cmd = '%s %s@%s %s' % (mkssh(), user, host, mkarg(cmd))
-    print cmd
+        cmd = '%s %s@%s %s' % (mkssh(), user, host, shlex.quote(cmd))
+    print(cmd)
     st = os.system(cmd)
     if desc and st:
         raise TestFailure('Failed to %s on host %s' % (desc, host))
@@ -50,8 +49,8 @@ def rcmd(cmd, user, host, desc=None):
 
 def rcmdin(cmd, content, user, host, desc=None):
     if host:
-        cmd = '%s %s@%s %s' % (mkssh(), user, host, mkarg(cmd))
-    print cmd
+        cmd = '%s %s@%s %s' % (mkssh(), user, host, shlex.quote(cmd))
+    print(cmd)
     pipe = os.popen(cmd, 'w')
     pipe.write(content)
     st = pipe.close()
@@ -61,8 +60,8 @@ def rcmdin(cmd, content, user, host, desc=None):
 
 def rcmdout(cmd, user, host, desc=None):
     if host:
-        cmd = '%s %s@%s %s' % (mkssh(), user, host, mkarg(cmd))
-    print cmd
+        cmd = '%s %s@%s %s' % (mkssh(), user, host, shlex.quote(cmd))
+    print(cmd)
     out = os.popen(cmd, 'r')
     try:
         return out.read()
@@ -93,9 +92,9 @@ def writefile(file, content, perm=None, mode='w', user=None, host=None):
     """
     if host:
         if mode.startswith('a'):
-            cmd = 'cat >> %s' % mkarg(file)
+            cmd = 'cat >> %s' % shlex.quote(file)
         else:
-            cmd = 'cat > %s' % mkarg(file)
+            cmd = 'cat > %s' % shlex.quote(file)
         rcmdin(cmd, content, user, host, 'write file %s' % file)
         if perm != None:
             cmd = 'chmod %s %s' % (perm, file)
@@ -107,7 +106,7 @@ def writefile(file, content, perm=None, mode='w', user=None, host=None):
         finally:
             fout.close()
 
-        if perm != None and isinstance(file, types.StringTypes): 
+        if perm != None and isinstance(file, (str,)): 
             os.chmod(file, perm)
 
 def augmentfile(file, user=None, host=None):
@@ -138,7 +137,7 @@ def localTest(tmproot):
         </backup>
     """
     writefile(os.path.join(tmproot, 'backup.d', 'test.backup'), BACKUP % params)
-    for i in xrange(test_reps):
+    for i in range(test_reps):
         FILES = (
             'data/fileA.out', 
             'data/fileB.nobackup', 
@@ -150,7 +149,7 @@ def localTest(tmproot):
         )
         for file in FILES:
             augmentfile(os.path.join(tmproot, 'client', file))
-        cmd = "cd %(tmproot)s/client; find -type f -a \! -name '*.nobackup' | sort | xargs md5sum > %(tmproot)s/md5sums.client"
+        cmd = r"cd %(tmproot)s/client; find -type f -a \! -name '*.nobackup' | sort | xargs md5sum > %(tmproot)s/md5sums.client"
         if os.system(cmd % params):
             raise TestFailure("Can't compute the source MD5 sums")
         cmd = "safekeep --server %(args)s --conf '%(tmproot)s/safekeep.conf'"
@@ -174,21 +173,21 @@ def localTest(tmproot):
 def takeOver(host, role, ver):
     cmd = 'ssh -o PasswordAuthentication=no root@%s true' % (host)
     if os.system(cmd): 
-        print 'The box %s does not appear to have been initialized' % (host)
-        print 'for functioning as %s in a SafeKeep remote test.' % (role)
-        print 'If you want to use it in such a role, please enter the root'
-        print 'password for the box so that the test can take over it.'
-        print 'WARNING: the test is potentially dangereous, all data on'
-        print '         the box may be lost! Please make SURE this is'
-        print '         the box you REALLY intend to use for the test.'
-        print 'To cancel the test, type Ctrl-C'
+        print('The box %s does not appear to have been initialized' % (host))
+        print('for functioning as %s in a SafeKeep remote test.' % (role))
+        print('If you want to use it in such a role, please enter the root')
+        print('password for the box so that the test can take over it.')
+        print('WARNING: the test is potentially dangereous, all data on')
+        print('         the box may be lost! Please make SURE this is')
+        print('         the box you REALLY intend to use for the test.')
+        print('To cancel the test, type Ctrl-C')
         # add the key blindly to make sure we have it, and we are asked the passwd only once
         cmd = 'umask 077; test -d .ssh || mkdir .ssh; cat >> .ssh/authorized_keys'
         rcmdin(cmd, ssh_id_file_keys[1], 'root', host)
 
     cmd = 'cat /etc/redhat-release'
     release = rcmdout(cmd, 'root', host, 'fetch the release')
-    res = re.match('\s*(.*) release (.*) \(.*\)\s*', release)
+    res = re.match(r'\s*(.*) release (.*) \(.*\)\s*', release)
     if not res:
         raise TestFailure('Unknown release format for: %s' % release)
     distro = res.group(1)
@@ -208,7 +207,7 @@ def takeOver(host, role, ver):
         gpgcheck=0
     """ % (distro)
     lattica_repo = '\n'.join([line.strip() for line in lattica_repo.splitlines()])
-    cmd = 'echo %s > /etc/yum.repos.d/safekeep-test-lattica-devel.repo' % (mkarg(lattica_repo).strip())
+    cmd = 'echo %s > /etc/yum.repos.d/safekeep-test-lattica-devel.repo' % (shlex.quote(lattica_repo).strip())
     rcmd(cmd, 'root', host, 'install Lattica Repo')
     cmd = """
         rm -rf /var/cache/yum/safekeep-test-lattica-devel/; 
@@ -248,16 +247,16 @@ def packageAndDeployRPM(tar, user, host):
 
     cmd = '%s %s %s@%s:%s' % \
           (mkssh('scp'), tar, user, host, pkgroot)
-    print cmd
+    print(cmd)
     if os.system(cmd):
-         raise TestFailure('Failed to copy %s to the RPM host %s' % (tar, host)) 
+        raise TestFailure('Failed to copy %s to the RPM host %s' % (tar, host)) 
 
-    cmd = 'HOME=%s rpmbuild -ta %s' % (pkgroot, mytar)
-    print cmd
+    cmd = 'HOME=%s rpmbuild -ta %s' % (pkgroot, tar)
+    print(cmd)
     if os.system(cmd):
         raise TestFailure('Failed to build the .rpm')
 
-    ver = mytar[len('safekeep-'):-len('.tar.gz')]
+    ver = tar[len('safekeep-'):-len('.tar.gz')]
     binrpm_list = glob.glob(os.path.join(pkgroot, 'RPMS/noarch', 'safekeep-*-' + ver + '-*.noarch.rpm'))
 
     rel = binrpm_list[0]
@@ -286,13 +285,13 @@ def packageAndUpload(user, rpmhost, debhost):
         raise TestFailure('Failed to determine the tar name')
 
     if rpmhost:
-        pacakgeAndDeployRPM(mytar, user, rpmhost)
+        packageAndDeployRPM(mytar, user, rpmhost)
 
     if debhost:
         packageAndDeployDEB(mytar, user, debhost)
 
     cmd = 'rm %s' % (mytar)
-    print cmd
+    print(cmd)
     if os.system(cmd):
         raise TestFailure('Failed to nuke the tar')
 
@@ -410,7 +409,7 @@ def guess_ssh_id_file_keys():
         out = os.popen('ssh-add -L', 'r')
         ids = out.read()
         if out.close() or not ids:
-            print >> sys.stderr, 'Failed to get keys from ssh agent'
+            print('Failed to get keys from ssh agent', file=sys.stderr)
         else:
             return (None, ids)
     for filename in ('identity', 'id_dsa', 'id_rsa'):
@@ -420,18 +419,18 @@ def guess_ssh_id_file_keys():
     return None
 
 def usage():
-    print 'usage: %s [options]' % (sys.argv[0])
-    print
-    print 'options:'
-    print '-l,--local            Run the local version of the test (default)'
-    print '-r,--remote           Run the client/server version of the test'
-    print '-n,--nocleanup        Do not erase the temporary root for the test'
-    print '-i,--identity IDFILE  SSH identity file to use (remote test only)'
-    print '-c,--client=ADDR      The client address (remote test only)'
-    print '-s,--server=ADDR      The server address (remote test only)'
-    print '--reps=N              The number of iterations for the test (default 2)'
-    print '--args=ARGS           Extra arguments to pass to SafeKeep (default to none)'
-    print '-h,--help             Print this help message and exit'
+    print('usage: %s [options]' % (sys.argv[0]))
+    print()
+    print('options:')
+    print('-l,--local            Run the local version of the test (default)')
+    print('-r,--remote           Run the client/server version of the test')
+    print('-n,--nocleanup        Do not erase the temporary root for the test')
+    print('-i,--identity IDFILE  SSH identity file to use (remote test only)')
+    print('-c,--client=ADDR      The client address (remote test only)')
+    print('-s,--server=ADDR      The server address (remote test only)')
+    print('--reps=N              The number of iterations for the test (default 2)')
+    print('--args=ARGS           Extra arguments to pass to SafeKeep (default to none)')
+    print('-h,--help             Print this help message and exit')
 
 def main():
     global ssh_id_file_keys
@@ -484,12 +483,12 @@ def main():
                 remoteTest(tmproot, client, server)
             else:
                 localTest(tmproot)
-        except TestFailure, tf:
-            print tf
+        except TestFailure as tf:
+            print(tf)
             exitcode = 1
     finally:
         if nocleanup:
-            print tmproot
+            print(tmproot)
         else:
             os.system("chmod -R +w " +tmproot)
             shutil.rmtree(tmproot)
