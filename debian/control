@@ -2,7 +2,7 @@ Source: safekeep
 Section: Applications/System
 Priority: optional
 Maintainer: Lattica, Inc.
-Build-Depends: debhelper (>= 4.0.0), python-support, asciidoc, xmlto
+Build-Depends: debhelper (>= 4.0.0), dh-python, asciidoc, xmlto
 Standards-Version: 3.6.2
 
 Package: safekeep-server
@@ -29,7 +29,7 @@ Description: The client component of the SafeKeep backup system.
 
 Package: safekeep-common
 Architecture: all
-Depends: ${python:Depends}, rdiff-backup
+Depends: ${python3:Depends}, rdiff-backup
 Replaces: safekeep
 Description: The common component of the SafeKeep backup system.
  SafeKeep is a client/server backup system which enhances the

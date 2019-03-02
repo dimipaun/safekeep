@@ -116,10 +116,11 @@ distdeb: distdeb-build distdeb-sign
 distdeb-build: $(releasedir)/$(releasename).tar.gz
 	tar xz -C /tmp -f $<
 	cd /tmp/$(releasename) && dpkg-buildpackage -us -uc
-	mv /tmp/$(name)-*_$(version)_all.deb $(releasedir)
+	mv /tmp/$(name)*_$(version)* $(releasedir)
 
 distdeb-sign:
-	debsign $(releasedir)/$(name)-*_$(version)_all.deb
+	debsign -k $(name) --re-sign $(releasedir)/$(name)_$(version).dsc $(releasedir)/$(name)_$(version)_amd64.*
+	for deb in $(releasedir)/$(name)-*_$(version)_all.deb ; do debsigs --sign=origin -k $(name) $$deb; done
 
 debsrc: $(releasedir)/$(releasename).tar.gz
 	cat debian/changelog.in | sed 's/^safekeep.*/safekeep ($(git_version)) unstable; urgency=low/' > debian/changelog
@@ -161,7 +162,7 @@ deploy-sf: $(releasedir)/CHECKSUM-$(releasename).txt
 	scp ANNOUNCE $(sf_login):$(sf_dir)/$(version)/README.txt
 	scp $(releasedir)/$(releasename)-$(release)*.src.rpm $(releasedir)/$(name)-*-$(version)-$(release)*.noarch.rpm $(sf_login):$(sf_dir)/$(version)
 	scp $(releasedir)/$(name)-*_$(version)_all.deb $(sf_login):$(sf_dir)/$(version)
-	scp $(releasedir)/$(name)_* $(sf_login):$(sf_dir)/$(version)
+	scp $(releasedir)/$(name)_$(version)* $(sf_login):$(sf_dir)/$(version)
 	scp $(releasedir)/CHECKSUM-$(releasename).txt $(sf_login):$(sf_dir)/$(version)
 	scp RPM-GPG-KEY-SafeKeep $(sf_login):$(sf_dir)/$(version)
 	scp README_SF_Top $(sf_login):$(sf_dir)/../README.txt
