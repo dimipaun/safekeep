@@ -11,7 +11,7 @@ safekeep - Client/server backup script
 
 SYNOPSIS
 --------
-'safekeep' --server [-q] [-v] [--noemail] [--force] [-c file] [--cleanup] [--tmpdir=<tmpdir>] <clientid>*
+'safekeep' --server [-q] [-v] [--noemail] [--force] [-c file] [--cleanup] [--tempdir=<tempdir>] <clientid>*
 
 'safekeep' --keys [-q] [-v] [--noemail] [-c file] [-i file] [--status] [--print] [--deploy] <clientid>*
 
