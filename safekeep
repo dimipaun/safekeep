@@ -37,6 +37,7 @@ verbosity_ssh = ''
 verbosity_trickle = ''
 work_user = getpass.getuser()
 backup_user = None
+backup_tempdir = None
 client_user = 'root'
 home_dir = None
 base_dir = None
@@ -902,7 +903,7 @@ def do_lvremove(device):
         lvmdev = '/dev/mapper/%s-%s' % (group.replace('-', '--'), volume.replace('-', '--'))
     if os.path.exists(lvmdev):
         for i in range(1, 10):
-            ret = spawn(['sync'])
+            os.sync()
             ret = spawn(['lvremove', '--force', device])
             if ret:
                 ret = spawn(['dmsetup', 'remove', lvmdev])
@@ -961,6 +962,7 @@ def do_client_snap_device(snap, bdir, mountpoint, mounttype, writable):
     else:
         args.extend(['--snapshot', '--size', size])
     args.extend(['--name', os.path.basename(snapdev), lvmdev])
+    os.sync()	# Should not be needed except for very old kernels
     ec = spawn(args)
     if ec:
         warn('Can not snapshot the device: %s' % device)
@@ -1513,6 +1515,9 @@ def do_server_rdiff(cfg, bdir, nice, ionice, force):
     if force:
         args.extend(['--force'])
 
+    if backup_tempdir:
+        args.extend(['--tempdir', backup_tempdir])
+
     options_append = []
 
     special_files = []
@@ -1557,13 +1562,19 @@ def do_server_rdiff(cfg, bdir, nice, ionice, force):
         raise Exception('Failed to run rdiff-backup')
 
 def do_server_rdiff_cleanup(cfg):
-    args = ['rdiff-backup', '--check-destination-dir', cfg['dir']]
+    args = ['rdiff-backup']
+    if backup_tempdir:
+        args.extend(['--tempdir', backup_tempdir])
+    args.extend(['--check-destination-dir', cfg['dir']])
     ret = spawn(args)
     if ret:
         warn('Failed to cleanup old data, please fix the problem manually')
 
 def do_server_data_cleanup(cfg):
-    args = ['rdiff-backup', '--force', '--remove-older-than', cfg['retention'], cfg['dir']]
+    args = ['rdiff-backup']
+    if backup_tempdir:
+        args.extend(['--tempdir', backup_tempdir])
+    args.extend(['--force', '--remove-older-than', cfg['retention'], cfg['dir']])
     ret = spawn(args)
     if ret:
         warn('Failed to cleanup old data, please fix the problem manually')
@@ -2043,6 +2054,7 @@ def usage(exitcode=None):
     print('server options:')
     print('--force             force backup destination overwriting, dangerous!')
     print('--cleanup           perform cleanup actions after a failure')
+    print('-t, --tempdir=DIR   set tempdir to DIR for rdiff-backup')
     print()
     print('keys options:')
     print('-i FILE             use FILE as identity for RSA/DSA authentication')
@@ -2060,18 +2072,18 @@ def usage(exitcode=None):
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'c:e:i:hs:qvV',
+        opts, args = getopt.getopt(sys.argv[1:], 'c:e:i:hs:t:qvV',
                                    ['conf=', 'client', 'deploy',
                                     'email=', 'force', 'help', 'keys',
                                     'list', 'increments', 'sizes',
                                     'parsable-output', 'changed=', 'at-time=',
                                     'noemail', 'cleanup',
                                     'print', 'quiet', 'server', 'smtp=',
-                                    'status', 'verbose', 'version'])
+                                    'status', 'tempdir=', 'verbose', 'version'])
     except getopt.GetoptError:
         usage(2)
 
-    global backup_user, client_user, home_dir, base_dir, config_file
+    global backup_user, backup_tempdir, client_user, home_dir, base_dir, config_file
     global verbosity_level
 
     mode = None
@@ -2137,6 +2149,8 @@ def main():
             cleanup = True
         elif o in ('--noemail', ):
             noemail = True
+        elif o in ('-t', '--tempdir'):
+            backup_tempdir = a
         elif o in ('--increments', ):
             if list_type: usage(2)
             list_type = 'increments'
@@ -2207,6 +2221,8 @@ def main():
 
         if 'backup.user' in props:
             backup_user = props['backup.user']
+        if 'backup.tempdir' in props and not backup_tempdir:
+            backup_tempdir = props['backup.tempdir']
         if 'base.dir' in props:
             base_dir = props['base.dir']
         if 'client.user' in props:
@@ -2336,6 +2352,19 @@ def main():
         if verbosity > 2:
             verbosity_trickle = verbosity_ssh = '-' + (verbosity-2) * 'v'
         if mode == 'server':
+
+            if backup_tempdir:
+                if not os.path.isabs(backup_tempdir):
+                    info('backup.tempdir %s is relative to base.dir %s' % (backup_tempdir, base_dir))
+                    backup_tempdir = os.path.join(base_dir, backup_tempdir)
+
+                if not os.path.isdir(backup_tempdir):
+                    error('CONFIG ERROR: backup.tempdir %s is not a valid directory' % backup_tempdir)
+                    sys.exit(2)
+                elif not os.access(backup_tempdir, os.W_OK):
+                    error('CONFIG ERROR: backup.tempdir %s is not writeable' % backup_tempdir)
+                    sys.exit(2)
+
             is_client = False
             verbosity_level = 1 + verbosity
             do_server(cfgs, args, nice_srv, ionice_def, force, cleanup)

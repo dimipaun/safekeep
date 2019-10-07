@@ -31,6 +31,10 @@ backup.user::
 	If not specified, `safekeep` will just run under the
 	current user.
 
+backup.tempdir::
+	Specifes a TEMPDIR for use with `rdiff-backup'.
+	This can be overridden by a commandline argument to `safekeep'.
+
 base.dir::
 	The base directory for date repository relative paths.
 	If not specified, it defaults to the home directory
