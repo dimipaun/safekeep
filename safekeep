@@ -575,6 +575,7 @@ def parse_config(backup_el, dflt_id):
     if parse_true_false(backup_el, 'enabled') == 'false':
         return None
 
+    local_rdiff = 'rdiff-backup'
     host_el = backup_el.getElementsByTagName('host')
     if host_el:
         host = host_el[0].getAttribute('name')
@@ -583,8 +584,9 @@ def parse_config(backup_el, dflt_id):
         nice = host_el[0].getAttribute('nice')
         key_ctrl = host_el[0].getAttribute('key-ctrl')
         key_data = host_el[0].getAttribute('key-data')
+        rdiff_version = host_el[0].getAttribute('rdiff-version')
     else:
-        host = port = user = nice = key_ctrl = key_data = None
+        host = port = user = nice = key_ctrl = key_data = rdiff_version = None
     if host and port and not port.isdigit():
         raise ConfigException('Host port must be a number: "%s"' % port)
     if host and not user:
@@ -597,6 +599,8 @@ def parse_config(backup_el, dflt_id):
         key_ctrl = os.path.join(home_dir, key_ctrl)
     if key_data and not os.path.isabs(key_data):
         key_data = os.path.join(home_dir, key_data)
+    if rdiff_version:
+        local_rdiff = local_rdiff + '-' + rdiff_version
 
     bw = {}
     bw_el = backup_el.getElementsByTagName('bandwidth')
@@ -695,7 +699,7 @@ def parse_config(backup_el, dflt_id):
 
     return {'id': cfg_id, 'host' : host, 'port' : port, 'nice' : nice, 'user' : user, 'key_ctrl' : key_ctrl, 'key_data' : key_data,
             'dir' : repo_dir, 'retention' : retention, 'dumps' : dumps, 'snaps' : snaps, 'script' : script, 'mount_writable' : writable,
-            'cludes' : cludes, 'data_options' : data_options, 'options' : options, 'bw' : bw, 'run_on': run_on}
+            'cludes' : cludes, 'data_options' : data_options, 'options' : options, 'bw' : bw, 'run_on': run_on, 'local_rdiff' : local_rdiff}
 
 def parse_locs(cfglocs):
     cfgfiles = []
@@ -1504,7 +1508,7 @@ def do_server_rdiff(cfg, bdir, nice, ionice, force):
             trickle = []
     args.extend(trickle)
 
-    args.extend(['rdiff-backup'])
+    args.extend([cfg['local_rdiff']])
 
     if cfg['host']:
         basessh = 'ssh -oStrictHostKeyChecking=%s' % (ssh_StrictHostKeyChecking)
@@ -1562,7 +1566,7 @@ def do_server_rdiff(cfg, bdir, nice, ionice, force):
         raise Exception('Failed to run rdiff-backup')
 
 def do_server_rdiff_cleanup(cfg):
-    args = ['rdiff-backup']
+    args = [cfg['local_rdiff']]
     if backup_tempdir:
         args.extend(['--tempdir', backup_tempdir])
     args.extend(['--check-destination-dir', cfg['dir']])
@@ -1571,7 +1575,7 @@ def do_server_rdiff_cleanup(cfg):
         warn('Failed to cleanup old data, please fix the problem manually')
 
 def do_server_data_cleanup(cfg):
-    args = ['rdiff-backup']
+    args = [cfg['local_rdiff']]
     if backup_tempdir:
         args.extend(['--tempdir', backup_tempdir])
     args.extend(['--force', '--remove-older-than', cfg['retention'], cfg['dir']])
@@ -1834,7 +1838,7 @@ def do_list(cfgs, ids, list_type, list_date, list_parsable):
         stats['id'] = cfg_id
         output_done = True
 
-        args = ['rdiff-backup']
+        args = [cfg['local_rdiff']]
 
         if list_type == 'increments':
             args.extend(['--list-increments'])

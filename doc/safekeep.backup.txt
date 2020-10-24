@@ -126,6 +126,11 @@ are separated by '/', attributes are introduced by '@':
 	is recommended.
 	Optional, defaults to `~/.ssh/safekeep-server-data-key`.
 
+/backup/host/@rdiff-version::
+	The version of rdiff-backup to use, if supplied rdiff-backup-<rdiff-version>
+	will be used instead of rdiff-backup. This only affects the version used
+	locally in the server.
+
 /backup/bandwidth/@overall::
         This is the client bandwidth limit for both upload and download. 
 	It is an integer number of KB/s (see the NOTES section in 
