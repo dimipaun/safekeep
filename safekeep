@@ -626,6 +626,19 @@ def parse_config(backup_el, dflt_id):
             if option == 'special-files':
                 warn('options element special-files is deprecated, use data attributes instead')
             if option in ('special-files', 'rdiff-backup'):
+                if options_el.hasChildNodes():
+                    exec_els = options_el.getElementsByTagName('executable')
+                    if len(exec_els) > 0:
+                        for exec_el in exec_els:
+                            if exec_el.nodeType != exec_el.ELEMENT_NODE:
+                                continue
+                            for key, value in list(exec_el.attributes.items()):
+                                if key in ('local', 'remote'):
+                                    options.append({option : {'exec:' + key : value}} )
+                                else:
+                                    raise ConfigException('Option "executable/%s" is invalid' % key)
+                    else:
+                        raise ConfigException('Option "%s" has invalid subkey' % option)
                 if options_el.hasAttributes():
                     for key, value in list(options_el.attributes.items()):
                         options.append({option : {key : value}})
@@ -1433,6 +1446,15 @@ def do_client():
 # Server implementation
 ######################################################################
 
+def executable_lookup(cfg, executable, location):
+    key = 'exec:' + location
+
+    for option in cfg['options']:
+        if executable in option:
+            if key in option[executable]:
+                return option[executable][key]
+    return executable
+
 def do_server_getanswer(cout, cl_status):
     while True:
         line = cout.readline()
@@ -1504,12 +1526,12 @@ def do_server_rdiff(cfg, bdir, nice, ionice, force):
             trickle = []
     args.extend(trickle)
 
-    args.extend(['rdiff-backup'])
+    args.extend([executable_lookup(cfg, 'rdiff-backup', 'local')])
 
     if cfg['host']:
         basessh = 'ssh -oStrictHostKeyChecking=%s' % (ssh_StrictHostKeyChecking)
         if cfg['port']: basessh += ' -p %s' % cfg['port']
-        schema = '%s %s -i %s %%s rdiff-backup --server' % (basessh, verbosity_ssh, cfg['key_data'])
+        schema = '%s %s -i %s %%s %s --server' % (basessh, verbosity_ssh, cfg['key_data'], executable_lookup(cfg, 'rdiff-backup', 'remote'))
         args.extend(['--remote-schema', schema])
 
     if force:
@@ -1559,10 +1581,10 @@ def do_server_rdiff(cfg, bdir, nice, ionice, force):
     args.extend([userhost + '::' + bdir, cfg['dir']])
     ret = spawn(args)
     if ret:
-        raise Exception('Failed to run rdiff-backup')
+        raise Exception('Failed to run %s' % executable_lookup(cfg, 'rdiff-backup', 'local'))
 
 def do_server_rdiff_cleanup(cfg):
-    args = ['rdiff-backup']
+    args = [executable_lookup(cfg, 'rdiff-backup', 'local')]
     if backup_tempdir:
         args.extend(['--tempdir', backup_tempdir])
     args.extend(['--check-destination-dir', cfg['dir']])
@@ -1571,7 +1593,7 @@ def do_server_rdiff_cleanup(cfg):
         warn('Failed to cleanup old data, please fix the problem manually')
 
 def do_server_data_cleanup(cfg):
-    args = ['rdiff-backup']
+    args = [executable_lookup(cfg, 'rdiff-backup', 'local')]
     if backup_tempdir:
         args.extend(['--tempdir', backup_tempdir])
     args.extend(['--force', '--remove-older-than', cfg['retention'], cfg['dir']])
@@ -1834,7 +1856,7 @@ def do_list(cfgs, ids, list_type, list_date, list_parsable):
         stats['id'] = cfg_id
         output_done = True
 
-        args = ['rdiff-backup']
+        args = [executable_lookup(cfg, 'rdiff-backup', 'local')]
 
         if list_type == 'increments':
             args.extend(['--list-increments'])
@@ -1854,7 +1876,7 @@ def do_list(cfgs, ids, list_type, list_date, list_parsable):
         # Call a low level routine to get the data back as well.
         ret, lines = _spawn(args)
         if ret:
-            error('Failed to run rdiff-backup')
+            error('Failed to run %s' % executable_lookup(cfg, 'rdiff-backup', 'local'))
             error_counter += 1
             stats['state'] = 'FAILED'
         else:
@@ -1896,7 +1918,7 @@ def do_keys(cfgs, ids, nice_rem, identity, status, dump, deploy):
         else:
             nice_cmd = ''
 
-        cmds = ['safekeep --client', 'rdiff-backup --server --restrict-read-only /']
+        cmds = ['safekeep --client', '%s --server --restrict-read-only /' % executable_lookup(cfg, 'rdiff-backup', 'remote')]
         privatekeyfiles = [cfg.get('key_ctrl'), cfg.get('key_data')]
         output = []
         keys_ok = False
