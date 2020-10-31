@@ -190,11 +190,11 @@ are separated by '/', attributes are introduced by '@':
        This is planned to be specific to the current rdiff-backup, and
        different options will be made available for other backends.
 
-/backup/options/rdiff-backup/executable/@local::
+/backup/options/rdiff-backup/@exec_local::
        Executable to be run on the local host.
        Optional, defaults to 'rdiff-backup'
 
-/backup/options/rdiff-backup/executable/@remote::
+/backup/options/rdiff-backup/@exec_remote::
        Executable to be run on the remote host.
        Optional, defaults to 'rdiff-backup'
 

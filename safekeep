@@ -626,19 +626,6 @@ def parse_config(backup_el, dflt_id):
             if option == 'special-files':
                 warn('options element special-files is deprecated, use data attributes instead')
             if option in ('special-files', 'rdiff-backup'):
-                if options_el.hasChildNodes():
-                    exec_els = options_el.getElementsByTagName('executable')
-                    if len(exec_els) > 0:
-                        for exec_el in exec_els:
-                            if exec_el.nodeType != exec_el.ELEMENT_NODE:
-                                continue
-                            for key, value in list(exec_el.attributes.items()):
-                                if key in ('local', 'remote'):
-                                    options.append({option : {'exec:' + key : value}} )
-                                else:
-                                    raise ConfigException('Option "executable/%s" is invalid' % key)
-                    else:
-                        raise ConfigException('Option "%s" has invalid subkey' % option)
                 if options_el.hasAttributes():
                     for key, value in list(options_el.attributes.items()):
                         options.append({option : {key : value}})
@@ -1447,7 +1434,7 @@ def do_client():
 ######################################################################
 
 def executable_lookup(cfg, executable, location):
-    key = 'exec:' + location
+    key = 'exec_' + location
 
     for option in cfg['options']:
         if executable in option:
