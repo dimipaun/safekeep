@@ -1555,8 +1555,8 @@ def do_server_rdiff(cfg, bdir, nice, ionice, force):
 
     userhost = ''
     if cfg['host']:
-        userhost = '%s@%s' % (cfg['user'], cfg['host'])
-    args.extend([userhost + '::' + bdir, cfg['dir']])
+        userhost = '%s@%s::' % (cfg['user'], cfg['host'])
+    args.extend([userhost + bdir, cfg['dir']])
     ret = spawn(args)
     if ret:
         raise Exception('Failed to run rdiff-backup')
