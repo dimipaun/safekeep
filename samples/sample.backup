@@ -1,5 +1,5 @@
 <!-- the client backup id -->
-<backup id="my_workstation">
+<backup id="my_workstation" enabled="true">
 
   <!-- the client backup host, the user under which the servers will connect,
        the SSH keys used for launching "safekeep -c" and "rdiff-backup" -->
@@ -9,12 +9,29 @@
     key-data="/home/jdoe/.ssh/backup2_id_dsa"
   />
 
+  <!-- rate limit bandwidth (kB/s) on a client basis -->
+  <bandwidth
+    overall="80"
+    download="50"
+    upload="50"
+  />
+
   <!-- location where the backed up data will be stored on the server
        and for how long (s=sec, m=min, h=hours, D=days, W=weeks, M=months, or Y=years) -->
   <repo
     path="./data"
     retention="10D"
   />
+
+  <!-- set options affecting execution of rdiff-backup for this host -->
+  <options>
+
+    <!-- An option to run a different version of rdiff-backup locally, -->
+    <!-- say for compatibility with older systems -->
+    <!-- (remove the comments if required) -->
+    <!-- <rdiff-backup exec_local="rdiff-backup-1" /> -->
+
+  </options>
 
   <!-- settings for database dump and for volume snapshot -->
   <setup>

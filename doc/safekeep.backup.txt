@@ -38,6 +38,13 @@ The full set of supported elements and attributes looks as follows:
   <!-- where to stored the data on the server, and for now long -->
   <repo path="./data" retention="10D" />
 
+  <!-- set options affecting execution of rdiff-backup for this host -->
+  <options>
+    <!-- An option to run a different version of rdiff-backup locally, -->
+    <!-- say for compatibility with older systems -->
+    <!-- <rdiff-backup exec_local="rdiff-backup-1" /> -->
+  </options>
+
   <!-- settings for database dump and for volume snapshot -->
   <setup>
     <!-- databases can be dumbed before the backup -->
