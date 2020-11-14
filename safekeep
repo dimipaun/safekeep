@@ -1876,9 +1876,13 @@ def do_list(cfgs, ids, list_type, list_date, list_parsable):
                     date_time = lines[0].split(None, 1)[0]
                     stats['OldestIncrement'] = time.ctime(int(date_time))
                 else:
-                    stats['Increments'] = str(len(lines) - 2)
+                    increments = len(lines) - 2
+                    stats['Increments'] = str(increments)
                     stats['CurrentMirror'] = lines[len(lines) - 1].strip().split(None, 2)[2]
-                    stats['OldestIncrement'] = lines[1].strip().split(None, 1)[1]
+                    if increments == 0:
+                        stats['OldestIncrement'] = lines[1].strip().split(None, 2)[2]
+                    else:
+                        stats['OldestIncrement'] = lines[1].strip().split(None, 1)[1]
             elif list_type == 'sizes':
                 stats['Increments'] = str(len(lines) - 3)
                 stats['CurrentMirror'] = lines[2].split('   ', 1)[0]
