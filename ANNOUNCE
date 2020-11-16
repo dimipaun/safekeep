@@ -1,28 +1,29 @@
-This is release 1.5.0 of SafeKeep, a centralized and easy to use 
+This is release 1.5.1 of SafeKeep, a centralized and easy to use 
 backup application that combines the best features of a mirror 
 and an incremental backup.
 
-This is a rebase of the source to Python 3, with the same functionality
-as 1.4.5.
+This version is base on Python 3.
 
-Many thanks to all those who sent in bug reports and fixes that made this
-release possible, and to Dimi Paun for his continual work with SafeKeep.
+
+Many thanks to those who sent in bug reports and fixes, especially
+Henrik Riomar that made this release possible, and to Dimi Paun for
+his work with SafeKeep.
 
 Sources and binaries are available from the following locations:
 
-  - RedHat EL/CentOS 8 Fedora 30:
-  http://prdownloads.sourceforge.net/safekeep/safekeep-common-1.5.0-1.noarch.rpm
-  http://prdownloads.sourceforge.net/safekeep/safekeep-client-1.5.0-1.noarch.rpm
-  http://prdownloads.sourceforge.net/safekeep/safekeep-server-1.5.0-1.noarch.rpm
+  - RedHat EL/CentOS 7-8 Fedora 30-34:
+  http://prdownloads.sourceforge.net/safekeep/safekeep-common-1.5.1-1.noarch.rpm
+  http://prdownloads.sourceforge.net/safekeep/safekeep-client-1.5.1-1.noarch.rpm
+  http://prdownloads.sourceforge.net/safekeep/safekeep-server-1.5.1-1.noarch.rpm
  
-  - Ubuntu Trusty Tahr (14.04 LTS) to Cosmic Cuttlefish (18.10):
-  http://prdownloads.sourceforge.net/safekeep/safekeep-common_1.5.0_all.deb
-  http://prdownloads.sourceforge.net/safekeep/safekeep-client_1.5.0_all.deb
-  http://prdownloads.sourceforge.net/safekeep/safekeep-server_1.5.0_all.deb
+  - Ubuntu Trusty Tahr (14.04 LTS) to Groovy Gorilla (20.10):
+  http://prdownloads.sourceforge.net/safekeep/safekeep-common_1.5.1_all.deb
+  http://prdownloads.sourceforge.net/safekeep/safekeep-client_1.5.1_all.deb
+  http://prdownloads.sourceforge.net/safekeep/safekeep-server_1.5.1_all.deb
 
   - Source:
-  http://prdownloads.sourceforge.net/safekeep/safekeep-1.5.0.tar.gz
-  http://prdownloads.sourceforge.net/safekeep/safekeep-1.5.0-1.src.rpm
+  http://prdownloads.sourceforge.net/safekeep/safekeep-1.5.1.tar.gz
+  http://prdownloads.sourceforge.net/safekeep/safekeep-1.5.1-1.src.rpm
 
 The GPG Signing Key can be found in the following location:
 
@@ -36,7 +37,7 @@ uid                  SafeKeep (Signing Key) <safekeep-devel@lists.sourceforge.ne
 sub   1024g/6AA3270F 2012-02-17
 
 NOTE: The minimum version of Python supported is Python 3.4.  If you
-require support of a Python 2, then you should select a release 1.4.5 of
+require support of a Python 2, then you should select release 1.4.5 of
 Safekeep.
 
 To find out more about the project visit on our website:

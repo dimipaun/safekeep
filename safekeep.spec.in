@@ -107,6 +107,11 @@ id %{name} >/dev/null 2>&1 || \
 %doc samples/sample.backup
 
 %changelog
+* Sun Nov 15 2020 Frank Crawford <frank@crawford.emu.id.au> 1.5.1-1
+  - Add configuration options to handle different versions of rdiff-backup.
+  - Allow specifications of a tempdir.
+  - Minor bugfixes.
+
 * Sat Feb 23 2019 Frank Crawford <frank@crawford.emu.id.au> 1.5.0-1
   - Updated for Python 3
 
