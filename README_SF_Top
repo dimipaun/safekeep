@@ -19,23 +19,23 @@ Requirements
   * python
   * openssh
 
-Current Release 1.5.0 (23 Feb 2019)
+Current Release 1.5.1 (15 Nov 2020)
 ~~~~~~~~~~~~~~~
 Sources and binaries are available from the following locations:
 
-  - RedHat EL/CentOS 8 Fedora 30:
-  http://prdownloads.sourceforge.net/safekeep/safekeep-common-1.5.0-1.noarch.rpm
-  http://prdownloads.sourceforge.net/safekeep/safekeep-client-1.5.0-1.noarch.rpm
-  http://prdownloads.sourceforge.net/safekeep/safekeep-server-1.5.0-1.noarch.rpm
+  - RedHat EL/CentOS 7-8 Fedora 30-34:
+  http://prdownloads.sourceforge.net/safekeep/safekeep-common-1.5.1-1.noarch.rpm
+  http://prdownloads.sourceforge.net/safekeep/safekeep-client-1.5.1-1.noarch.rpm
+  http://prdownloads.sourceforge.net/safekeep/safekeep-server-1.5.1-1.noarch.rpm
  
-  - Ubuntu Cosmic Cuttlefish (18.10):
-  http://prdownloads.sourceforge.net/safekeep/safekeep-common_1.5.0_all.deb
-  http://prdownloads.sourceforge.net/safekeep/safekeep-client_1.5.0_all.deb
-  http://prdownloads.sourceforge.net/safekeep/safekeep-server_1.5.0_all.deb
+  - Ubuntu Trusty Tahr (14.04 LTS) to Groovy Gorilla (20.10):
+  http://prdownloads.sourceforge.net/safekeep/safekeep-common_1.5.1_all.deb
+  http://prdownloads.sourceforge.net/safekeep/safekeep-client_1.5.1_all.deb
+  http://prdownloads.sourceforge.net/safekeep/safekeep-server_1.5.1_all.deb
 
   - Source:
-  http://prdownloads.sourceforge.net/safekeep/safekeep-1.5.0.tar.gz
-  http://prdownloads.sourceforge.net/safekeep/safekeep-1.5.0-1.src.rpm
+  http://prdownloads.sourceforge.net/safekeep/safekeep-1.5.1.tar.gz
+  http://prdownloads.sourceforge.net/safekeep/safekeep-1.5.1-1.src.rpm
 
 Current GPG Key
 ~~~~~~~~~~~~~~~
