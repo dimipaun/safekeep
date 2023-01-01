@@ -1868,25 +1868,35 @@ def do_list(cfgs, ids, list_type, list_date, list_parsable):
             stats['state'] = 'FAILED'
         else:
             stats['state'] = 'OK'
+            warning_cnt = 0
+            if lines[0].startswith('WARNING:'):
+                warning_cnt = 1
             if list_type == 'increments':
                 if list_parsable:
-                    stats['Increments'] = str(len(lines) - 1)
+                    stats['Increments'] = str(len(lines) - 1 - warning_cnt)
                     date_time = lines[len(lines) - 1].split(None, 1)[0]
                     stats['CurrentMirror'] = time.ctime(int(date_time))
-                    date_time = lines[0].split(None, 1)[0]
+                    date_time = lines[warning_cnt].split(None, 1)[0]
                     stats['OldestIncrement'] = time.ctime(int(date_time))
                 else:
-                    increments = len(lines) - 2
+                    increments = len(lines) - 2 - warning_cnt
                     stats['Increments'] = str(increments)
                     stats['CurrentMirror'] = lines[len(lines) - 1].strip().split(None, 2)[2]
                     if increments == 0:
-                        stats['OldestIncrement'] = lines[1].strip().split(None, 2)[2]
+                        stats['OldestIncrement'] = lines[1 + warning_cnt].strip().split(None, 2)[2]
                     else:
-                        stats['OldestIncrement'] = lines[1].strip().split(None, 1)[1]
+                        stats['OldestIncrement'] = lines[1 + warning_cnt].strip().split(None, 1)[1]
             elif list_type == 'sizes':
-                stats['Increments'] = str(len(lines) - 3)
-                stats['CurrentMirror'] = lines[2].split('   ', 1)[0]
-                stats['OldestIncrement'] = lines[len(lines) - 1].split('   ', 1)[0]
+                if list_parsable:
+                    stats['Increments'] = str(int((len(lines) - 6 - warning_cnt)/3))
+                    date_time = lines[len(lines) - 4].split(None, 2)[1]
+                    stats['CurrentMirror'] = time.ctime(int(date_time))
+                    date_time = lines[2 + warning_cnt].split(None, 2)[1]
+                    stats['OldestIncrement'] = time.ctime(int(date_time))
+                else:
+                    stats['Increments'] = str(len(lines) - 3 - warning_cnt)
+                    stats['CurrentMirror'] = lines[len(lines) - 1].split('   ', 1)[0]
+                    stats['OldestIncrement'] = lines[2 + warning_cnt].split('   ', 1)[0]
 
         statistics.append(stats)
 
