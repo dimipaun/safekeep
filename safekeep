@@ -1869,8 +1869,8 @@ def do_list(cfgs, ids, list_type, list_date, list_parsable):
         else:
             stats['state'] = 'OK'
             warning_cnt = 0
-            if lines[0].startswith('WARNING:'):
-                warning_cnt = 1
+            while lines[warning_cnt].startswith('WARNING:'):
+                warning_cnt += 1
             if list_type == 'increments':
                 if list_parsable:
                     stats['Increments'] = str(len(lines) - 1 - warning_cnt)
